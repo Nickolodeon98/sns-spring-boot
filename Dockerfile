@@ -10,12 +10,12 @@ RUN gradle build -x test --parallel --continue > /dev/null 2>&1 || true
 COPY . /build
 RUN gradle build -x test --parallel
 
-# 빌드 이미지의 애플리케이션 관련 업무를 수행함
+# 빌더 이미지의 애플리케이션 관련 업무를 수행함
 FROM openjdk:11.0-slim
 WORKDIR /app
 
-# 빌드 이미지의 APP 에는 jar 파일이 있음. 이를 복사함.
-COPY --from= builder /build/build/libs/*-SNAPSHOT.jar ./app.jar
+# 빌더 이미지의 APP 에는 jar 파일이 있음. 이를 복사함.
+COPY --from=builder /build/build/libs/*-SNAPSHOT.jar ./app.jar
 
 EXPOSE 8080
 
