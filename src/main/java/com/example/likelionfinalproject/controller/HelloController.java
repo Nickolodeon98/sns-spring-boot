@@ -11,14 +11,14 @@ public class HelloController {
 
     @GetMapping("/hello")
     @ResponseBody
-    public String helloWorld() {
+    public String hello() {
         return "hello";
     }
 
 
     @GetMapping("/bye")
     @ResponseBody
-    public String byeWorld() {
+    public String bye() {
         return "bye";
     }
 }
