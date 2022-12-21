@@ -15,6 +15,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -49,18 +50,21 @@ class UserControllerTest {
                 .name("전승환")
                 .build();
 
-        UserJoinResponse userJoinResponse = UserJoinResponse.builder().userId("sjeon0730").message("전승환").build();
+        UserJoinResponse userJoinResponse = UserJoinResponse.builder()
+                .userId("sjeon0730")
+                .message("회원가입에 성공했습니다.")
+                .build();
 
-        given(userService.registerUser(userJoinRequest)).willReturn(userJoinResponse);
+        given(userService.registerUser(any())).willReturn(userJoinResponse);
 
         String url = "/api/v1/users/join";
 
         mockMvc.perform(post(url).contentType(MediaType.APPLICATION_JSON)
-                        .with(csrf())
-                .content(objectMapper.writeValueAsBytes(userJoinRequest)))
+                .content(objectMapper.writeValueAsBytes(any()))
+                .with(csrf()))
                 .andExpect(status().isOk())
                 .andDo(print());
 
-        verify(userService).registerUser(userJoinRequest);
+        verify(userService).registerUser(any());
     }
 }
