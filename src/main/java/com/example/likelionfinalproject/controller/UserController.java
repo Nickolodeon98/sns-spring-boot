@@ -1,5 +1,6 @@
 package com.example.likelionfinalproject.controller;
 
+import com.example.likelionfinalproject.domain.Response;
 import com.example.likelionfinalproject.domain.dto.UserJoinRequest;
 import com.example.likelionfinalproject.domain.dto.UserJoinResponse;
 import com.example.likelionfinalproject.service.UserService;
