@@ -17,8 +17,6 @@ import org.springframework.stereotype.Service;
 public class UserService {
     private final UserRepository userRepository;
 
-    private TokenUtils tokenUtils;
-
     public UserJoinResponse registerUser(UserJoinRequest userJoinRequest) {
 
         userRepository.findByUserId(userJoinRequest.getUserId()).ifPresent((user) -> {
@@ -32,7 +30,7 @@ public class UserService {
     }
 
     public UserLoginResponse verifyUser(UserLoginRequest userLoginRequest) {
-        String token = tokenUtils.createToken(userLoginRequest.getUserId());
+        String token = TokenUtils.createToken(userLoginRequest.getUserId());
         return new UserLoginResponse(token);
     }
 }
