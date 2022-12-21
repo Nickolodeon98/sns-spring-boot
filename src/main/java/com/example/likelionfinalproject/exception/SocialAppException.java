@@ -6,7 +6,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @ControllerAdvice
 public class SocialAppException {
@@ -14,7 +13,9 @@ public class SocialAppException {
     @ResponseBody
     @ExceptionHandler
     public ResponseEntity<?> userJoinExceptionHandler(UserJoinException exception) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(Response.fail(exception.getErrorCode()));
+        ErrorResponse errorResponse = new ErrorResponse(exception.getErrorCode(), exception.getMessage());
+        return ResponseEntity.status(exception.getErrorCode().getHttpStatus())
+                .body(Response.fail(errorResponse));
     }
 
 }
