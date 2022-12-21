@@ -1,15 +1,15 @@
 package com.example.likelionfinalproject.exception;
 
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
+@Getter
 public enum ErrorCode {
-    DUPLICATE_USERNAME(HttpStatus.CONFLICT, "아이디가 중복됩니다.");
+    DUPLICATE_USERNAME(HttpStatus.CONFLICT);
 
     private final HttpStatus httpStatus;
-    private final String errorMessage;
 
-    ErrorCode (HttpStatus httpStatus, String errorMessage) {
+    ErrorCode (HttpStatus httpStatus) {
         this.httpStatus = httpStatus;
-        this.errorMessage = errorMessage;
     }
 }
