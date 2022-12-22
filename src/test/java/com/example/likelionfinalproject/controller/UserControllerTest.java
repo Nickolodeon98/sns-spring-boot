@@ -75,6 +75,9 @@ class UserControllerTest {
                 .content(objectMapper.writeValueAsBytes(any()))
                 .with(csrf()))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
+                .andExpect(jsonPath("$.result.userId").value("sjeon0730"))
+                .andExpect(jsonPath("$.result.message").value("회원가입에 성공했습니다."))
                 .andDo(print());
 
         verify(userService).registerUser(any());
@@ -94,6 +97,9 @@ class UserControllerTest {
                 .content(objectMapper.writeValueAsBytes(any()))
                 .with(csrf()))
                 .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.resultCode").value("ERROR"))
+                .andExpect(jsonPath("$.result.errorCode").value("DUPLICATE_USERNAME"))
+                .andExpect(jsonPath("$.result.message").value(duplicateUser.getUserId() + "는 이미 존재하는 아이디입니다."))
                 .andDo(print());
 
         verify(userService).registerUser(any());
