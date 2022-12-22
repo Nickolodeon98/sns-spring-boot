@@ -3,6 +3,8 @@ package com.example.likelionfinalproject.utils;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -12,6 +14,8 @@ import java.util.Date;
 @Component
 public class TokenUtils {
 
+    @Value("${jwt.secret.key}")
+    private static String key;
     private static final long expirationTimeMs = 1000 * 60 * 60;
 
     public static String createToken(String userId) {
@@ -23,6 +27,7 @@ public class TokenUtils {
                 .setClaims(claims)
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + expirationTimeMs))
+                .signWith(SignatureAlgorithm.HS256, key)
                 .compact();
     }
 }
