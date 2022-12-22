@@ -6,9 +6,7 @@ import com.example.likelionfinalproject.domain.dto.UserLoginRequest;
 import com.example.likelionfinalproject.domain.dto.UserLoginResponse;
 import com.example.likelionfinalproject.exception.ErrorCode;
 import com.example.likelionfinalproject.exception.UserJoinException;
-import com.example.likelionfinalproject.exception.UserLoginException;
 import com.example.likelionfinalproject.service.UserService;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -20,7 +18,6 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
@@ -119,7 +116,7 @@ class UserControllerTest {
     @DisplayName("로그인에 실패한다.")
     @WithMockUser
     void fail_login() throws Exception {
-        given(userService.verifyUser(any())).willThrow(new UserLoginException());
+        given(userService.verifyUser(any())).willThrow(new UserJoinException(ErrorCode.NOT_FOUND_USERNAME, "등록되지 않은 아이디입니다."));
 
         mockMvc.perform(post(loginUrl).contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsBytes(any())).with(csrf()))
