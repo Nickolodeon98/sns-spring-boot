@@ -22,7 +22,7 @@ public class UserService {
     private final BCryptPasswordEncoder encoder;
 
     @Value("${jwt.secret.key}")
-    private static String secretKey;
+    private String secretKey;
 
     public UserJoinResponse registerUser(UserJoinRequest userJoinRequest) {
 
