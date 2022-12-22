@@ -22,7 +22,7 @@ public class SecurityConfig {
                 .and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                .authorizeRequests().antMatchers(HttpMethod.POST, "/api/v1/users/join")
+                .authorizeRequests().antMatchers(HttpMethod.POST, "/api/v1/users/**")
                 .permitAll()
                 .and()
 //                .addFilterBefore(new JsonTokenFilter(), UsernamePasswordAuthenticationFilter.class)
