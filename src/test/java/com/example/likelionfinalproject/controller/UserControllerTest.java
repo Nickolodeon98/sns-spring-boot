@@ -119,13 +119,13 @@ class UserControllerTest {
     @DisplayName("로그인에 실패한다.")
     @WithMockUser
     void fail_login() throws Exception {
-        given(userService.verifyUser(any())).willThrow(new UserJoinException(ErrorCode.NOT_FOUND_USERNAME, "등록되지 않은 아이디입니다."));
+        given(userService.verifyUser(any())).willThrow(new UserJoinException(ErrorCode.USERNAME_NOT_FOUND, "등록되지 않은 아이디입니다."));
 
         mockMvc.perform(post(loginUrl).contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsBytes(any())).with(csrf()))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.resultCode").value("ERROR"))
-                .andExpect(jsonPath("$.result.errorCode").value("NOT_FOUND_USERNAME"))
+                .andExpect(jsonPath("$.result.errorCode").value("USERNAME_NOT_FOUND"))
                 .andExpect(jsonPath("$.result.message").value("등록되지 않은 아이디입니다."))
                 .andDo(print());
 

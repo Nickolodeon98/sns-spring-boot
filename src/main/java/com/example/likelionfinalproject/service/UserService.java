@@ -31,7 +31,7 @@ public class UserService {
 
     public UserLoginResponse verifyUser(UserLoginRequest userLoginRequest) {
         userRepository.findByUserId(userLoginRequest.getUserId())
-                .orElseThrow(() -> new UserJoinException(ErrorCode.NOT_FOUND_USERNAME,
+                .orElseThrow(() -> new UserJoinException(ErrorCode.USERNAME_NOT_FOUND,
                         userLoginRequest.getUserId() + "는 등록되지 않은 아이디입니다."));
 
         String token = TokenUtils.createToken(userLoginRequest.getUserId());
