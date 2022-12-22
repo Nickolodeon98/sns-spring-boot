@@ -3,6 +3,8 @@ package com.example.likelionfinalproject.controller;
 import com.example.likelionfinalproject.domain.Response;
 import com.example.likelionfinalproject.domain.dto.UserJoinRequest;
 import com.example.likelionfinalproject.domain.dto.UserJoinResponse;
+import com.example.likelionfinalproject.domain.dto.UserLoginRequest;
+import com.example.likelionfinalproject.domain.dto.UserLoginResponse;
 import com.example.likelionfinalproject.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,5 +26,10 @@ public class UserController {
         return Response.success(userJoinResponse);
     }
 
+    @PostMapping("/login")
+    public Response<UserLoginResponse> loginUser(UserLoginRequest userLoginRequest) {
+        UserLoginResponse userLoginResponse = userService.verifyUser(userLoginRequest);
 
+        return Response.success(userLoginResponse);
+    }
 }
