@@ -5,7 +5,7 @@ import com.example.likelionfinalproject.domain.dto.UserJoinResponse;
 import com.example.likelionfinalproject.domain.dto.UserLoginRequest;
 import com.example.likelionfinalproject.domain.dto.UserLoginResponse;
 import com.example.likelionfinalproject.exception.ErrorCode;
-import com.example.likelionfinalproject.exception.UserJoinException;
+import com.example.likelionfinalproject.exception.UserException;
 import com.example.likelionfinalproject.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -87,7 +87,7 @@ class UserControllerTest {
         UserJoinRequest duplicateUser = UserJoinRequest.builder().userId("sjeon0730").name("전승환").password("1q2w3e4r").build();
 
         given(userService.registerUser(any()))
-                .willThrow(new UserJoinException(ErrorCode.DUPLICATE_USERNAME,
+                .willThrow(new UserException(ErrorCode.DUPLICATE_USERNAME,
                         duplicateUser.getUserId() + "는 이미 존재하는 아이디입니다."));
 
         mockMvc.perform(post(joinUrl).contentType(MediaType.APPLICATION_JSON)
@@ -119,7 +119,7 @@ class UserControllerTest {
     @DisplayName("로그인에 실패한다 - 회원가입 된 아이디 없음")
     @WithMockUser
     void fail_login_no_id() throws Exception {
-        given(userService.verifyUser(any())).willThrow(new UserJoinException(ErrorCode.USERNAME_NOT_FOUND, "등록되지 않은 아이디입니다."));
+        given(userService.verifyUser(any())).willThrow(new UserException(ErrorCode.USERNAME_NOT_FOUND, "등록되지 않은 아이디입니다."));
 
         mockMvc.perform(post(loginUrl).contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsBytes(any())).with(csrf()))
@@ -136,7 +136,7 @@ class UserControllerTest {
     @DisplayName("로그인에 실패한다 - 비밀번호가 잘못됨")
     @WithMockUser
     void fail_login_wrong_password() throws Exception {
-        given(userService.verifyUser(any())).willThrow(new UserJoinException(ErrorCode.INVALID_PASSWORD, "비밀번호가 잘못되었습니다."));
+        given(userService.verifyUser(any())).willThrow(new UserException(ErrorCode.INVALID_PASSWORD, "비밀번호가 잘못되었습니다."));
 
         mockMvc.perform(post(loginUrl).contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(any())).with(csrf()))
