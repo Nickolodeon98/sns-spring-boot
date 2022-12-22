@@ -2,6 +2,8 @@ package com.example.likelionfinalproject.controller;
 
 import com.example.likelionfinalproject.domain.dto.UserJoinRequest;
 import com.example.likelionfinalproject.domain.dto.UserJoinResponse;
+import com.example.likelionfinalproject.domain.dto.UserLoginRequest;
+import com.example.likelionfinalproject.domain.dto.UserLoginResponse;
 import com.example.likelionfinalproject.exception.ErrorCode;
 import com.example.likelionfinalproject.exception.UserJoinException;
 import com.example.likelionfinalproject.service.UserService;
@@ -41,7 +43,8 @@ class UserControllerTest {
     UserJoinResponse userJoinResponse;
     UserJoinRequest userJoinRequest;
 
-    String joinUrl;
+    final String joinUrl = "/api/v1/users/join";
+    final String loginUrl = "/api/v1/users/login";
 
     @BeforeEach
     void setUp() {
@@ -55,8 +58,6 @@ class UserControllerTest {
                 .userId("sjeon0730")
                 .message("회원가입에 성공했습니다.")
                 .build();
-
-        joinUrl = "/api/v1/users/join";
     }
 
     @Test
@@ -91,5 +92,30 @@ class UserControllerTest {
                 .andDo(print());
 
         verify(userService).registerUser(any());
+    }
+
+    @Test
+    @DisplayName("로그인에 성공한다.")
+    @WithMockUser
+    void success_login() throws Exception {
+        UserLoginRequest userLoginRequest = UserLoginRequest.builder().userId("sjeon0730").password("1q2w3e4r").build();
+
+        UserLoginResponse userLoginResponse = UserLoginResponse.builder().token("123456789").build();
+
+        given(userService.verifyUser(userLoginRequest)).willReturn(userLoginResponse);
+
+        mockMvc.perform(post(loginUrl).contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsBytes(userLoginRequest)).with(csrf()))
+                .andExpect(status().isOk())
+                .andDo(print());
+
+        verify(userService).verifyUser(userLoginRequest);
+    }
+
+    @Test
+    @DisplayName("로그인에 실패한다.")
+    @WithMockUser
+    void fail_login() {
+
     }
 }
