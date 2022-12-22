@@ -5,20 +5,21 @@ import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
 
 @Component
 public class TokenUtils {
 
-    @Value("${jwt.secret.key}")
-    private static String key;
     private static final long expirationTimeMs = 1000 * 60 * 60;
 
-    public static String createToken(String userId) {
+    public static String createToken(String userId, String key) {
         Date now = new Date();
         Claims claims = Jwts.claims()
                 .setSubject(userId);
@@ -39,4 +40,13 @@ public class TokenUtils {
         return extractClaims(token, key).getExpiration().before(new Date());
     }
 
+    public static String getUserId(String token, String key) {
+        return extractClaims(token, key).getSubject();
+    }
+
+    public static UsernamePasswordAuthenticationToken getAuthentication(String userId) {
+        return new UsernamePasswordAuthenticationToken(userId,
+                null,
+                List.of(new SimpleGrantedAuthority("USER")));
+    }
 }
