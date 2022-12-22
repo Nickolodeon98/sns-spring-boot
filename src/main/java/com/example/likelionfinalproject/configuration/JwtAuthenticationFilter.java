@@ -2,7 +2,11 @@ package com.example.likelionfinalproject.configuration;
 
 import com.example.likelionfinalproject.service.UserService;
 import com.example.likelionfinalproject.utils.TokenUtils;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpHeaders;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -11,9 +15,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+@AllArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-
-    UserService userService;
     String secretKey;
 
     @Override
@@ -31,5 +34,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
+
+        String userId = TokenUtils.getUserId(token, secretKey);
+
+        SecurityContextHolder.getContext().setAuthentication(TokenUtils.getAuthentication(userId));
+        filterChain.doFilter(request, response);
     }
 }
