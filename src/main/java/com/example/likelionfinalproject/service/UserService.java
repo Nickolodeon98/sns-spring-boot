@@ -34,6 +34,10 @@ public class UserService {
                 .orElseThrow(() -> new UserJoinException(ErrorCode.USERNAME_NOT_FOUND,
                         userLoginRequest.getUserId() + "는 등록되지 않은 아이디입니다."));
 
+        userRepository.findByPassword(userLoginRequest.getPassword())
+                .orElseThrow(() -> new UserJoinException(ErrorCode.INVALID_PASSWORD,
+                        "패스워드가 잘못되었습니다."));
+
         String token = TokenUtils.createToken(userLoginRequest.getUserId());
         return new UserLoginResponse(token);
     }
