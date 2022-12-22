@@ -17,7 +17,7 @@ public class UserJoinRequest {
     private String password;
 
 
-    public User toEntity() {
-        return User.builder().userId(this.userId).password(this.password).name(this.name).build();
+    public User toEntity(String password) {
+        return User.builder().userId(this.userId).password(password).name(this.name).build();
     }
 }
