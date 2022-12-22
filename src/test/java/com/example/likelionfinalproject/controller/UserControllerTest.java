@@ -116,9 +116,9 @@ class UserControllerTest {
     }
 
     @Test
-    @DisplayName("로그인에 실패한다.")
+    @DisplayName("로그인에 실패한다 - 회원가입 된 아이디 없음")
     @WithMockUser
-    void fail_login() throws Exception {
+    void fail_login_no_id() throws Exception {
         given(userService.verifyUser(any())).willThrow(new UserJoinException(ErrorCode.USERNAME_NOT_FOUND, "등록되지 않은 아이디입니다."));
 
         mockMvc.perform(post(loginUrl).contentType(MediaType.APPLICATION_JSON)
@@ -127,6 +127,23 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.resultCode").value("ERROR"))
                 .andExpect(jsonPath("$.result.errorCode").value("USERNAME_NOT_FOUND"))
                 .andExpect(jsonPath("$.result.message").value("등록되지 않은 아이디입니다."))
+                .andDo(print());
+
+        verify(userService).verifyUser(any());
+    }
+
+    @Test
+    @DisplayName("로그인에 실패한다 - 비밀번호가 잘못됨")
+    @WithMockUser
+    void fail_login_wrong_password() throws Exception {
+        given(userService.verifyUser(any())).willThrow(new UserJoinException(ErrorCode.INVALID_PASSWORD, "비밀번호가 잘못되었습니다."));
+
+        mockMvc.perform(post(loginUrl).contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(any())).with(csrf()))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.resultCode").value("ERROR"))
+                .andExpect(jsonPath("$.result.errorCode").value("INVALID_PASSWORD"))
+                .andExpect(jsonPath("$.result.message").value("비밀번호가 잘못되었습니다."))
                 .andDo(print());
 
         verify(userService).verifyUser(any());
