@@ -102,14 +102,14 @@ class UserControllerTest {
 
         UserLoginResponse userLoginResponse = UserLoginResponse.builder().token("123456789").build();
 
-        given(userService.verifyUser(userLoginRequest)).willReturn(userLoginResponse);
+        given(userService.verifyUser(any())).willReturn(userLoginResponse);
 
         mockMvc.perform(post(loginUrl).contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsBytes(userLoginRequest)).with(csrf()))
+                .content(objectMapper.writeValueAsBytes(any())).with(csrf()))
                 .andExpect(status().isOk())
                 .andDo(print());
 
-        verify(userService).verifyUser(userLoginRequest);
+        verify(userService).verifyUser(any());
     }
 
     @Test
