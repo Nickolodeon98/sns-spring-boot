@@ -30,4 +30,13 @@ public class TokenUtils {
                 .signWith(SignatureAlgorithm.HS256, key)
                 .compact();
     }
+
+    public static Claims extractClaims(String token, String key) {
+        return Jwts.parser().setSigningKey(key).parseClaimsJws(token).getBody();
+    }
+
+    public static boolean isExpired(String token, String key) {
+        return extractClaims(token, key).getExpiration().before(new Date());
+    }
+
 }
