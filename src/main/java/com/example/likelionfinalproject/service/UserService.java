@@ -10,12 +10,15 @@ import com.example.likelionfinalproject.exception.UserJoinException;
 import com.example.likelionfinalproject.repository.UserRepository;
 import com.example.likelionfinalproject.utils.TokenUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+
+    private final BCryptPasswordEncoder encoder;
 
     public UserJoinResponse registerUser(UserJoinRequest userJoinRequest) {
 
@@ -24,7 +27,9 @@ public class UserService {
                     user.getUserId() + "는 이미 존재하는 아이디입니다.");
         });
 
-        User savedUser = userRepository.save(userJoinRequest.toEntity());
+        User savedUser = userRepository
+                .save(userJoinRequest
+                        .toEntity(encoder.encode(userJoinRequest.getPassword())));
 
         return UserJoinResponse.of(savedUser);
     }
@@ -36,7 +41,7 @@ public class UserService {
 
         String password = userLoginRequest.getPassword();
 
-        if (!password.equals(user.getPassword()))
+        if (!encoder.matches(password, user.getPassword()))
             throw new UserJoinException(ErrorCode.INVALID_PASSWORD, "패스워드가 잘못되었습니다.");
 
         String token = TokenUtils.createToken(userLoginRequest.getUserId());
