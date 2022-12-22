@@ -24,6 +24,7 @@ import static org.mockito.Mockito.verify;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest
@@ -107,6 +108,8 @@ class UserControllerTest {
         mockMvc.perform(post(loginUrl).contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsBytes(any())).with(csrf()))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
+                .andExpect(jsonPath("$.result.token").value("123456789"))
                 .andDo(print());
 
         verify(userService).verifyUser(any());
@@ -121,6 +124,9 @@ class UserControllerTest {
         mockMvc.perform(post(loginUrl).contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsBytes(any())).with(csrf()))
                 .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.resultCode").value("ERROR"))
+                .andExpect(jsonPath("$.result.errorCode").value("NOT_FOUND_USERNAME"))
+                .andExpect(jsonPath("$.result.message").value("등록되지 않은 아이디입니다."))
                 .andDo(print());
 
         verify(userService).verifyUser(any());
