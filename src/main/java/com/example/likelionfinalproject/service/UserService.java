@@ -10,6 +10,7 @@ import com.example.likelionfinalproject.exception.UserException;
 import com.example.likelionfinalproject.repository.UserRepository;
 import com.example.likelionfinalproject.utils.TokenUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +20,9 @@ public class UserService {
     private final UserRepository userRepository;
 
     private final BCryptPasswordEncoder encoder;
+
+    @Value("${jwt.secret.key}")
+    private String secretKey;
 
     public UserJoinResponse registerUser(UserJoinRequest userJoinRequest) {
 
@@ -44,7 +48,7 @@ public class UserService {
         if (!encoder.matches(password, user.getPassword()))
             throw new UserException(ErrorCode.INVALID_PASSWORD, "패스워드가 잘못되었습니다.");
 
-        String token = TokenUtils.createToken(userLoginRequest.getUserId());
+        String token = TokenUtils.createToken(userLoginRequest.getUserId(), secretKey);
         return new UserLoginResponse(token);
     }
 }
