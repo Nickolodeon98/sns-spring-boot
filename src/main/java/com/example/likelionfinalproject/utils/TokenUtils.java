@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -15,6 +16,7 @@ import java.util.Date;
 import java.util.List;
 
 @Component
+@Slf4j
 public class TokenUtils {
 
     private static final long expirationTimeMs = 1000 * 60 * 60;
@@ -23,7 +25,7 @@ public class TokenUtils {
         Date now = new Date();
         Claims claims = Jwts.claims()
                 .setSubject(userId);
-
+        log.info("key:{}", key);
         return Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(now)
