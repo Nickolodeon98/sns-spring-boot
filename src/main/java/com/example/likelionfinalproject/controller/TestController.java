@@ -24,7 +24,7 @@ public class TestController {
         return "bye6";
     }
 
-    @PostMapping("/test")
+    @GetMapping("/test")
     @ResponseBody
     public String test(Authentication authentication) {
         return authentication.getName();
