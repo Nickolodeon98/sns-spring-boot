@@ -30,15 +30,13 @@ public class UserService {
     }
 
     public UserLoginResponse verifyUser(UserLoginRequest userLoginRequest) {
-        User actualUser = userRepository.findByUserId(userLoginRequest.getUserId())
+        User user = userRepository.findByUserId(userLoginRequest.getUserId())
                 .orElseThrow(() -> new UserJoinException(ErrorCode.USERNAME_NOT_FOUND,
                         userLoginRequest.getUserId() + "는 등록되지 않은 아이디입니다."));
 
-        User userTriedWithPassword = userRepository.findByPassword(userLoginRequest.getPassword())
-                .orElseThrow(() -> new UserJoinException(ErrorCode.INVALID_PASSWORD,
-                        "패스워드가 잘못되었습니다."));
+        String password = userLoginRequest.getPassword();
 
-        if (!userTriedWithPassword.getPassword().equals(actualUser.getPassword()))
+        if (!password.equals(user.getPassword()))
             throw new UserJoinException(ErrorCode.INVALID_PASSWORD, "패스워드가 잘못되었습니다.");
 
         String token = TokenUtils.createToken(userLoginRequest.getUserId());
