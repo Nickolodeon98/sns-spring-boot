@@ -12,7 +12,7 @@ public class TestController {
     @GetMapping("/hello")
     @ResponseBody
     public String hello() {
-        return "hello";
+        return "darkchocolate";
     }
 
 
