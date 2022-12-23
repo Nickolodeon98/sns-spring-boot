@@ -1,9 +1,16 @@
 package com.example.likelionfinalproject.domain.entity;
 
+import lombok.*;
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
+@AllArgsConstructor
+@Getter
+@NoArgsConstructor
+@Setter
+@Builder
 public class Post {
 
     @Id
