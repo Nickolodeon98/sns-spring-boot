@@ -48,7 +48,6 @@ class PostControllerTest {
         postRequest = PostRequest.builder()
                 .title("포스트 제목")
                 .body("포스트 내용")
-                .author("포스트 작성자")
                 .build();
 
         postResponse = PostResponse.builder()
@@ -65,7 +64,7 @@ class PostControllerTest {
     @WithMockUser
     public void post_success() throws Exception {
 
-        given(postService.createNewPost(any())).willReturn(postResponse);
+        given(postService.createNewPost(any(), any())).willReturn(postResponse);
 
         mockMvc.perform(post(postUrl).contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsBytes(postRequest)).with(csrf()))
@@ -74,7 +73,7 @@ class PostControllerTest {
                 .andExpect(jsonPath("$.result.message").value("포스트 등록 완료"))
                 .andDo(print());
 
-        verify(postService).createNewPost(any());
+        verify(postService).createNewPost(any(), any());
     }
 
 }
