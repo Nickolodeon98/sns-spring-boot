@@ -21,7 +21,7 @@ public class TestController {
     @GetMapping("/bye")
     @ResponseBody
     public String bye() {
-        return "bye6";
+        return "bye";
     }
 
     @GetMapping("/test")
