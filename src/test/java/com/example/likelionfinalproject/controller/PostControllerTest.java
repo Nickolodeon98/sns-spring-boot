@@ -1,6 +1,9 @@
 package com.example.likelionfinalproject.controller;
 
+import com.example.likelionfinalproject.domain.dto.PostRequest;
+import com.example.likelionfinalproject.domain.dto.PostResponse;
 import com.example.likelionfinalproject.service.PostService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -15,9 +18,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest
@@ -44,12 +47,11 @@ class PostControllerTest {
                 .title("포스트 제목")
                 .body("포스트 내용")
                 .author("포스트 작성자")
-                .createdAt("포스트 작성 날짜")
                 .build();
 
         postResponse = PostResponse.builder()
                 .message("포스트 등록 완료")
-                .postId(1)
+                .postId(1L)
                 .build();
 
         postUrl = "/api/v1/posts";
@@ -58,7 +60,7 @@ class PostControllerTest {
 
     @Test
     @DisplayName("포스트 작성에 성공한다")
-    public void post_success() {
+    public void post_success() throws Exception {
 
         given(postService.createNewPost(postRequest)).willReturn(postResponse);
 
