@@ -12,7 +12,6 @@ public class PostRequest {
 
     private String title;
     private String body;
-    private String author;
 
     public Post toEntity() {
         return Post.builder()
