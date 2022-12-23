@@ -5,6 +5,7 @@ import com.example.likelionfinalproject.domain.dto.PostRequest;
 import com.example.likelionfinalproject.domain.dto.PostResponse;
 import com.example.likelionfinalproject.service.PostService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,11 +20,10 @@ public class PostController {
 
     @PostMapping("")
     @ResponseBody
-    public Response<PostResponse> newPost(PostRequest postRequest) {
-        PostResponse postResponse = postService.createNewPost(postRequest);
+    public Response<PostResponse> newPost(Authentication authentication, PostRequest postRequest) {
+        PostResponse postResponse = postService.createNewPost(postRequest, authentication.getName());
 
         return Response.success(postResponse);
     }
-
 
 }
