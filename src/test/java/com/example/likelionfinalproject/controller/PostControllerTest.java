@@ -16,6 +16,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -64,7 +65,7 @@ class PostControllerTest {
     @WithMockUser
     public void post_success() throws Exception {
 
-        given(postService.createNewPost(postRequest)).willReturn(postResponse);
+        given(postService.createNewPost(any())).willReturn(postResponse);
 
         mockMvc.perform(post(postUrl).contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsBytes(postRequest)).with(csrf()))
@@ -73,7 +74,7 @@ class PostControllerTest {
                 .andExpect(jsonPath("$.result.message").value("포스트 등록 완료"))
                 .andDo(print());
 
-        verify(postService).createNewPost(postRequest);
+        verify(postService).createNewPost(any());
     }
 
 }
