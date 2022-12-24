@@ -1,11 +1,12 @@
 package com.example.likelionfinalproject.domain.entity;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.jsonschema.JsonSerializableSchema;
 import lombok.*;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
+import java.io.Serializable;
+import java.util.List;
 
 @Entity
 @AllArgsConstructor
@@ -13,14 +14,17 @@ import javax.persistence.Id;
 @Setter
 @NoArgsConstructor
 @Builder
-public class User {
+public class User implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+
     private String name;
     private String userId;
     private String password;
 
+    @OneToMany(mappedBy = "author")
+    private List<Post> posts;
 }
