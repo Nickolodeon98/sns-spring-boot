@@ -1,5 +1,6 @@
 package com.example.likelionfinalproject.controller;
 
+import com.example.likelionfinalproject.domain.dto.EditPostRequest;
 import com.example.likelionfinalproject.domain.dto.PostRequest;
 import com.example.likelionfinalproject.domain.dto.PostResponse;
 import com.example.likelionfinalproject.domain.dto.SelectedPostResponse;
