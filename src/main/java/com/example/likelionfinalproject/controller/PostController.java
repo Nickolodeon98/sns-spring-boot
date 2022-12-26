@@ -28,7 +28,7 @@ public class PostController {
     /* id, 제목, 내용, 작성자, 작성날짜, 수정날짜 조회 */
     @GetMapping("/{postsId}")
     @ResponseBody
-    public Response<SelectedPostResponse> postInfoDetails(@RequestParam Long postsId) {
+    public Response<SelectedPostResponse> postInfoDetails(@PathVariable Long postsId) {
         SelectedPostResponse selectedPostResponse = postService.acquireSinglePost(postsId);
         return Response.success(selectedPostResponse);
     }
