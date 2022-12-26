@@ -176,6 +176,7 @@ class PostControllerTest {
 
     @Test
     @DisplayName("고유 아이디로 찾은 특정 포스트의 내용 수정에 성공한다.")
+    @WithMockUser
     void success_edit_post() throws Exception {
         EditPostRequest editPostRequest = EditPostRequest.builder()
                                             .title("title")
@@ -187,7 +188,7 @@ class PostControllerTest {
                                         .postId(postsId)
                                         .build();
 
-        given(postService.editPost(editPostRequest, postsId)).willReturn(postResponse);
+        given(postService.editPost(editPostRequest, postsId)).willReturn(editedPost);
 
         String editUrl = String.format("%s/%d", postUrl, postsId);
 
