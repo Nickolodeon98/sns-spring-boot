@@ -2,6 +2,7 @@ package com.example.likelionfinalproject.controller;
 
 import com.example.likelionfinalproject.domain.dto.PostRequest;
 import com.example.likelionfinalproject.domain.dto.PostResponse;
+import com.example.likelionfinalproject.domain.dto.SelectedPostResponse;
 import com.example.likelionfinalproject.exception.ErrorCode;
 import com.example.likelionfinalproject.exception.UserException;
 import com.example.likelionfinalproject.service.PostService;
@@ -23,6 +24,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -70,7 +72,7 @@ class PostControllerTest {
         given(postService.createNewPost(any(), any())).willReturn(postResponse);
 
         mockMvc.perform(post(postUrl).contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsBytes(postRequest)).with(csrf()))
+                        .content(objectMapper.writeValueAsBytes(postRequest)).with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
                 .andExpect(jsonPath("$.result.message").value("포스트 등록 완료"))
@@ -87,8 +89,8 @@ class PostControllerTest {
                 .willThrow(new UserException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다."));
 
         mockMvc.perform(post(postUrl).contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsBytes(any()))
-                .content(objectMapper.writeValueAsBytes(any())).with(csrf()))
+                        .content(objectMapper.writeValueAsBytes(any()))
+                        .content(objectMapper.writeValueAsBytes(any())).with(csrf()))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.resultCode").value("ERROR"))
                 .andExpect(jsonPath("$.result.errorCode").value("INVALID_PERMISSION"))
@@ -96,5 +98,38 @@ class PostControllerTest {
                 .andDo(print());
 
         verify(postService).createNewPost(any(), any());
+    }
+
+    @Test
+    @DisplayName("주어진 고유 번호로 포스트를 조회한다")
+    @WithMockUser
+    public void find_post() throws Exception {
+        Long postsId = 1L;
+
+        SelectedPostResponse selectedPostResponse = SelectedPostResponse.builder()
+                                                        .id(1L)
+                                                        .title("title")
+                                                        .body("body")
+                                                        .userName("userName")
+                                                        .createdAt("2022-12-26 18:03:14.384056")
+                                                        .lastModifiedAt("2022-12-26 18:03:14.384000")
+                                                        .build();
+
+        given(postService.acquireSinglePost(postsId)).willReturn(selectedPostResponse);
+
+        String selectUrl = "api/v1/posts/" + postsId;
+
+        mockMvc.perform(get(selectUrl))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
+                .andExpect(jsonPath("$.result.id").value(1L))
+                .andExpect(jsonPath("$.result.title").value("title1"))
+                .andExpect(jsonPath("$.result.body").value("body"))
+                .andExpect(jsonPath("$.result.userName").value("user1"))
+                .andExpect(jsonPath("$.result.createdAt").value("2022-12-26 18:03:14.384056"))
+                .andExpect(jsonPath("$.result.lastModifiedAt").value("2022-12-26 18:03:14.384000"))
+                .andDo(print());
+
+        verify(postService).acquireSinglePost(postsId);
     }
 }
