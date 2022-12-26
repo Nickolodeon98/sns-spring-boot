@@ -35,6 +35,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -188,19 +189,22 @@ class PostControllerTest {
                                         .postId(postsId)
                                         .build();
 
-        given(postService.editPost(editPostRequest, postsId)).willReturn(editedPost);
+        given(postService.editPost(any(), eq(postsId))).willReturn(editedPost);
 
         String editUrl = String.format("%s/%d", postUrl, postsId);
 
         mockMvc.perform(put(editUrl)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsBytes(editPostRequest)).with(csrf()))
+                .content(objectMapper.writeValueAsBytes(editPostRequest))
+                .content(objectMapper.writeValueAsBytes(postsId)).with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
                 .andExpect(jsonPath("$.result.message").value("포스트 수정 완료"))
                 .andExpect(jsonPath("$.result.postId").value(postsId))
                 .andDo(print());
 
+
+        verify(postService).editPost(any(), eq(postsId));
     }
 
 }
