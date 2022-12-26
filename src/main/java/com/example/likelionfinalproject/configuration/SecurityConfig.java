@@ -40,13 +40,12 @@ public class SecurityConfig {
                 .antMatchers(HttpMethod.POST, "/api/v1/users/join", "/api/v1/users/login")
                 .permitAll()
                 .and()
-                .antMatcher("/api/v1/posts")
+                .antMatcher("/api/v1/posts/**")
                 .authorizeRequests()
                 .anyRequest().authenticated()
                 .and()
                 .addFilterBefore(new JwtAuthenticationFilter(secretKey, exceptionResolver), UsernamePasswordAuthenticationFilter.class)
                 .build();
-
     }
 
 }
