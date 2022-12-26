@@ -11,9 +11,13 @@ import com.example.likelionfinalproject.repository.PostRepository;
 import com.example.likelionfinalproject.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -41,5 +45,12 @@ public class PostService {
         Optional<Post> acquiredPost = postRepository.findById(postsId);
         SelectedPostResponse response = SelectedPostResponse.of(acquiredPost.get());
         return response;
+    }
+
+    public Page<SelectedPostResponse> listAllPosts(Pageable pageable) {
+
+        Page<Post> posts = postRepository.findAll(pageable);
+
+        return new PageImpl<>(posts.stream().map(SelectedPostResponse::of).collect(Collectors.toList()));
     }
 }
