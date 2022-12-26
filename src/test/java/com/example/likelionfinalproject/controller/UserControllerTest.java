@@ -61,7 +61,7 @@ class UserControllerTest {
                 .build();
 
         userLoginRequest = UserLoginRequest.builder().userName("sjeon0730").password("1q2w3e4r").build();
-        userLoginResponse = UserLoginResponse.builder().token("123456789").build();
+        userLoginResponse = UserLoginResponse.builder().jwt("123456789").build();
     }
 
     @Test

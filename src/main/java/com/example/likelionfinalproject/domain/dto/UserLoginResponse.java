@@ -9,5 +9,5 @@ import lombok.Getter;
 @Builder
 public class UserLoginResponse {
 
-    private String token;
+    private String jwt;
 }
