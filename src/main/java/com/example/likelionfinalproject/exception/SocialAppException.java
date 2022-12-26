@@ -1,6 +1,6 @@
 package com.example.likelionfinalproject.exception;
 
-import com.example.likelionfinalproject.domain.Response;
+import com.example.likelionfinalproject.domain.dto.Response;
 import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
