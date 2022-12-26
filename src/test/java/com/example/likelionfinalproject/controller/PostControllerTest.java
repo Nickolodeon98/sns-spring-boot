@@ -146,14 +146,14 @@ class PostControllerTest {
     }
 
     @Captor
-    ArgumentCaptor<Page<Post>> postArgumentCaptor;
+    ArgumentCaptor<Pageable> postArgumentCaptor;
 
     @Test
     @DisplayName("등록된 모든 포스트를 조회한다.")
     @WithMockUser
     void find_every_posts() throws Exception {
         final int size = 20;
-        Pageable pageable = PageRequest.of(1, size, Sort.by("id").descending());
+        Pageable pageable = PageRequest.of(0, size, Sort.by("id").descending());
 
         List<SelectedPostResponse> multiplePosts = List.of(selectedPostResponse);
 
@@ -162,16 +162,15 @@ class PostControllerTest {
         given(postService.listAllPosts(pageable)).willReturn(posts);
 
         mockMvc.perform(get(postUrl))
-                .andExpect(status().isAccepted())
+                .andExpect(status().isOk())
                 .andDo(print());
 
-        verify(postArgumentCaptor.capture()).stream()
-                .map(i->SelectedPostResponse.of(mock(Post.class))).collect(Collectors.toList());
+        verify(postService).listAllPosts(postArgumentCaptor.capture());
 
-        Page<Post> createdPost = postArgumentCaptor.getValue();
+        Pageable createdPost = postArgumentCaptor.getValue();
 
-        Assertions.assertEquals(pageable.getPageSize(), createdPost.getSize());
+        Assertions.assertEquals(pageable.getPageSize(), createdPost.getPageSize());
         Assertions.assertEquals(pageable.getSort(), createdPost.getSort());
-        Assertions.assertEquals(pageable.getPageNumber(), createdPost.getTotalPages());
+        Assertions.assertEquals(pageable.getPageNumber(), createdPost.getPageNumber());
     }
 }
