@@ -87,7 +87,7 @@ class PostServiceTest {
     }
 
     @Test
-    @DisplayName("조회하고자 하는 포스트를 찾아 반환한다.")
+    @DisplayName("조회하려는 포스트를 찾아 반환한다.")
     void fetch_post_info() {
         when(postRepository.findById(postsId)).thenReturn(Optional.of(mockPost));
 
