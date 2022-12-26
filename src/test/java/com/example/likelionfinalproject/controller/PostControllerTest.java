@@ -2,6 +2,8 @@ package com.example.likelionfinalproject.controller;
 
 import com.example.likelionfinalproject.domain.dto.PostRequest;
 import com.example.likelionfinalproject.domain.dto.PostResponse;
+import com.example.likelionfinalproject.exception.ErrorCode;
+import com.example.likelionfinalproject.exception.UserException;
 import com.example.likelionfinalproject.service.PostService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -76,4 +79,21 @@ class PostControllerTest {
         verify(postService).createNewPost(any(), any());
     }
 
+    @Test
+    @DisplayName("포스트 작성에 실패한다")
+    @WithAnonymousUser
+    public void post_fail() throws Exception {
+        given(postService.createNewPost(any(), any()))
+                .willThrow(new UserException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다."));
+
+        mockMvc.perform(post(postUrl).contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsBytes(any())).with(csrf()))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.resultCode").value("ERROR"))
+                .andExpect(jsonPath("$.result.errorCode").value("INVALID_PERMISSION"))
+                .andExpect(jsonPath("$.result.message").value("사용자가 권한이 없습니다."))
+                .andDo(print());
+
+        verify(postService).createNewPost(any(), any());
+    }
 }
