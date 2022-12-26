@@ -39,16 +39,16 @@ public class UserService {
     }
 
     public UserLoginResponse verifyUser(UserLoginRequest userLoginRequest) {
-        User user = userRepository.findByUserName(userLoginRequest.getUserId())
+        User user = userRepository.findByUserName(userLoginRequest.getUserName())
                 .orElseThrow(() -> new UserException(ErrorCode.USERNAME_NOT_FOUND,
-                        userLoginRequest.getUserId() + "는 등록되지 않은 아이디입니다."));
+                        userLoginRequest.getUserName() + "는 등록되지 않은 아이디입니다."));
 
         String password = userLoginRequest.getPassword();
 
         if (!encoder.matches(password, user.getPassword()))
             throw new UserException(ErrorCode.INVALID_PASSWORD, "패스워드가 잘못되었습니다.");
 
-        String token = TokenUtils.createToken(userLoginRequest.getUserId(), secretKey);
+        String token = TokenUtils.createToken(userLoginRequest.getUserName(), secretKey);
         return new UserLoginResponse(token);
     }
 }

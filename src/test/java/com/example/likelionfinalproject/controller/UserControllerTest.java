@@ -60,7 +60,7 @@ class UserControllerTest {
                 .message("회원가입에 성공했습니다.")
                 .build();
 
-        userLoginRequest = UserLoginRequest.builder().userId("sjeon0730").password("1q2w3e4r").build();
+        userLoginRequest = UserLoginRequest.builder().userName("sjeon0730").password("1q2w3e4r").build();
         userLoginResponse = UserLoginResponse.builder().token("123456789").build();
     }
 

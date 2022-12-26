@@ -11,7 +11,7 @@ import lombok.Getter;
 @EqualsAndHashCode
 public class UserLoginRequest {
 
-    private String userId;
+    private String userName;
     private String password;
 
 }
