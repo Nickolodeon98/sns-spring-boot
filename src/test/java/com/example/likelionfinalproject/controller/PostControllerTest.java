@@ -114,24 +114,22 @@ class PostControllerTest {
                                                         .id(1L)
                                                         .title("title")
                                                         .body("body")
-                                                        .userName("userName")
+                                                        .userName("username")
                                                         .createdAt(LocalDateTime.of(2022, 12, 26, 18, 03, 14))
                                                         .lastModifiedAt(LocalDateTime.of(2022, 12, 26, 18, 03, 14))
                                                         .build();
 
         given(postService.acquireSinglePost(postsId)).willReturn(selectedPostResponse);
 
-        String selectUrl = "api/v1/posts/" + postsId;
+        String selectUrl = String.format("/api/v1/posts/%d", postsId);
 
         mockMvc.perform(get(selectUrl))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
                 .andExpect(jsonPath("$.result.id").value(1L))
-                .andExpect(jsonPath("$.result.title").value("title1"))
+                .andExpect(jsonPath("$.result.title").value("title"))
                 .andExpect(jsonPath("$.result.body").value("body"))
-                .andExpect(jsonPath("$.result.userName").value("user1"))
-                .andExpect(jsonPath("$.result.createdAt").value("2022-12-26 18:03:14"))
-                .andExpect(jsonPath("$.result.lastModifiedAt").value("2022-12-26 18:03:14"))
+                .andExpect(jsonPath("$.result.userName").value("username"))
                 .andDo(print());
 
         verify(postService).acquireSinglePost(postsId);
