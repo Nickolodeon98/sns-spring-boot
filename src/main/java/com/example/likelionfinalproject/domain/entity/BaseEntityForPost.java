@@ -1,6 +1,5 @@
 package com.example.likelionfinalproject.domain.entity;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -18,7 +17,7 @@ import java.time.LocalDateTime;
 @ToString
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
-public class BaseEntity {
+public class BaseEntityForPost {
 
     @CreatedDate
     @Column(updatable = false)
@@ -27,4 +26,6 @@ public class BaseEntity {
     @LastModifiedDate
     @Column(updatable = false)
     private LocalDateTime lastModifiedAt;
+
+
 }
