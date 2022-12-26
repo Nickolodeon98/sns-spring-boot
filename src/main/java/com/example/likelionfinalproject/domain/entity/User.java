@@ -14,7 +14,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @Builder
-public class User implements Serializable {
+public class User extends BaseEntityForUser implements Serializable  {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
