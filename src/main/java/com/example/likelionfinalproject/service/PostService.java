@@ -2,6 +2,7 @@ package com.example.likelionfinalproject.service;
 
 import com.example.likelionfinalproject.domain.dto.PostRequest;
 import com.example.likelionfinalproject.domain.dto.PostResponse;
+import com.example.likelionfinalproject.domain.dto.SelectedPostResponse;
 import com.example.likelionfinalproject.domain.entity.Post;
 import com.example.likelionfinalproject.domain.entity.User;
 import com.example.likelionfinalproject.exception.ErrorCode;
@@ -10,6 +11,8 @@ import com.example.likelionfinalproject.repository.PostRepository;
 import com.example.likelionfinalproject.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -30,5 +33,11 @@ public class PostService {
         Post savedPost = postRepository.save(post);
 
         return PostResponse.of(savedPost);
+    }
+
+    public SelectedPostResponse acquireSinglePost(Long postsId) {
+        Optional<Post> acquiredPost = postRepository.findById(postsId);
+        SelectedPostResponse response = SelectedPostResponse.of(acquiredPost.get());
+        return response;
     }
 }
