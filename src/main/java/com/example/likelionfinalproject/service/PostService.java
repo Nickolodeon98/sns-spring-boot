@@ -10,12 +10,14 @@ import com.example.likelionfinalproject.exception.UserException;
 import com.example.likelionfinalproject.repository.PostRepository;
 import com.example.likelionfinalproject.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PostService {
 
     private final PostRepository postRepository;
