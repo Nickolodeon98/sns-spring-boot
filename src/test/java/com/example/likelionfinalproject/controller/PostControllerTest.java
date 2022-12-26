@@ -3,29 +3,39 @@ package com.example.likelionfinalproject.controller;
 import com.example.likelionfinalproject.domain.dto.PostRequest;
 import com.example.likelionfinalproject.domain.dto.PostResponse;
 import com.example.likelionfinalproject.domain.dto.SelectedPostResponse;
+import com.example.likelionfinalproject.domain.entity.Post;
 import com.example.likelionfinalproject.exception.ErrorCode;
 import com.example.likelionfinalproject.exception.UserException;
 import com.example.likelionfinalproject.service.PostService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.*;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.awt.print.PageFormat;
+import java.awt.print.Printable;
 import java.sql.Date;
 import java.text.DateFormat;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -49,6 +59,7 @@ class PostControllerTest {
     PostRequest postRequest;
 
     PostResponse postResponse;
+    SelectedPostResponse selectedPostResponse;
 
     String postUrl;
 
@@ -64,8 +75,16 @@ class PostControllerTest {
                 .postId(1L)
                 .build();
 
-        postUrl = "/api/v1/posts";
+        selectedPostResponse = SelectedPostResponse.builder()
+                .id(1L)
+                .title("title")
+                .body("body")
+                .userName("username")
+                .createdAt(LocalDateTime.of(2022, 12, 26, 18, 03, 14))
+                .lastModifiedAt(LocalDateTime.of(2022, 12, 26, 18, 03, 14))
+                .build();
 
+        postUrl = "/api/v1/posts";
     }
 
     @Test
@@ -110,18 +129,9 @@ class PostControllerTest {
     public void find_post() throws Exception {
         Long postsId = 1L;
 
-        SelectedPostResponse selectedPostResponse = SelectedPostResponse.builder()
-                                                        .id(1L)
-                                                        .title("title")
-                                                        .body("body")
-                                                        .userName("username")
-                                                        .createdAt(LocalDateTime.of(2022, 12, 26, 18, 03, 14))
-                                                        .lastModifiedAt(LocalDateTime.of(2022, 12, 26, 18, 03, 14))
-                                                        .build();
-
         given(postService.acquireSinglePost(postsId)).willReturn(selectedPostResponse);
 
-        String selectUrl = String.format("/api/v1/posts/%d", postsId);
+        String selectUrl = String.format("%s/%d", postUrl, postsId);
 
         mockMvc.perform(get(selectUrl))
                 .andExpect(status().isOk())
@@ -133,5 +143,34 @@ class PostControllerTest {
                 .andDo(print());
 
         verify(postService).acquireSinglePost(postsId);
+    }
+
+    @Captor
+    ArgumentCaptor<Pageable> postArgumentCaptor;
+
+    @Test
+    @DisplayName("등록된 모든 포스트를 조회한다.")
+    @WithMockUser
+    void find_every_posts() throws Exception {
+        final int size = 20;
+        Pageable pageable = PageRequest.of(0, size, Sort.by("id").descending());
+
+        List<SelectedPostResponse> multiplePosts = List.of(selectedPostResponse);
+
+        Page<SelectedPostResponse> posts = new PageImpl<>(multiplePosts);
+
+        given(postService.listAllPosts(pageable)).willReturn(posts);
+
+        mockMvc.perform(get(postUrl))
+                .andExpect(status().isOk())
+                .andDo(print());
+
+        verify(postService).listAllPosts(postArgumentCaptor.capture());
+
+        Pageable createdPost = postArgumentCaptor.getValue();
+
+        Assertions.assertEquals(pageable.getPageSize(), createdPost.getPageSize());
+        Assertions.assertEquals(pageable.getSort(), createdPost.getSort());
+        Assertions.assertEquals(pageable.getPageNumber(), createdPost.getPageNumber());
     }
 }
