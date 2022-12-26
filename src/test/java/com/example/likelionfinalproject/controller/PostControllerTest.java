@@ -30,10 +30,12 @@ import java.sql.Date;
 import java.text.DateFormat;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -151,7 +153,7 @@ class PostControllerTest {
     @WithMockUser
     void find_every_posts() throws Exception {
         final int size = 20;
-        Pageable pageable = PageRequest.of(1, size, Sort.Direction.DESC);
+        Pageable pageable = PageRequest.of(1, size, Sort.by("id").descending());
 
         List<SelectedPostResponse> multiplePosts = List.of(selectedPostResponse);
 
@@ -163,14 +165,13 @@ class PostControllerTest {
                 .andExpect(status().isAccepted())
                 .andDo(print());
 
-        verify(postService).listAllPosts(postArgumentCaptor.capture());
+        verify(postArgumentCaptor.capture()).stream()
+                .map(i->SelectedPostResponse.of(mock(Post.class))).collect(Collectors.toList());
 
         Page<Post> createdPost = postArgumentCaptor.getValue();
 
         Assertions.assertEquals(pageable.getPageSize(), createdPost.getSize());
         Assertions.assertEquals(pageable.getSort(), createdPost.getSort());
         Assertions.assertEquals(pageable.getPageNumber(), createdPost.getTotalPages());
-
-
     }
 }
