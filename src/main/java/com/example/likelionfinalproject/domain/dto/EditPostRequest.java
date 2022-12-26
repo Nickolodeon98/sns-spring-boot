@@ -1,5 +1,6 @@
 package com.example.likelionfinalproject.domain.dto;
 
+import com.example.likelionfinalproject.domain.entity.Post;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,4 +13,10 @@ public class EditPostRequest {
     private String title;
     private String body;
 
+    public Post toEntity() {
+        return Post.builder()
+                .title(title)
+                .body(body)
+                .build();
+    }
 }
