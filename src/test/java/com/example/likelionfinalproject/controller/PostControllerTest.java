@@ -19,6 +19,10 @@ import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.sql.Date;
+import java.text.DateFormat;
+import java.time.LocalDateTime;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -111,8 +115,8 @@ class PostControllerTest {
                                                         .title("title")
                                                         .body("body")
                                                         .userName("userName")
-                                                        .createdAt("2022-12-26 18:03:14.384056")
-                                                        .lastModifiedAt("2022-12-26 18:03:14.384000")
+                                                        .createdAt(LocalDateTime.of(2022, 12, 26, 18, 03, 14))
+                                                        .lastModifiedAt(LocalDateTime.of(2022, 12, 26, 18, 03, 14))
                                                         .build();
 
         given(postService.acquireSinglePost(postsId)).willReturn(selectedPostResponse);
@@ -126,8 +130,8 @@ class PostControllerTest {
                 .andExpect(jsonPath("$.result.title").value("title1"))
                 .andExpect(jsonPath("$.result.body").value("body"))
                 .andExpect(jsonPath("$.result.userName").value("user1"))
-                .andExpect(jsonPath("$.result.createdAt").value("2022-12-26 18:03:14.384056"))
-                .andExpect(jsonPath("$.result.lastModifiedAt").value("2022-12-26 18:03:14.384000"))
+                .andExpect(jsonPath("$.result.createdAt").value("2022-12-26 18:03:14"))
+                .andExpect(jsonPath("$.result.lastModifiedAt").value("2022-12-26 18:03:14"))
                 .andDo(print());
 
         verify(postService).acquireSinglePost(postsId);
