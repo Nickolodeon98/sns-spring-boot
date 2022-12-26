@@ -51,13 +51,12 @@ class UserControllerTest {
     @BeforeEach
     void setUp() {
         userJoinRequest = UserJoinRequest.builder()
-                .userId("sjeon0730")
+                .userName("sjeon0730")
                 .password("1q2w3e4r")
-                .name("전승환")
                 .build();
 
         userJoinResponse = UserJoinResponse.builder()
-                .userId("sjeon0730")
+                .userName("sjeon0730")
                 .message("회원가입에 성공했습니다.")
                 .build();
 
@@ -87,11 +86,11 @@ class UserControllerTest {
     @DisplayName("회원가입에 실패한다.")
     @WithMockUser
     void fail_join() throws Exception {
-        UserJoinRequest duplicateUser = UserJoinRequest.builder().userId("sjeon0730").name("전승환").password("1q2w3e4r").build();
+        UserJoinRequest duplicateUser = UserJoinRequest.builder().userName("sjeon0730").password("1q2w3e4r").build();
 
         given(userService.registerUser(any()))
                 .willThrow(new UserException(ErrorCode.DUPLICATE_USERNAME,
-                        duplicateUser.getUserId() + "는 이미 존재하는 아이디입니다."));
+                        duplicateUser.getUserName() + "는 이미 존재하는 아이디입니다."));
 
         mockMvc.perform(post(joinUrl).contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsBytes(any()))
@@ -99,7 +98,7 @@ class UserControllerTest {
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.resultCode").value("ERROR"))
                 .andExpect(jsonPath("$.result.errorCode").value("DUPLICATE_USERNAME"))
-                .andExpect(jsonPath("$.result.message").value(duplicateUser.getUserId() + "는 이미 존재하는 아이디입니다."))
+                .andExpect(jsonPath("$.result.message").value(duplicateUser.getUserName() + "는 이미 존재하는 아이디입니다."))
                 .andDo(print());
 
         verify(userService).registerUser(any());

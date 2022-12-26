@@ -20,7 +20,7 @@ public class PostService {
 
     public PostResponse createNewPost(PostRequest postRequest, String authorId) {
         Post post = postRequest.toEntity();
-        User user = userRepository.findByUserId(authorId)
+        User user = userRepository.findByUserName(authorId)
                 .orElseThrow(()->new UserException(ErrorCode.USERNAME_NOT_FOUND, authorId + "은 없는 아이디입니다."));
         // TODO: 이후에 에러를 어떻게 처리할 지 생각
         // 필터에서 다 걸러져서 아이디가 오는 것이라 아이디가 없을 수는 없음!!!

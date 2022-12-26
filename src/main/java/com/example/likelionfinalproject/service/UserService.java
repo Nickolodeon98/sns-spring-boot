@@ -26,9 +26,9 @@ public class UserService {
 
     public UserJoinResponse registerUser(UserJoinRequest userJoinRequest) {
 
-        userRepository.findByUserId(userJoinRequest.getUserId()).ifPresent((user) -> {
+        userRepository.findByUserName(userJoinRequest.getUserName()).ifPresent((user) -> {
             throw new UserException(ErrorCode.DUPLICATE_USERNAME,
-                    user.getUserId() + "는 이미 존재하는 아이디입니다.");
+                    user.getUserName() + "는 이미 존재하는 아이디입니다.");
         });
 
         User savedUser = userRepository
@@ -39,7 +39,7 @@ public class UserService {
     }
 
     public UserLoginResponse verifyUser(UserLoginRequest userLoginRequest) {
-        User user = userRepository.findByUserId(userLoginRequest.getUserId())
+        User user = userRepository.findByUserName(userLoginRequest.getUserId())
                 .orElseThrow(() -> new UserException(ErrorCode.USERNAME_NOT_FOUND,
                         userLoginRequest.getUserId() + "는 등록되지 않은 아이디입니다."));
 
