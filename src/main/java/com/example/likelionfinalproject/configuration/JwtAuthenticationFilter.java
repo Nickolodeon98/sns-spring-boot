@@ -4,6 +4,7 @@ import com.example.likelionfinalproject.service.UserService;
 import com.example.likelionfinalproject.utils.TokenUtils;
 import io.jsonwebtoken.ExpiredJwtException;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,6 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @AllArgsConstructor
+@Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     String secretKey;
 
@@ -43,9 +45,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String userId = TokenUtils.getUserId(token, secretKey);
 
             SecurityContextHolder.getContext().setAuthentication(TokenUtils.getAuthentication(userId));
+            filterChain.doFilter(request, response);
         } catch (ExpiredJwtException e) {
             exceptionResolver.resolveException(request, response, null, e);
         }
-        filterChain.doFilter(request, response);
     }
 }
