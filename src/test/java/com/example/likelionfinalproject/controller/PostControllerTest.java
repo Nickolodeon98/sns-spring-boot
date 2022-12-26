@@ -81,12 +81,13 @@ class PostControllerTest {
 
     @Test
     @DisplayName("포스트 작성에 실패한다")
-    @WithAnonymousUser
+    @WithMockUser
     public void post_fail() throws Exception {
         given(postService.createNewPost(any(), any()))
                 .willThrow(new UserException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다."));
 
         mockMvc.perform(post(postUrl).contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsBytes(any()))
                 .content(objectMapper.writeValueAsBytes(any())).with(csrf()))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.resultCode").value("ERROR"))
