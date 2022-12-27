@@ -258,11 +258,11 @@ class PostControllerTest {
     }
 
     @Test
-    @DisplayName("주어진 고유 번호를 갖는 포스트를 삭제한다.")
+    @DisplayName("주어진 고유 번호를 갖는 포스트 삭제에 성공한다.")
     @WithMockUser
     void success_delete_post() throws Exception {
 
-        given(postService.removeSinglePost(eq(postId))).willReturn(deletedPostResponse);
+        given(postService.removeSinglePost(eq(postId), any())).willReturn(deletedPostResponse);
 
         mockMvc.perform(delete(deleteUrl).with(csrf()))
                 .andExpect(status().isOk())
@@ -271,13 +271,13 @@ class PostControllerTest {
                 .andExpect(jsonPath("$.result.postId").value(postId))
                 .andDo(print());
 
-        verify(postService).removeSinglePost(eq(postId));
+        verify(postService).removeSinglePost(eq(postId), any());
     }
 
     @Test
     @DisplayName("인증되지 않은 사용자가 포스트를 삭제하면 실패한다.")
     void fail_delete_post_unauthorized() throws Exception {
-        given(postService.removeSinglePost(eq(postId)))
+        given(postService.removeSinglePost(eq(postId), any()))
                 .willThrow(new UserException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다."));
 
         mockMvc.perform(delete(deleteUrl).with(csrf()))
@@ -289,7 +289,7 @@ class PostControllerTest {
     @DisplayName("로그인된 사용자와 삭제하려는 포스트의 작성자가 다르면 삭제에 실패한다.")
     @WithMockUser
     void fail_delete_post_inconsistent_author() throws Exception {
-        given(postService.removeSinglePost(eq(postId)))
+        given(postService.removeSinglePost(eq(postId), any()))
                 .willThrow(new UserException(ErrorCode.USERNAME_NOT_FOUND, "Not Found."));
 
         mockMvc.perform(delete(deleteUrl).with(csrf()))
@@ -297,5 +297,16 @@ class PostControllerTest {
                 .andDo(print());
     }
 
+    @Test
+    @DisplayName("DB 에 오류가 나면 포스트 삭제를 실패한다.")
+    @WithMockUser
+    void fail_delete_post_database_error() throws Exception {
+        given(postService.removeSinglePost(eq(postId), any()))
+                .willThrow(new UserException(ErrorCode.DATABASE_ERROR, "DB 에러"));
+
+        mockMvc.perform(delete(deleteUrl).with(csrf()))
+                .andExpect(status().isInternalServerError())
+                .andDo(print());
+    }
 
 }
