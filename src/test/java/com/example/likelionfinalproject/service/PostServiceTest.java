@@ -93,7 +93,11 @@ class PostServiceTest {
     void fail_add_post() {
         when(userRepository.findByUserName(mockAuthorId)).thenReturn(Optional.empty());
 
-        Assertions.assertThrows(UserException.class, ()->postService.createNewPost(postRequest, mockAuthorId));
+        UserException e = Assertions.assertThrows(UserException.class,
+                ()->postService.createNewPost(postRequest, mockAuthorId));
+
+        Assertions.assertEquals(ErrorCode.USERNAME_NOT_FOUND, e.getErrorCode());
+
         verify(userRepository).findByUserName(mockAuthorId);
     }
 
