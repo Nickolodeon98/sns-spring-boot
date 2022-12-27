@@ -68,6 +68,7 @@ class PostControllerTest {
     String deleteUrl;
     EditPostRequest editPostRequest;
     PostResponse editedPost;
+    PostResponse deletedPostResponse;
     @BeforeEach
     void setUp() {
         postId = 1;
@@ -100,6 +101,11 @@ class PostControllerTest {
 
         editedPost = PostResponse.builder()
                 .message("포스트 수정 완료")
+                .postId(postId)
+                .build();
+
+        deletedPostResponse = PostResponse.builder()
+                .message("포스트 삭제 완료")
                 .postId(postId)
                 .build();
 
@@ -256,9 +262,9 @@ class PostControllerTest {
     @WithMockUser
     void success_delete_post() throws Exception {
 
-        given(postService.removeSinglePost(eq(postId))).willReturn(postResponse);
+        given(postService.removeSinglePost(eq(postId))).willReturn(deletedPostResponse);
 
-        mockMvc.perform(delete(deleteUrl))
+        mockMvc.perform(delete(deleteUrl).with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
                 .andExpect(jsonPath("$.result.message").value("포스트 삭제 완료"))
