@@ -3,11 +3,13 @@ package com.example.likelionfinalproject.domain.dto;
 import com.example.likelionfinalproject.domain.entity.Post;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
 @Builder
+@Data
 public class PostRequest {
 
     private String title;

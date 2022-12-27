@@ -24,6 +24,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.awt.print.PageFormat;
 import java.awt.print.Printable;
@@ -61,12 +62,14 @@ class PostControllerTest {
 
     PostResponse postResponse;
     SelectedPostResponse selectedPostResponse;
-
+    Integer postId;
     String postUrl;
-    Integer postsId;
+    String editUrl;
+    EditPostRequest editPostRequest;
+    PostResponse editedPost;
     @BeforeEach
     void setUp() {
-        postsId = 1;
+        postId = 1;
 
         postRequest = PostRequest.builder()
                 .title("포스트 제목")
@@ -75,11 +78,11 @@ class PostControllerTest {
 
         postResponse = PostResponse.builder()
                 .message("포스트 등록 완료")
-                .postId(postsId)
+                .postId(postId)
                 .build();
 
         selectedPostResponse = SelectedPostResponse.builder()
-                .id(postsId)
+                .id(postId)
                 .title("title")
                 .body("body")
                 .userName("username")
@@ -88,6 +91,19 @@ class PostControllerTest {
                 .build();
 
         postUrl = "/api/v1/posts";
+
+        editPostRequest = EditPostRequest.builder()
+                .title("title")
+                .body("body")
+                .build();
+
+        editedPost = PostResponse.builder()
+                .message("포스트 수정 완료")
+                .postId(postId)
+                .build();
+
+        editUrl = String.format("%s/%d", postUrl, postId);
+
     }
 
     @Test
@@ -123,16 +139,16 @@ class PostControllerTest {
                 .andExpect(jsonPath("$.result.message").value("사용자가 권한이 없습니다."))
                 .andDo(print());
 
-        verify(postService).createNewPost(any(), any());
+//        verify(postService).createNewPost(any(), any());
     }
 
     @Test
     @DisplayName("주어진 고유 번호로 포스트를 조회한다")
     @WithMockUser
     public void find_post() throws Exception {
-        given(postService.acquireSinglePost(postsId)).willReturn(selectedPostResponse);
+        given(postService.acquireSinglePost(postId)).willReturn(selectedPostResponse);
 
-        String selectUrl = String.format("%s/%d", postUrl, postsId);
+        String selectUrl = String.format("%s/%d", postUrl, postId);
 
         mockMvc.perform(get(selectUrl))
                 .andExpect(status().isOk())
@@ -143,7 +159,7 @@ class PostControllerTest {
                 .andExpect(jsonPath("$.result.userName").value("username"))
                 .andDo(print());
 
-        verify(postService).acquireSinglePost(postsId);
+        verify(postService).acquireSinglePost(postId);
     }
 
     @Captor
@@ -162,7 +178,7 @@ class PostControllerTest {
 
         given(postService.listAllPosts(pageable)).willReturn(posts);
 
-        mockMvc.perform(get(postUrl))
+        mockMvc.perform(get(postUrl).with(csrf()))
                 .andExpect(status().isOk())
                 .andDo(print());
 
@@ -179,31 +195,56 @@ class PostControllerTest {
     @DisplayName("고유 아이디로 찾은 특정 포스트의 내용 수정에 성공한다.")
     @WithMockUser
     void success_edit_post() throws Exception {
-        EditPostRequest editPostRequest = EditPostRequest.builder()
-                .title("title")
-                .body("body")
-                .build();
 
-        PostResponse editedPost = PostResponse.builder()
-                .message("포스트 수정 완료")
-                .postId(postsId)
-                .build();
-
-        given(postService.editPost(any(), eq(postsId))).willReturn(editedPost);
-
-        String editUrl = String.format("%s/%d", postUrl, postsId);
+        given(postService.editPost(any(), eq(postId), any())).willReturn(editedPost);
 
         mockMvc.perform(put(editUrl)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(editPostRequest))
-                        .content(objectMapper.writeValueAsBytes(postsId)).with(csrf()))
+                        .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
                 .andExpect(jsonPath("$.result.message").value("포스트 수정 완료"))
-                .andExpect(jsonPath("$.result.postId").value(postsId))
+                .andExpect(jsonPath("$.result.postId").value(postId))
                 .andDo(print());
 
 
-        verify(postService).editPost(any(), eq(postsId));
+        verify(postService).editPost(any(), eq(postId), any());
+    }
+
+    @Test
+    @DisplayName("로그인 하지 않았거나 작성자와 현재 로그인된 유저가 일치하지 않아 포스트 수정에 실패한다.")
+    @WithMockUser
+    void fail_edit_post_inconsistent_user() throws Exception {
+
+        given(postService.editPost(any(), eq(postId), any()))
+                .willThrow(new UserException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다."));
+
+        mockMvc.perform(put(editUrl).contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsBytes(editPostRequest))
+                .with(csrf()))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.result.errorCode").value("INVALID_PERMISSION"))
+                .andDo(print());
+
+        verify(postService).editPost(any(), eq(postId), any());
+    }
+
+    @Test
+    @DisplayName("데이터베이스에서 수정할 포스트를 찾지 못하면 수정에 실패한다.")
+    @WithMockUser
+    void fail_edit_post_not_in_db() throws Exception {
+
+        given(postService.editPost(any(), eq(postId), any()))
+                .willThrow(new UserException(ErrorCode.DATABASE_ERROR, "DB 에러"));
+
+        mockMvc.perform(put(editUrl).contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(editPostRequest))
+                        .with(csrf()))
+                .andExpect(status().isInternalServerError())
+                .andDo(print());
+
+        verify(postService).editPost(any(), eq(postId), any());
+
     }
 }
