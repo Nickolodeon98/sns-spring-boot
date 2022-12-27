@@ -1,5 +1,6 @@
 package com.example.likelionfinalproject.service;
 
+import com.example.likelionfinalproject.domain.dto.EditPostRequest;
 import com.example.likelionfinalproject.domain.dto.PostRequest;
 import com.example.likelionfinalproject.domain.dto.PostResponse;
 import com.example.likelionfinalproject.domain.dto.SelectedPostResponse;
@@ -16,7 +17,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.TestExecutionListeners;
 
+import javax.swing.text.html.Option;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -60,6 +63,8 @@ class PostServiceTest {
                 .title("제목")
                 .body("내용")
                 .build();
+
+
     }
 
     @Test
@@ -98,4 +103,43 @@ class PostServiceTest {
         verify(postRepository).findById(postId);
     }
 
+    @Test
+    @DisplayName("수정하려는 포스트가 존재하지 않아 수정에 실패한다.")
+    void edit_post_not_found() {
+        when(postRepository.findById(postId)).thenReturn(Optional.empty());
+
+        EditPostRequest editPostRequest = EditPostRequest.builder()
+                                            .body("body")
+                                            .title("title")
+                                            .build();
+
+        Assertions.assertThrows(UserException.class,
+                ()->postService.editPost(editPostRequest, postId, "작성자1"));
+    }
+
+    @Test
+    @DisplayName("수정하려는 포스트의 작성자와 로그인된 사용자가 달라 수정에 실패한다.")
+    void edit_post_not_allowed_user() {
+        User author = User.builder()
+                .userName("작성자1")
+                .build();
+
+        User currentUser = User.builder().userName("작성자2")
+                .build();
+
+        Post postWithAuthor = Post.builder()
+                .author(author)
+                .title("제목")
+                .body("내용")
+                .build();
+
+        when(postRepository.findById(postId)).thenReturn(Optional.of(postWithAuthor));
+
+        Assertions.assertThrows(UserException.class, ()->postService.editPost(any(), postId, currentUser.getUserName()));
+
+    }
+
+//    @Test
+//    @DisplayName("현재 DB에 더 이상 포스트를 작성했던 사용자가 없어서 수정에 실패한다.")
+//    void
 }
