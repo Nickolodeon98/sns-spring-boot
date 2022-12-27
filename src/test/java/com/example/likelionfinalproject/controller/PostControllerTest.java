@@ -273,4 +273,29 @@ class PostControllerTest {
 
         verify(postService).removeSinglePost(eq(postId));
     }
+
+    @Test
+    @DisplayName("인증되지 않은 사용자가 포스트를 삭제하면 실패한다.")
+    void fail_delete_post_unauthorized() throws Exception {
+        given(postService.removeSinglePost(eq(postId)))
+                .willThrow(new UserException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다."));
+
+        mockMvc.perform(delete(deleteUrl).with(csrf()))
+                .andExpect(status().isUnauthorized())
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("로그인된 사용자와 삭제하려는 포스트의 작성자가 다르면 삭제에 실패한다.")
+    @WithMockUser
+    void fail_delete_post_inconsistent_author() throws Exception {
+        given(postService.removeSinglePost(eq(postId)))
+                .willThrow(new UserException(ErrorCode.USERNAME_NOT_FOUND, "Not Found."));
+
+        mockMvc.perform(delete(deleteUrl).with(csrf()))
+                .andExpect(status().isNotFound())
+                .andDo(print());
+    }
+
+
 }
