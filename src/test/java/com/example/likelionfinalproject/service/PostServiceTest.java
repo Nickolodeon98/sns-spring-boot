@@ -40,6 +40,7 @@ class PostServiceTest {
     Integer postId;
     String mockAuthorId;
     PostRequest postRequest;
+    EditPostRequest editPostRequest;
     @BeforeEach
     void setUp() {
         postService = new PostService(postRepository, userRepository);
@@ -64,6 +65,10 @@ class PostServiceTest {
                 .body("내용")
                 .build();
 
+        editPostRequest = EditPostRequest.builder()
+                .body("body")
+                .title("title")
+                .build();
 
     }
 
@@ -106,15 +111,10 @@ class PostServiceTest {
     @Test
     @DisplayName("수정하려는 포스트가 존재하지 않아 수정에 실패한다.")
     void edit_post_not_found() {
-        when(postRepository.findById(postId)).thenReturn(Optional.empty());
-
-        EditPostRequest editPostRequest = EditPostRequest.builder()
-                                            .body("body")
-                                            .title("title")
-                                            .build();
+        when(postRepository.findById(mockPost.getId())).thenReturn(Optional.empty());
 
         Assertions.assertThrows(UserException.class,
-                ()->postService.editPost(editPostRequest, postId, "작성자1"));
+                ()->postService.editPost(editPostRequest, mockPost.getId(), "작성자1"));
     }
 
     @Test
@@ -133,13 +133,20 @@ class PostServiceTest {
                 .body("내용")
                 .build();
 
-        when(postRepository.findById(postId)).thenReturn(Optional.of(postWithAuthor));
+        when(postRepository.findById(mockPost.getId())).thenReturn(Optional.of(postWithAuthor));
 
-        Assertions.assertThrows(UserException.class, ()->postService.editPost(any(), postId, currentUser.getUserName()));
+        Assertions.assertThrows(UserException.class, ()->postService.editPost(any(), mockPost.getId(), currentUser.getUserName()));
+
 
     }
 
-//    @Test
-//    @DisplayName("현재 DB에 더 이상 포스트를 작성했던 사용자가 없어서 수정에 실패한다.")
-//    void
+    @Test
+    @DisplayName("현재 DB에 더 이상 포스트를 작성했던 사용자가 없어서 수정에 실패한다.")
+    void edit_post_user_absent() {
+        when(postRepository.findById(mockPost.getId())).thenReturn(Optional.of(mockPost));
+
+        when(userRepository.findByUserName(mockPost.getAuthor().getUserName())).thenReturn(Optional.empty());
+
+        Assertions.assertThrows(UserException.class, ()->postService.editPost(editPostRequest, mockPost.getId(), any()));
+    }
 }
