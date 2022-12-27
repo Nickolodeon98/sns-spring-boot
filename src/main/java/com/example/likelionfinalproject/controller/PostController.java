@@ -58,4 +58,13 @@ public class PostController {
 
         return Response.success(response);
     }
+
+    @DeleteMapping("/{postId}")
+    @ResponseBody
+    public Response<PostResponse> deleteAPost(@PathVariable Integer postId) {
+        PostResponse postResponse = postService.removeSinglePost(postId);
+
+        return Response.success(postResponse);
+    }
+
 }
