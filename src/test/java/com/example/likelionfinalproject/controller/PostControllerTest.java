@@ -180,23 +180,23 @@ class PostControllerTest {
     @WithMockUser
     void success_edit_post() throws Exception {
         EditPostRequest editPostRequest = EditPostRequest.builder()
-                                            .title("title")
-                                            .body("body")
-                                            .build();
+                .title("title")
+                .body("body")
+                .build();
 
         PostResponse editedPost = PostResponse.builder()
-                                        .message("포스트 수정 완료")
-                                        .postId(postsId)
-                                        .build();
+                .message("포스트 수정 완료")
+                .postId(postsId)
+                .build();
 
         given(postService.editPost(any(), eq(postsId))).willReturn(editedPost);
 
         String editUrl = String.format("%s/%d", postUrl, postsId);
 
         mockMvc.perform(put(editUrl)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsBytes(editPostRequest))
-                .content(objectMapper.writeValueAsBytes(postsId)).with(csrf()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(editPostRequest))
+                        .content(objectMapper.writeValueAsBytes(postsId)).with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
                 .andExpect(jsonPath("$.result.message").value("포스트 수정 완료"))
@@ -206,5 +206,4 @@ class PostControllerTest {
 
         verify(postService).editPost(any(), eq(postsId));
     }
-
 }
