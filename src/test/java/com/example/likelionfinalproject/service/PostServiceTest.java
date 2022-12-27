@@ -7,6 +7,7 @@ import com.example.likelionfinalproject.domain.dto.SelectedPostResponse;
 import com.example.likelionfinalproject.domain.entity.Post;
 import com.example.likelionfinalproject.domain.entity.User;
 import com.example.likelionfinalproject.exception.ErrorCode;
+import com.example.likelionfinalproject.exception.SocialAppException;
 import com.example.likelionfinalproject.exception.UserException;
 import com.example.likelionfinalproject.repository.PostRepository;
 import com.example.likelionfinalproject.repository.UserRepository;
@@ -113,8 +114,11 @@ class PostServiceTest {
     void edit_post_not_found() {
         when(postRepository.findById(mockPost.getId())).thenReturn(Optional.empty());
 
-        Assertions.assertThrows(UserException.class,
+        UserException e = Assertions.assertThrows(UserException.class,
                 ()->postService.editPost(editPostRequest, mockPost.getId(), "작성자1"));
+
+        Assertions.assertEquals(ErrorCode.POST_NOT_FOUND, e.getErrorCode());
+
     }
 
     @Test
@@ -135,9 +139,10 @@ class PostServiceTest {
 
         when(postRepository.findById(mockPost.getId())).thenReturn(Optional.of(postWithAuthor));
 
-        Assertions.assertThrows(UserException.class, ()->postService.editPost(any(), mockPost.getId(), currentUser.getUserName()));
+        UserException e = Assertions.assertThrows(UserException.class,
+                ()->postService.editPost(any(), mockPost.getId(), currentUser.getUserName()));
 
-
+        Assertions.assertEquals(ErrorCode.INVALID_PERMISSION, e.getErrorCode());
     }
 
     @Test
@@ -147,6 +152,9 @@ class PostServiceTest {
 
         when(userRepository.findByUserName(mockPost.getAuthor().getUserName())).thenReturn(Optional.empty());
 
-        Assertions.assertThrows(UserException.class, ()->postService.editPost(editPostRequest, mockPost.getId(), any()));
+        UserException e = Assertions.assertThrows(UserException.class,
+                ()->postService.editPost(editPostRequest, mockPost.getId(), any()));
+
+        Assertions.assertEquals(ErrorCode.USERNAME_NOT_FOUND, e.getErrorCode());
     }
 }
