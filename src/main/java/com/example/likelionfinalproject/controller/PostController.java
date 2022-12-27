@@ -26,7 +26,7 @@ public class PostController {
 
     @PostMapping("")
     @ResponseBody
-    public Response<PostResponse> newPost(Authentication authentication, PostRequest postRequest) {
+    public Response<PostResponse> newPost(Authentication authentication, @RequestBody PostRequest postRequest) {
         PostResponse postResponse = postService.createNewPost(postRequest, authentication.getName());
 
         return Response.success(postResponse);
@@ -35,8 +35,8 @@ public class PostController {
     /* id, 제목, 내용, 작성자, 작성날짜, 수정날짜 조회 */
     @GetMapping("/{postId}")
     @ResponseBody
-    public Response<SelectedPostResponse> postInfoDetails(@PathVariable Integer postsId) {
-        SelectedPostResponse selectedPostResponse = postService.acquireSinglePost(postsId);
+    public Response<SelectedPostResponse> postInfoDetails(@PathVariable Integer postId) {
+        SelectedPostResponse selectedPostResponse = postService.acquireSinglePost(postId);
         return Response.success(selectedPostResponse);
     }
 
@@ -50,8 +50,8 @@ public class PostController {
 
     @PutMapping("/{postId}")
     @ResponseBody
-    public Response<PostResponse> updateAPost(EditPostRequest editPostRequest, @PathVariable Integer postsId) {
-        PostResponse response = postService.editPost(editPostRequest, postsId);
+    public Response<PostResponse> updateAPost(@RequestBody EditPostRequest editPostRequest, @PathVariable Integer postId) {
+        PostResponse response = postService.editPost(editPostRequest, postId);
 
         return Response.success(response);
     }
