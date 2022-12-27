@@ -143,6 +143,8 @@ class PostServiceTest {
 
         when(postRepository.findById(mockPost.getId())).thenReturn(Optional.of(postWithAuthor));
 
+        when(userRepository.findByUserName(postWithAuthor.getAuthor().getUserName())).thenReturn(Optional.of(author));
+
         UserException e = Assertions.assertThrows(UserException.class,
                 ()->postService.editPost(any(), mockPost.getId(), currentUser.getUserName()));
 

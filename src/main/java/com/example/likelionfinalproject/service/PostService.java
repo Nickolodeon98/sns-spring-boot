@@ -69,7 +69,6 @@ public class PostService {
 
         /* TODO: 데이터베이스 오류가 나는 상황을 처리하는 코드 구현 */
 
-
         Post editedPost = postRepository.save(editPostRequest.toEntity(postId, postToUpdate.getAuthor()));
 
         return PostResponse.of(editedPost);

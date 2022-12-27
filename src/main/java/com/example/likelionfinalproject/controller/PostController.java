@@ -26,7 +26,7 @@ public class PostController {
 
     @PostMapping("")
     @ResponseBody
-    public Response<PostResponse> newPost(Authentication authentication, @RequestBody PostRequest postRequest) {
+    public Response<PostResponse> newPost(Authentication authentication, @RequestBody(required = false) PostRequest postRequest) {
         PostResponse postResponse = postService.createNewPost(postRequest, authentication.getName());
 
         return Response.success(postResponse);
