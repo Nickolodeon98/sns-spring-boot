@@ -61,7 +61,7 @@ public class PostController {
 
     @DeleteMapping("/{postId}")
     @ResponseBody
-    public Response<PostResponse> deleteAPost(@PathVariable Integer postId) {
+    public Response<PostResponse> deleteAPost(@PathVariable Integer postId, Authentication authentication) {
         PostResponse postResponse = postService.removeSinglePost(postId);
 
         return Response.success(postResponse);
