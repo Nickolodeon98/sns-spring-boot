@@ -103,7 +103,7 @@ class PostServiceTest {
 
     @Test
     @DisplayName("조회하려는 포스트를 찾아 반환한다.")
-    void fetch_post_info() {
+    void success_fetch_post_info() {
         when(postRepository.findById(postId)).thenReturn(Optional.of(mockPost));
 
         SelectedPostResponse response = postService.acquireSinglePost(postId);
@@ -115,7 +115,7 @@ class PostServiceTest {
 
     @Test
     @DisplayName("수정하려는 포스트가 존재하지 않아 수정에 실패한다.")
-    void edit_post_not_found() {
+    void fail_edit_post_not_found() {
         when(postRepository.findById(mockPost.getId())).thenReturn(Optional.empty());
 
         UserException e = Assertions.assertThrows(UserException.class,
@@ -127,7 +127,7 @@ class PostServiceTest {
 
     @Test
     @DisplayName("수정하려는 포스트의 작성자와 로그인된 사용자가 달라 수정에 실패한다.")
-    void edit_post_not_allowed_user() {
+    void fail_edit_post_not_allowed_user() {
         User author = User.builder()
                 .userName("작성자1")
                 .build();
@@ -153,7 +153,7 @@ class PostServiceTest {
 
     @Test
     @DisplayName("현재 DB에 더 이상 포스트를 작성했던 사용자가 없어서 수정에 실패한다.")
-    void edit_post_user_absent() {
+    void fail_edit_post_user_absent() {
         when(postRepository.findById(mockPost.getId())).thenReturn(Optional.of(mockPost));
 
         when(userRepository.findByUserName(mockPost.getAuthor().getUserName())).thenReturn(Optional.empty());
@@ -163,4 +163,56 @@ class PostServiceTest {
 
         Assertions.assertEquals(ErrorCode.USERNAME_NOT_FOUND, e.getErrorCode());
     }
+
+    @Test
+    @DisplayName("사용자가 존재하지 않아 포스트 삭제에 실패한다.")
+    void fail_delete_post_user_absent() {
+        when(postRepository.findById(mockPost.getId())).thenReturn(Optional.of(mockPost));
+
+        when(userRepository.findByUserName(mockPost.getAuthor().getUserName())).thenReturn(Optional.empty());
+
+        UserException e = Assertions.assertThrows(UserException.class,
+                ()->postService.removeSinglePost(mockPost.getId(), mockPost.getAuthor().getUserName()));
+
+        Assertions.assertEquals(ErrorCode.USERNAME_NOT_FOUND, e.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("포스트가 존재하지 않아 포스트 삭제에 실패한다.")
+    void fail_delete_post_absent() {
+        when(postRepository.findById(mockPost.getId())).thenReturn(Optional.empty());
+
+        UserException e = Assertions.assertThrows(UserException.class,
+                ()->postService.removeSinglePost(mockPost.getId(), mockPost.getAuthor().getUserName()));
+
+        Assertions.assertEquals(ErrorCode.POST_NOT_FOUND, e.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("작성자와 유저가 일치하지 않아 포스트 삭제에 실패한다.")
+    void fail_delete_inconsistent_author() {
+        User author = User.builder()
+                .userName("작성자1")
+                .build();
+
+        User currentUser = User.builder().userName("작성자2")
+                .build();
+
+        Post postWithAuthor = Post.builder()
+                .author(author)
+                .title("제목")
+                .body("내용")
+                .build();
+
+        when(postRepository.findById(mockPost.getId())).thenReturn(Optional.of(postWithAuthor));
+
+        when(userRepository.findByUserName(postWithAuthor.getAuthor().getUserName())).thenReturn(Optional.of(author));
+
+        UserException e = Assertions.assertThrows(UserException.class,
+                ()->postService.removeSinglePost(mockPost.getId(), currentUser.getUserName()));
+
+        Assertions.assertEquals(ErrorCode.INVALID_PERMISSION, e.getErrorCode());
+    }
+
+    
 }
