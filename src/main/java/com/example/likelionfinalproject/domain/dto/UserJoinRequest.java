@@ -1,15 +1,14 @@
 package com.example.likelionfinalproject.domain.dto;
 
 import com.example.likelionfinalproject.domain.entity.User;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
+import lombok.*;
 
 @Getter
 @AllArgsConstructor
 @Builder
 @EqualsAndHashCode
+@Setter
+@NoArgsConstructor
 public class UserJoinRequest {
 
     private String userName;
