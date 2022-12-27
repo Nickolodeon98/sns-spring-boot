@@ -1,6 +1,7 @@
 package com.example.likelionfinalproject.controller;
 
 import com.example.likelionfinalproject.domain.Response;
+import com.example.likelionfinalproject.domain.dto.EditPostRequest;
 import com.example.likelionfinalproject.domain.dto.PostRequest;
 import com.example.likelionfinalproject.domain.dto.PostResponse;
 import com.example.likelionfinalproject.domain.dto.SelectedPostResponse;
@@ -45,5 +46,13 @@ public class PostController {
         Page<SelectedPostResponse> responses = postService.listAllPosts(pageable);
         log.info("Responses:{}", responses);
         return Response.success(responses);
+    }
+
+    @PutMapping("/{postsId}")
+    @ResponseBody
+    public Response<PostResponse> updateAPost(EditPostRequest editPostRequest, @PathVariable Long postsId) {
+        PostResponse response = postService.editPost(editPostRequest, postsId);
+
+        return Response.success(response);
     }
 }

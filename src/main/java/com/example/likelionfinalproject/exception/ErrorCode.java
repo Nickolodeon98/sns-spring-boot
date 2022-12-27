@@ -8,7 +8,8 @@ public enum ErrorCode {
     DUPLICATE_USERNAME(HttpStatus.CONFLICT),
     USERNAME_NOT_FOUND(HttpStatus.NOT_FOUND),
     INVALID_PASSWORD(HttpStatus.UNAUTHORIZED),
-    INVALID_PERMISSION(HttpStatus.UNAUTHORIZED);
+    INVALID_PERMISSION(HttpStatus.UNAUTHORIZED),
+    POST_NOT_FOUND(HttpStatus.NOT_FOUND);
 
     private final HttpStatus httpStatus;
 
