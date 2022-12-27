@@ -14,7 +14,7 @@ public class TestController {
     @GetMapping("/hello")
     @ResponseBody
     public String hello() {
-        return "happy_new_year";
+        return "전승환";
     }
 
 

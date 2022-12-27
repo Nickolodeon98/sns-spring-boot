@@ -1,5 +1,6 @@
 package com.example.likelionfinalproject.controller;
 
+import com.example.likelionfinalproject.domain.dto.EditPostRequest;
 import com.example.likelionfinalproject.domain.dto.PostRequest;
 import com.example.likelionfinalproject.domain.dto.PostResponse;
 import com.example.likelionfinalproject.domain.dto.SelectedPostResponse;
@@ -34,12 +35,12 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -62,9 +63,11 @@ class PostControllerTest {
     SelectedPostResponse selectedPostResponse;
 
     String postUrl;
-
+    Long postsId;
     @BeforeEach
     void setUp() {
+        postsId = 1L;
+
         postRequest = PostRequest.builder()
                 .title("포스트 제목")
                 .body("포스트 내용")
@@ -72,11 +75,11 @@ class PostControllerTest {
 
         postResponse = PostResponse.builder()
                 .message("포스트 등록 완료")
-                .postId(1L)
+                .postId(postsId)
                 .build();
 
         selectedPostResponse = SelectedPostResponse.builder()
-                .id(1L)
+                .id(postsId)
                 .title("title")
                 .body("body")
                 .userName("username")
@@ -127,8 +130,6 @@ class PostControllerTest {
     @DisplayName("주어진 고유 번호로 포스트를 조회한다")
     @WithMockUser
     public void find_post() throws Exception {
-        Long postsId = 1L;
-
         given(postService.acquireSinglePost(postsId)).willReturn(selectedPostResponse);
 
         String selectUrl = String.format("%s/%d", postUrl, postsId);
@@ -172,5 +173,37 @@ class PostControllerTest {
         Assertions.assertEquals(pageable.getPageSize(), createdPost.getPageSize());
         Assertions.assertEquals(pageable.getSort(), createdPost.getSort());
         Assertions.assertEquals(pageable.getPageNumber(), createdPost.getPageNumber());
+    }
+
+    @Test
+    @DisplayName("고유 아이디로 찾은 특정 포스트의 내용 수정에 성공한다.")
+    @WithMockUser
+    void success_edit_post() throws Exception {
+        EditPostRequest editPostRequest = EditPostRequest.builder()
+                .title("title")
+                .body("body")
+                .build();
+
+        PostResponse editedPost = PostResponse.builder()
+                .message("포스트 수정 완료")
+                .postId(postsId)
+                .build();
+
+        given(postService.editPost(any(), eq(postsId))).willReturn(editedPost);
+
+        String editUrl = String.format("%s/%d", postUrl, postsId);
+
+        mockMvc.perform(put(editUrl)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(editPostRequest))
+                        .content(objectMapper.writeValueAsBytes(postsId)).with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
+                .andExpect(jsonPath("$.result.message").value("포스트 수정 완료"))
+                .andExpect(jsonPath("$.result.postId").value(postsId))
+                .andDo(print());
+
+
+        verify(postService).editPost(any(), eq(postsId));
     }
 }
