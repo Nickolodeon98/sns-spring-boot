@@ -26,7 +26,7 @@ public class PostController {
 
     @PostMapping("")
     @ResponseBody
-    public Response<PostResponse> newPost(Authentication authentication, @RequestBody PostRequest postRequest) {
+    public Response<PostResponse> newPost(Authentication authentication, @RequestBody(required = false) PostRequest postRequest) {
         PostResponse postResponse = postService.createNewPost(postRequest, authentication.getName());
 
         return Response.success(postResponse);
@@ -50,8 +50,11 @@ public class PostController {
 
     @PutMapping("/{postId}")
     @ResponseBody
-    public Response<PostResponse> updateAPost(@RequestBody EditPostRequest editPostRequest, @PathVariable Integer postId) {
-        PostResponse response = postService.editPost(editPostRequest, postId);
+    public Response<PostResponse> updateAPost(@RequestBody EditPostRequest editPostRequest,
+                                              @PathVariable Integer postId,
+                                              Authentication authentication) {
+
+        PostResponse response = postService.editPost(editPostRequest, postId, authentication.getName());
 
         return Response.success(response);
     }

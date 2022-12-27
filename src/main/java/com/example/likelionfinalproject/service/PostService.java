@@ -55,11 +55,21 @@ public class PostService {
         return new PageImpl<>(posts.stream().map(SelectedPostResponse::of).collect(Collectors.toList()));
     }
 
-    public PostResponse editPost(EditPostRequest editPostRequest, Integer postsId) {
-        postRepository.findById(postsId)
+    public PostResponse editPost(EditPostRequest editPostRequest, Integer postId, String currentUser) {
+        Post postToUpdate = postRepository.findById(postId)
                 .orElseThrow(()->new UserException(ErrorCode.POST_NOT_FOUND, "해당 포스트가 없습니다."));
 
-        Post editedPost = postRepository.save(editPostRequest.toEntity());
+        /* 포스트의 작성자로 등록되어 있는 사용자를 못 찾을 때 */
+        userRepository.findByUserName(postToUpdate.getAuthor().getUserName())
+                .orElseThrow(()->new UserException(ErrorCode.USERNAME_NOT_FOUND, "Not Found"));
+
+        /* 작성자와 사용자가 일치하지 않을 때 */
+        if (!currentUser.equals(postToUpdate.getAuthor().getUserName()))
+            throw new UserException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다.");
+
+        /* TODO: 데이터베이스 오류가 나는 상황을 처리하는 코드 구현 */
+
+        Post editedPost = postRepository.save(editPostRequest.toEntity(postId, postToUpdate.getAuthor()));
 
         return PostResponse.of(editedPost);
     }
