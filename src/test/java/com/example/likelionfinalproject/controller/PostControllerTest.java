@@ -177,7 +177,7 @@ class PostControllerTest {
 
         given(postService.listAllPosts(pageable)).willReturn(posts);
 
-        mockMvc.perform(get(postUrl))
+        mockMvc.perform(get(postUrl).with(csrf()))
                 .andExpect(status().isOk())
                 .andDo(print());
 
