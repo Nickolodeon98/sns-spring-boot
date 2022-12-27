@@ -60,10 +60,10 @@ public class PostService {
                 .orElseThrow(()->new UserException(ErrorCode.POST_NOT_FOUND, "해당 포스트가 없습니다."));
 
         /* 작성자와 사용자가 일치하지 않을 때 */
-        if (!currentUser.equals(postToUpdate.getAuthor()))
+        if (!currentUser.equals(postToUpdate.getAuthor().getUserName()))
             throw new UserException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다.");
 
-
+        /* TODO: 데이터베이스 오류가 나는 상황을 처리하는 코드 구현 */
 
         Post editedPost = postRepository.save(editPostRequest.toEntity(postId, postToUpdate.getAuthor()));
 
