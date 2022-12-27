@@ -195,7 +195,7 @@ class PostControllerTest {
     @WithMockUser
     void success_edit_post() throws Exception {
 
-        given(postService.editPost(any(), eq(postId))).willReturn(editedPost);
+        given(postService.editPost(any(), eq(postId), any())).willReturn(editedPost);
 
         mockMvc.perform(put(editUrl)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -208,7 +208,7 @@ class PostControllerTest {
                 .andDo(print());
 
 
-        verify(postService).editPost(any(), eq(postId));
+        verify(postService).editPost(any(), eq(postId), any());
     }
 
     @Test
@@ -216,7 +216,7 @@ class PostControllerTest {
     @WithMockUser
     void fail_edit_post_inconsistent_user() throws Exception {
 
-        given(postService.editPost(any(), eq(postId)))
+        given(postService.editPost(any(), eq(postId), any()))
                 .willThrow(new UserException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다."));
 
         mockMvc.perform(put(editUrl).contentType(MediaType.APPLICATION_JSON)
@@ -224,6 +224,25 @@ class PostControllerTest {
                 .with(csrf()))
                 .andExpect(status().isUnauthorized())
                 .andDo(print());
+
+        verify(postService).editPost(any(), eq(postId), any());
+    }
+
+    @Test
+    @DisplayName("데이터베이스에서 수정할 포스트를 찾지 못하면 수정에 실패한다.")
+    @WithMockUser
+    void fail_edit_post_not_in_db() throws Exception {
+
+        given(postService.editPost(any(), eq(postId), any()))
+                .willThrow(new UserException(ErrorCode.DATABASE_ERROR, "DB 에러"));
+
+        mockMvc.perform(put(editUrl).contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(editPostRequest))
+                        .with(csrf()))
+                .andExpect(status().isInternalServerError())
+                .andDo(print());
+
+        verify(postService).editPost(any(), eq(postId), any());
 
     }
 }
