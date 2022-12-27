@@ -74,13 +74,16 @@ public class PostService {
         return PostResponse.of(editedPost);
     }
 
-    public PostResponse removeSinglePost(Integer postId) {
+    public PostResponse removeSinglePost(Integer postId, String userName) {
 
         Post post = postRepository.findById(postId)
                 .orElseThrow(()->new UserException(ErrorCode.POST_NOT_FOUND, "해당 포스트가 없습니다."));
 
-        userRepository.findByUserName(post.getAuthor().getUserName())
+        User user = userRepository.findByUserName(post.getAuthor().getUserName())
                 .orElseThrow(()->new UserException(ErrorCode.USERNAME_NOT_FOUND, "Not Found."));
+
+        if (!userName.equals(user.getUserName()))
+            throw new UserException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다.");
 
         postRepository.deleteById(postId);
 
