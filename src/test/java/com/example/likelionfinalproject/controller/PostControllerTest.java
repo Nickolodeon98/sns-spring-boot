@@ -65,6 +65,7 @@ class PostControllerTest {
     Integer postId;
     String postUrl;
     String editUrl;
+    String deleteUrl;
     EditPostRequest editPostRequest;
     PostResponse editedPost;
     @BeforeEach
@@ -103,6 +104,8 @@ class PostControllerTest {
                 .build();
 
         editUrl = String.format("%s/%d", postUrl, postId);
+        deleteUrl = String.format("%s/%d", postUrl, postId);
+
 
     }
 
@@ -246,5 +249,22 @@ class PostControllerTest {
 
         verify(postService).editPost(any(), eq(postId), any());
 
+    }
+
+    @Test
+    @DisplayName("주어진 고유 번호를 갖는 포스트를 삭제한다.")
+    @WithMockUser
+    void success_delete_post() throws Exception {
+
+        given(postService.removeSinglePost(eq(postId))).willReturn(postResponse);
+
+        mockMvc.perform(delete(deleteUrl))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
+                .andExpect(jsonPath("$.result.message").value("포스트 삭제 완료"))
+                .andExpect(jsonPath("$.result.postId").value(postId))
+                .andDo(print());
+
+        verify(postService).removeSinglePost(eq(postId));
     }
 }
