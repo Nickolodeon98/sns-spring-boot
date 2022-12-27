@@ -55,11 +55,11 @@ public class PostService {
         return new PageImpl<>(posts.stream().map(SelectedPostResponse::of).collect(Collectors.toList()));
     }
 
-    public PostResponse editPost(EditPostRequest editPostRequest, Integer postsId) {
-        postRepository.findById(postsId)
+    public PostResponse editPost(EditPostRequest editPostRequest, Integer postId) {
+        Post postToUpdate = postRepository.findById(postId)
                 .orElseThrow(()->new UserException(ErrorCode.POST_NOT_FOUND, "해당 포스트가 없습니다."));
 
-        Post editedPost = postRepository.save(editPostRequest.toEntity());
+        Post editedPost = postRepository.save(editPostRequest.toEntity(postId, postToUpdate.getAuthor()));
 
         return PostResponse.of(editedPost);
     }
