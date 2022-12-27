@@ -212,7 +212,7 @@ class PostControllerTest {
     }
 
     @Test
-    @DisplayName("작성자와 현재 로그인된 유저가 일치하지 않으면 포스트 수정에 실패한다.")
+    @DisplayName("로그인 하지 않았거나 작성자와 현재 로그인된 유저가 일치하지 않아 포스트 수정에 실패한다.")
     @WithMockUser
     void fail_edit_post_inconsistent_user() throws Exception {
 
@@ -223,6 +223,7 @@ class PostControllerTest {
                 .content(objectMapper.writeValueAsBytes(editPostRequest))
                 .with(csrf()))
                 .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.result.errorCode").value("INVALID_PERMISSION"))
                 .andDo(print());
 
         verify(postService).editPost(any(), eq(postId), any());
