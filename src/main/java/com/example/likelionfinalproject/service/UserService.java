@@ -44,7 +44,7 @@ public class UserService {
         return UserJoinResponse.of(savedUser);
     }
 
-    public UserLoginResponse verifyUser(@RequestBody UserLoginRequest userLoginRequest) {
+    public UserLoginResponse verifyUser(UserLoginRequest userLoginRequest) {
         User user = userRepository.findByUserName(userLoginRequest.getUserName())
                 .orElseThrow(() -> new UserException(ErrorCode.USERNAME_NOT_FOUND,
                         userLoginRequest.getUserName() + "는 등록되지 않은 아이디입니다."));

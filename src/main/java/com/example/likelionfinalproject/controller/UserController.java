@@ -27,7 +27,7 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public Response<UserLoginResponse> loginUser(UserLoginRequest userLoginRequest) {
+    public Response<UserLoginResponse> loginUser(@RequestBody UserLoginRequest userLoginRequest) {
         UserLoginResponse userLoginResponse = userService.verifyUser(userLoginRequest);
 
         return Response.success(userLoginResponse);
