@@ -57,7 +57,7 @@ class UserControllerTest {
 
         userJoinResponse = UserJoinResponse.builder()
                 .userName("sjeon0730")
-                .message("회원가입에 성공했습니다.")
+                .userId(1)
                 .build();
 
         userLoginRequest = UserLoginRequest.builder().userName("sjeon0730").password("1q2w3e4r").build();
@@ -75,8 +75,8 @@ class UserControllerTest {
                 .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
-                .andExpect(jsonPath("$.result.userId").value("sjeon0730"))
-                .andExpect(jsonPath("$.result.message").value("회원가입에 성공했습니다."))
+                .andExpect(jsonPath("$.result.userId").value(1))
+                .andExpect(jsonPath("$.result.userName").value("sjeon0730"))
                 .andDo(print());
 
         verify(userService).registerUser(any());
