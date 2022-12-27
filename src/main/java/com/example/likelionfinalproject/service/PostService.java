@@ -42,8 +42,8 @@ public class PostService {
         return PostResponse.of(savedPost);
     }
 
-    public SelectedPostResponse acquireSinglePost(Long postsId) {
-        Optional<Post> acquiredPost = postRepository.findById(postsId);
+    public SelectedPostResponse acquireSinglePost(Integer postId) {
+        Optional<Post> acquiredPost = postRepository.findById(postId);
         SelectedPostResponse response = SelectedPostResponse.of(acquiredPost.get());
         return response;
     }
@@ -55,7 +55,7 @@ public class PostService {
         return new PageImpl<>(posts.stream().map(SelectedPostResponse::of).collect(Collectors.toList()));
     }
 
-    public PostResponse editPost(EditPostRequest editPostRequest, Long postsId) {
+    public PostResponse editPost(EditPostRequest editPostRequest, Integer postsId) {
         postRepository.findById(postsId)
                 .orElseThrow(()->new UserException(ErrorCode.POST_NOT_FOUND, "해당 포스트가 없습니다."));
 

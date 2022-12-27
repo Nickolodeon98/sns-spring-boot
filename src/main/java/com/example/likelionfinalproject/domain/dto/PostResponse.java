@@ -13,7 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 public class PostResponse {
 
     private String message;
-    private Long postId;
+    private Integer postId;
 
     public static PostResponse of(Post savedPost) {
 

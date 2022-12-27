@@ -33,9 +33,9 @@ public class PostController {
     }
 
     /* id, 제목, 내용, 작성자, 작성날짜, 수정날짜 조회 */
-    @GetMapping("/{postsId}")
+    @GetMapping("/{postId}")
     @ResponseBody
-    public Response<SelectedPostResponse> postInfoDetails(@PathVariable Long postsId) {
+    public Response<SelectedPostResponse> postInfoDetails(@PathVariable Integer postsId) {
         SelectedPostResponse selectedPostResponse = postService.acquireSinglePost(postsId);
         return Response.success(selectedPostResponse);
     }
@@ -48,9 +48,9 @@ public class PostController {
         return Response.success(responses);
     }
 
-    @PutMapping("/{postsId}")
+    @PutMapping("/{postId}")
     @ResponseBody
-    public Response<PostResponse> updateAPost(EditPostRequest editPostRequest, @PathVariable Long postsId) {
+    public Response<PostResponse> updateAPost(EditPostRequest editPostRequest, @PathVariable Integer postsId) {
         PostResponse response = postService.editPost(editPostRequest, postsId);
 
         return Response.success(response);

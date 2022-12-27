@@ -63,10 +63,10 @@ class PostControllerTest {
     SelectedPostResponse selectedPostResponse;
 
     String postUrl;
-    Long postsId;
+    Integer postsId;
     @BeforeEach
     void setUp() {
-        postsId = 1L;
+        postsId = 1;
 
         postRequest = PostRequest.builder()
                 .title("포스트 제목")
