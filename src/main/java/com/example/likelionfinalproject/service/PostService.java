@@ -76,6 +76,12 @@ public class PostService {
 
     public PostResponse removeSinglePost(Integer postId) {
 
+        Post post = postRepository.findById(postId)
+                .orElseThrow(()->new UserException(ErrorCode.POST_NOT_FOUND, "해당 포스트가 없습니다."));
+
+        userRepository.findByUserName(post.getAuthor().getUserName())
+                .orElseThrow(()->new UserException(ErrorCode.USERNAME_NOT_FOUND, "Not Found."));
+
         postRepository.deleteById(postId);
 
         return PostResponse.builder()
