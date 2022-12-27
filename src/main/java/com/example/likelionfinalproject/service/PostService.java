@@ -73,4 +73,14 @@ public class PostService {
 
         return PostResponse.of(editedPost);
     }
+
+    public PostResponse removeSinglePost(Integer postId) {
+
+        postRepository.deleteById(postId);
+
+        return PostResponse.builder()
+                .message("포스트 삭제 완료")
+                .postId(postId)
+                .build();
+    }
 }
