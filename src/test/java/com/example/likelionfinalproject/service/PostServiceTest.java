@@ -34,14 +34,14 @@ class PostServiceTest {
     PostService postService;
     User postAuthor;
     Post mockPost;
-    Long postsId;
+    Integer postId;
     String mockAuthorId;
     PostRequest postRequest;
     @BeforeEach
     void setUp() {
         postService = new PostService(postRepository, userRepository);
 
-        postsId = 1L;
+        postId = 1;
 
         mockAuthorId = "작성자";
 
@@ -50,7 +50,7 @@ class PostServiceTest {
                 .build();
 
         mockPost = Post.builder()
-                .id(postsId)
+                .id(postId)
                 .author(postAuthor)
                 .title("제목")
                 .body("내용")
@@ -89,13 +89,13 @@ class PostServiceTest {
     @Test
     @DisplayName("조회하려는 포스트를 찾아 반환한다.")
     void fetch_post_info() {
-        when(postRepository.findById(postsId)).thenReturn(Optional.of(mockPost));
+        when(postRepository.findById(postId)).thenReturn(Optional.of(mockPost));
 
-        SelectedPostResponse response = postService.acquireSinglePost(postsId);
+        SelectedPostResponse response = postService.acquireSinglePost(postId);
 
         Assertions.assertEquals(mockPost.getAuthor().getUserName(), response.getUserName());
 
-        verify(postRepository).findById(postsId);
+        verify(postRepository).findById(postId);
     }
 
 }
