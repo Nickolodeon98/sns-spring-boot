@@ -9,6 +9,8 @@ import com.example.likelionfinalproject.domain.entity.User;
 import com.example.likelionfinalproject.exception.ErrorCode;
 import com.example.likelionfinalproject.exception.SocialAppException;
 import com.example.likelionfinalproject.exception.UserException;
+import com.example.likelionfinalproject.fixture.PostFixture;
+import com.example.likelionfinalproject.fixture.UserFixture;
 import com.example.likelionfinalproject.repository.PostRepository;
 import com.example.likelionfinalproject.repository.UserRepository;
 import org.assertj.core.api.Assert;
@@ -36,11 +38,10 @@ class PostServiceTest {
 
     UserRepository userRepository = Mockito.mock(UserRepository.class);
     PostService postService;
-    User postAuthor;
+    User mockUser;
     Post mockPost;
     Integer postId;
     String mockAuthorId;
-    PostRequest postRequest;
     EditPostRequest editPostRequest;
     @BeforeEach
     void setUp() {
@@ -48,23 +49,10 @@ class PostServiceTest {
 
         postId = 1;
 
+        mockUser = UserFixture.get();
         mockAuthorId = "작성자";
 
-        postAuthor = User.builder()
-                .userName("작성자")
-                .build();
-
-        mockPost = Post.builder()
-                .id(postId)
-                .author(postAuthor)
-                .title("제목")
-                .body("내용")
-                .build();
-
-         postRequest = PostRequest.builder()
-                .title("제목")
-                .body("내용")
-                .build();
+        mockPost = PostFixture.get(postId);
 
         editPostRequest = EditPostRequest.builder()
                 .body("body")
@@ -76,29 +64,31 @@ class PostServiceTest {
     @Test
     @DisplayName("주어진 정보대로 포스트 등록에 성공한다.")
     void success_add_post() {
+        when(userRepository.findByUserName(mockUser.getUserName())).thenReturn(Optional.of(mockPost.getAuthor()));
         when(postRepository.save(any())).thenReturn(mockPost);
-        when(userRepository.findByUserName(mockAuthorId)).thenReturn(Optional.of(postAuthor));
 
-        PostResponse postResponse = postService.createPost(postRequest, mockAuthorId);
+        PostResponse postResponse = postService.createPost(mockPost.toRequest(), mockUser.getUserName());
 
-        Assertions.assertDoesNotThrow(()->new UserException(ErrorCode.USERNAME_NOT_FOUND, mockAuthorId + "은 없는 아이디입니다."));
+        Assertions.assertDoesNotThrow(()->new UserException(ErrorCode.USERNAME_NOT_FOUND,
+                mockUser.getUserName() + "은 없는 아이디입니다."));
+
         Assertions.assertEquals(mockPost.getId(), postResponse.getPostId());
 
         verify(postRepository).save(any());
-        verify(userRepository).findByUserName(mockAuthorId);
+        verify(userRepository).findByUserName(mockUser.getUserName());
     }
 
     @Test
     @DisplayName("로그인 하지 않아 포스트 등록에 실패한다.")
     void fail_add_post() {
-        when(userRepository.findByUserName(mockAuthorId)).thenReturn(Optional.empty());
+        when(userRepository.findByUserName(mockUser.getUserName())).thenReturn(Optional.empty());
 
         UserException e = Assertions.assertThrows(UserException.class,
-                ()->postService.createPost(postRequest, mockAuthorId));
+                ()->postService.createPost(mockPost.toRequest(), mockUser.getUserName()));
 
         Assertions.assertEquals(ErrorCode.USERNAME_NOT_FOUND, e.getErrorCode());
 
-        verify(userRepository).findByUserName(mockAuthorId);
+        verify(userRepository).findByUserName(mockUser.getUserName());
     }
 
     @Test
