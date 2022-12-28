@@ -114,7 +114,7 @@ class UserControllerTest {
                 .content(objectMapper.writeValueAsBytes(any())).with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
-                .andExpect(jsonPath("$.result.token").value("123456789"))
+                .andExpect(jsonPath("$.result.jwt").value("123456789"))
                 .andDo(print());
 
         verify(userService).verifyUser(any());
