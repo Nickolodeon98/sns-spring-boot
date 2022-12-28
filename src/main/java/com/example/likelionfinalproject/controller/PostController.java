@@ -27,7 +27,7 @@ public class PostController {
     @PostMapping("")
     @ResponseBody
     public Response<PostResponse> uploadPost(Authentication authentication, @RequestBody(required = false) PostRequest postRequest) {
-        PostResponse postResponse = postService.createNewPost(postRequest, authentication.getName());
+        PostResponse postResponse = postService.createPost(postRequest, authentication.getName());
 
         return Response.success(postResponse);
     }
@@ -36,7 +36,7 @@ public class PostController {
     @GetMapping("/{postId}")
     @ResponseBody
     public Response<SelectedPostResponse> getSinglePost(@PathVariable Integer postId) {
-        SelectedPostResponse selectedPostResponse = postService.acquireSinglePost(postId);
+        SelectedPostResponse selectedPostResponse = postService.acquirePost(postId);
         return Response.success(selectedPostResponse);
     }
 
@@ -62,7 +62,7 @@ public class PostController {
     @DeleteMapping("/{postId}")
     @ResponseBody
     public Response<PostResponse> delete(@PathVariable Integer postId, Authentication authentication) {
-        PostResponse postResponse = postService.removeSinglePost(postId, authentication.getName());
+        PostResponse postResponse = postService.removePost(postId, authentication.getName());
 
         return Response.success(postResponse);
     }
