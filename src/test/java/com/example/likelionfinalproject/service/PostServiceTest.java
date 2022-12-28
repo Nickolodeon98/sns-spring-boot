@@ -94,13 +94,13 @@ class PostServiceTest {
     @Test
     @DisplayName("포스트 조회 성공")
     void success_fetch_post_info() {
-        when(postRepository.findById(postId)).thenReturn(Optional.of(mockPost));
+        when(postRepository.findById(mockPost.getId())).thenReturn(Optional.of(mockPost));
 
-        SelectedPostResponse response = postService.acquirePost(postId);
+        SelectedPostResponse response = postService.acquirePost(mockPost.getId());
 
         Assertions.assertEquals(mockPost.getAuthor().getUserName(), response.getUserName());
 
-        verify(postRepository).findById(postId);
+        verify(postRepository).findById(mockPost.getId());
     }
 
     @Test
