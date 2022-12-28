@@ -14,6 +14,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +27,9 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.client.HttpServerErrorException;
 
 import java.awt.print.PageFormat;
 import java.awt.print.Printable;
@@ -33,6 +38,7 @@ import java.text.DateFormat;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -285,28 +291,33 @@ class PostControllerTest {
                 .andDo(print());
     }
 
-    @Test
-    @DisplayName("로그인된 사용자와 삭제하려는 포스트의 작성자가 다르면 삭제에 실패한다.")
+//    @Test
+//    @DisplayName("로그인된 사용자와 삭제하려는 포스트의 작성자가 다르면 삭제에 실패한다.")
+//    @WithMockUser
+//    void fail_delete_post_inconsistent_author() throws Exception {
+//        given(postService.removePost(eq(postId), any()))
+//                .willThrow(new UserException(ErrorCode.USERNAME_NOT_FOUND, "Not Found."));
+//
+//        mockMvc.perform(delete(deleteUrl).with(csrf()))
+//                .andExpect(status().isNotFound())
+//                .andDo(print());
+//    }
+
+    @ParameterizedTest
+    @DisplayName("DB 에 오류가 나면 포스트 삭제를 실패한다.")
     @WithMockUser
-    void fail_delete_post_inconsistent_author() throws Exception {
+    @MethodSource("provideDeleteErrorCase")
+    void fail_delete_post(ErrorCode errorCode, ResultMatcher isError) throws Exception {
         given(postService.removePost(eq(postId), any()))
-                .willThrow(new UserException(ErrorCode.USERNAME_NOT_FOUND, "Not Found."));
+                .willThrow(new UserException(errorCode, errorCode.getMessage()));
 
         mockMvc.perform(delete(deleteUrl).with(csrf()))
-                .andExpect(status().isNotFound())
+                .andExpect(isError)
                 .andDo(print());
     }
 
-    @Test
-    @DisplayName("DB 에 오류가 나면 포스트 삭제를 실패한다.")
-    @WithMockUser
-    void fail_delete_post_database_error() throws Exception {
-        given(postService.removePost(eq(postId), any()))
-                .willThrow(new UserException(ErrorCode.DATABASE_ERROR, "DB 에러"));
-
-        mockMvc.perform(delete(deleteUrl).with(csrf()))
-                .andExpect(status().isInternalServerError())
-                .andDo(print());
+    private static Stream<Arguments> provideDeleteErrorCase() {
+        return Stream.of(Arguments.of(ErrorCode.USERNAME_NOT_FOUND, status().isInternalServerError()));
     }
 
 }
