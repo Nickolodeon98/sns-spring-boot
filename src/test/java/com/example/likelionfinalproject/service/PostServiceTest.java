@@ -62,7 +62,7 @@ class PostServiceTest {
     }
 
     @Test
-    @DisplayName("주어진 정보대로 포스트 등록에 성공한다.")
+    @DisplayName("포스트 등록 성공")
     void success_add_post() {
         when(userRepository.findByUserName(mockUser.getUserName())).thenReturn(Optional.of(mockPost.getAuthor()));
         when(postRepository.save(any())).thenReturn(mockPost);
@@ -79,7 +79,7 @@ class PostServiceTest {
     }
 
     @Test
-    @DisplayName("로그인 하지 않아 포스트 등록에 실패한다.")
+    @DisplayName("포스트 등록 실패")
     void fail_add_post() {
         when(userRepository.findByUserName(mockUser.getUserName())).thenReturn(Optional.empty());
 
@@ -92,7 +92,7 @@ class PostServiceTest {
     }
 
     @Test
-    @DisplayName("조회하려는 포스트를 찾아 반환한다.")
+    @DisplayName("포스트 조회 성공")
     void success_fetch_post_info() {
         when(postRepository.findById(postId)).thenReturn(Optional.of(mockPost));
 
