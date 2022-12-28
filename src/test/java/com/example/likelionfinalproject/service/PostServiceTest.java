@@ -79,7 +79,7 @@ class PostServiceTest {
         when(postRepository.save(any())).thenReturn(mockPost);
         when(userRepository.findByUserName(mockAuthorId)).thenReturn(Optional.of(postAuthor));
 
-        PostResponse postResponse = postService.createNewPost(postRequest, mockAuthorId);
+        PostResponse postResponse = postService.createPost(postRequest, mockAuthorId);
 
         Assertions.assertDoesNotThrow(()->new UserException(ErrorCode.USERNAME_NOT_FOUND, mockAuthorId + "은 없는 아이디입니다."));
         Assertions.assertEquals(mockPost.getId(), postResponse.getPostId());
@@ -94,7 +94,7 @@ class PostServiceTest {
         when(userRepository.findByUserName(mockAuthorId)).thenReturn(Optional.empty());
 
         UserException e = Assertions.assertThrows(UserException.class,
-                ()->postService.createNewPost(postRequest, mockAuthorId));
+                ()->postService.createPost(postRequest, mockAuthorId));
 
         Assertions.assertEquals(ErrorCode.USERNAME_NOT_FOUND, e.getErrorCode());
 
@@ -106,7 +106,7 @@ class PostServiceTest {
     void success_fetch_post_info() {
         when(postRepository.findById(postId)).thenReturn(Optional.of(mockPost));
 
-        SelectedPostResponse response = postService.acquireSinglePost(postId);
+        SelectedPostResponse response = postService.acquirePost(postId);
 
         Assertions.assertEquals(mockPost.getAuthor().getUserName(), response.getUserName());
 
@@ -172,7 +172,7 @@ class PostServiceTest {
         when(userRepository.findByUserName(mockPost.getAuthor().getUserName())).thenReturn(Optional.empty());
 
         UserException e = Assertions.assertThrows(UserException.class,
-                ()->postService.removeSinglePost(mockPost.getId(), mockPost.getAuthor().getUserName()));
+                ()->postService.removePost(mockPost.getId(), mockPost.getAuthor().getUserName()));
 
         Assertions.assertEquals(ErrorCode.USERNAME_NOT_FOUND, e.getErrorCode());
     }
@@ -183,7 +183,7 @@ class PostServiceTest {
         when(postRepository.findById(mockPost.getId())).thenReturn(Optional.empty());
 
         UserException e = Assertions.assertThrows(UserException.class,
-                ()->postService.removeSinglePost(mockPost.getId(), mockPost.getAuthor().getUserName()));
+                ()->postService.removePost(mockPost.getId(), mockPost.getAuthor().getUserName()));
 
         Assertions.assertEquals(ErrorCode.POST_NOT_FOUND, e.getErrorCode());
     }
@@ -209,7 +209,7 @@ class PostServiceTest {
         when(userRepository.findByUserName(postWithAuthor.getAuthor().getUserName())).thenReturn(Optional.of(author));
 
         UserException e = Assertions.assertThrows(UserException.class,
-                ()->postService.removeSinglePost(mockPost.getId(), currentUser.getUserName()));
+                ()->postService.removePost(mockPost.getId(), currentUser.getUserName()));
 
         Assertions.assertEquals(ErrorCode.INVALID_PERMISSION, e.getErrorCode());
     }

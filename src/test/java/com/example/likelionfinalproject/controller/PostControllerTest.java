@@ -120,7 +120,7 @@ class PostControllerTest {
     @WithMockUser
     public void post_success() throws Exception {
 
-        given(postService.createNewPost(any(), any())).willReturn(postResponse);
+        given(postService.createPost(any(), any())).willReturn(postResponse);
 
         mockMvc.perform(post(postUrl).contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(postRequest)).with(csrf()))
@@ -129,14 +129,14 @@ class PostControllerTest {
                 .andExpect(jsonPath("$.result.message").value("포스트 등록 완료"))
                 .andDo(print());
 
-        verify(postService).createNewPost(any(), any());
+        verify(postService).createPost(any(), any());
     }
 
     @Test
     @DisplayName("포스트 작성에 실패한다")
     @WithMockUser
     public void post_fail() throws Exception {
-        given(postService.createNewPost(any(), any()))
+        given(postService.createPost(any(), any()))
                 .willThrow(new UserException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다."));
 
         mockMvc.perform(post(postUrl).contentType(MediaType.APPLICATION_JSON)
@@ -155,7 +155,7 @@ class PostControllerTest {
     @DisplayName("주어진 고유 번호로 포스트를 조회한다")
     @WithMockUser
     public void find_post() throws Exception {
-        given(postService.acquireSinglePost(postId)).willReturn(selectedPostResponse);
+        given(postService.acquirePost(postId)).willReturn(selectedPostResponse);
 
         String selectUrl = String.format("%s/%d", postUrl, postId);
 
@@ -168,7 +168,7 @@ class PostControllerTest {
                 .andExpect(jsonPath("$.result.userName").value("username"))
                 .andDo(print());
 
-        verify(postService).acquireSinglePost(postId);
+        verify(postService).acquirePost(postId);
     }
 
     @Captor
@@ -262,7 +262,7 @@ class PostControllerTest {
     @WithMockUser
     void success_delete_post() throws Exception {
 
-        given(postService.removeSinglePost(eq(postId), any())).willReturn(deletedPostResponse);
+        given(postService.removePost(eq(postId), any())).willReturn(deletedPostResponse);
 
         mockMvc.perform(delete(deleteUrl).with(csrf()))
                 .andExpect(status().isOk())
@@ -271,13 +271,13 @@ class PostControllerTest {
                 .andExpect(jsonPath("$.result.postId").value(postId))
                 .andDo(print());
 
-        verify(postService).removeSinglePost(eq(postId), any());
+        verify(postService).removePost(eq(postId), any());
     }
 
     @Test
     @DisplayName("인증되지 않은 사용자가 포스트를 삭제하면 실패한다.")
     void fail_delete_post_unauthorized() throws Exception {
-        given(postService.removeSinglePost(eq(postId), any()))
+        given(postService.removePost(eq(postId), any()))
                 .willThrow(new UserException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다."));
 
         mockMvc.perform(delete(deleteUrl).with(csrf()))
@@ -289,7 +289,7 @@ class PostControllerTest {
     @DisplayName("로그인된 사용자와 삭제하려는 포스트의 작성자가 다르면 삭제에 실패한다.")
     @WithMockUser
     void fail_delete_post_inconsistent_author() throws Exception {
-        given(postService.removeSinglePost(eq(postId), any()))
+        given(postService.removePost(eq(postId), any()))
                 .willThrow(new UserException(ErrorCode.USERNAME_NOT_FOUND, "Not Found."));
 
         mockMvc.perform(delete(deleteUrl).with(csrf()))
@@ -301,7 +301,7 @@ class PostControllerTest {
     @DisplayName("DB 에 오류가 나면 포스트 삭제를 실패한다.")
     @WithMockUser
     void fail_delete_post_database_error() throws Exception {
-        given(postService.removeSinglePost(eq(postId), any()))
+        given(postService.removePost(eq(postId), any()))
                 .willThrow(new UserException(ErrorCode.DATABASE_ERROR, "DB 에러"));
 
         mockMvc.perform(delete(deleteUrl).with(csrf()))

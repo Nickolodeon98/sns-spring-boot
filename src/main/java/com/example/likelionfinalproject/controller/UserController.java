@@ -20,15 +20,15 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/join")
-    public Response<UserJoinResponse> joinUser(@RequestBody(required = false) UserJoinRequest userJoinRequest) {
-        UserJoinResponse userJoinResponse = userService.registerUser(userJoinRequest);
+    public Response<UserJoinResponse> join(@RequestBody(required = false) UserJoinRequest userJoinRequest) {
+        UserJoinResponse userJoinResponse = userService.register(userJoinRequest);
 
         return Response.success(userJoinResponse);
     }
 
     @PostMapping("/login")
-    public Response<UserLoginResponse> loginUser(@RequestBody(required = false) UserLoginRequest userLoginRequest) {
-        UserLoginResponse userLoginResponse = userService.verifyUser(userLoginRequest);
+    public Response<UserLoginResponse> login(@RequestBody(required = false) UserLoginRequest userLoginRequest) {
+        UserLoginResponse userLoginResponse = userService.verify(userLoginRequest);
 
         return Response.success(userLoginResponse);
     }
