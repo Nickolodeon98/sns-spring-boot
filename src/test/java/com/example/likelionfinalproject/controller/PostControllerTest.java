@@ -1,14 +1,11 @@
 package com.example.likelionfinalproject.controller;
 
-import com.example.likelionfinalproject.domain.dto.EditPostRequest;
 import com.example.likelionfinalproject.domain.dto.PostRequest;
 import com.example.likelionfinalproject.domain.dto.PostResponse;
 import com.example.likelionfinalproject.domain.dto.SelectedPostResponse;
-import com.example.likelionfinalproject.domain.entity.Post;
 import com.example.likelionfinalproject.exception.ErrorCode;
 import com.example.likelionfinalproject.exception.UserException;
 import com.example.likelionfinalproject.service.PostService;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -21,23 +18,14 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.*;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultMatcher;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.client.HttpServerErrorException;
 
-import java.awt.print.PageFormat;
-import java.awt.print.Printable;
-import java.sql.Date;
-import java.text.DateFormat;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -69,7 +57,7 @@ class PostControllerTest {
     String postUrl;
     String editUrl;
     String deleteUrl;
-    EditPostRequest editPostRequest;
+    PostRequest editPostRequest;
     PostResponse editedPost;
     PostResponse deletedPostResponse;
     @BeforeEach
@@ -97,7 +85,7 @@ class PostControllerTest {
 
         postUrl = "/api/v1/posts";
 
-        editPostRequest = EditPostRequest.builder()
+        editPostRequest = PostRequest.builder()
                 .title("title")
                 .body("body")
                 .build();

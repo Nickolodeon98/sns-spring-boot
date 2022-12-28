@@ -1,31 +1,24 @@
 package com.example.likelionfinalproject.service;
 
-import com.example.likelionfinalproject.domain.dto.EditPostRequest;
 import com.example.likelionfinalproject.domain.dto.PostRequest;
 import com.example.likelionfinalproject.domain.dto.PostResponse;
 import com.example.likelionfinalproject.domain.dto.SelectedPostResponse;
 import com.example.likelionfinalproject.domain.entity.Post;
 import com.example.likelionfinalproject.domain.entity.User;
 import com.example.likelionfinalproject.exception.ErrorCode;
-import com.example.likelionfinalproject.exception.SocialAppException;
 import com.example.likelionfinalproject.exception.UserException;
 import com.example.likelionfinalproject.fixture.PostFixture;
 import com.example.likelionfinalproject.fixture.UserFixture;
 import com.example.likelionfinalproject.repository.PostRepository;
 import com.example.likelionfinalproject.repository.UserRepository;
-import org.assertj.core.api.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.TestExecutionListeners;
 
-import javax.swing.text.html.Option;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -42,7 +35,7 @@ class PostServiceTest {
     Post mockPost;
     Integer postId;
     String mockAuthorId;
-    EditPostRequest editPostRequest;
+    PostRequest editPostRequest;
     @BeforeEach
     void setUp() {
         postService = new PostService(postRepository, userRepository);
@@ -54,7 +47,7 @@ class PostServiceTest {
 
         mockPost = PostFixture.get(postId);
 
-        editPostRequest = EditPostRequest.builder()
+        editPostRequest = PostRequest.builder()
                 .body("body")
                 .title("title")
                 .build();
@@ -109,7 +102,7 @@ class PostServiceTest {
         when(postRepository.findById(mockPost.getId())).thenReturn(Optional.empty());
 
         UserException e = Assertions.assertThrows(UserException.class,
-                ()->postService.editPost(editPostRequest, mockPost.getId(), "작성자1"));
+                ()->postService.editPost(editPostRequest, mockPost.getId(), mockUser.getUserName()));
 
         Assertions.assertEquals(ErrorCode.POST_NOT_FOUND, e.getErrorCode());
 
