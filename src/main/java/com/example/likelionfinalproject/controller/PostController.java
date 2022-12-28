@@ -24,7 +24,7 @@ public class PostController {
 
     private final PostService postService;
 
-    @PostMapping("")
+    @PostMapping
     @ResponseBody
     public Response<PostResponse> uploadPost(Authentication authentication, @RequestBody(required = false) PostRequest postRequest) {
         PostResponse postResponse = postService.createPost(postRequest, authentication.getName());
@@ -40,7 +40,7 @@ public class PostController {
         return Response.success(selectedPostResponse);
     }
 
-    @GetMapping("")
+    @GetMapping
     @ResponseBody
     public Response<Page<SelectedPostResponse>> getEveryPost(@PageableDefault(size=20, sort="id", direction = Sort.Direction.DESC) Pageable pageable) {
         Page<SelectedPostResponse> responses = postService.listAllPosts(pageable);
