@@ -26,7 +26,7 @@ public class PostController {
 
     @PostMapping("")
     @ResponseBody
-    public Response<PostResponse> newPost(Authentication authentication, @RequestBody(required = false) PostRequest postRequest) {
+    public Response<PostResponse> uploadPost(Authentication authentication, @RequestBody(required = false) PostRequest postRequest) {
         PostResponse postResponse = postService.createNewPost(postRequest, authentication.getName());
 
         return Response.success(postResponse);
@@ -35,14 +35,14 @@ public class PostController {
     /* id, 제목, 내용, 작성자, 작성날짜, 수정날짜 조회 */
     @GetMapping("/{postId}")
     @ResponseBody
-    public Response<SelectedPostResponse> postInfoDetails(@PathVariable Integer postId) {
+    public Response<SelectedPostResponse> getSinglePost(@PathVariable Integer postId) {
         SelectedPostResponse selectedPostResponse = postService.acquireSinglePost(postId);
         return Response.success(selectedPostResponse);
     }
 
     @GetMapping("")
     @ResponseBody
-    public Response<Page<SelectedPostResponse>> everyPostAsList(@PageableDefault(size=20, sort="id", direction = Sort.Direction.DESC) Pageable pageable) {
+    public Response<Page<SelectedPostResponse>> getEveryPost(@PageableDefault(size=20, sort="id", direction = Sort.Direction.DESC) Pageable pageable) {
         Page<SelectedPostResponse> responses = postService.listAllPosts(pageable);
         log.info("Responses:{}", responses);
         return Response.success(responses);
@@ -50,7 +50,7 @@ public class PostController {
 
     @PutMapping("/{postId}")
     @ResponseBody
-    public Response<PostResponse> updateAPost(@RequestBody EditPostRequest editPostRequest,
+    public Response<PostResponse> update(@RequestBody EditPostRequest editPostRequest,
                                               @PathVariable Integer postId,
                                               Authentication authentication) {
 
@@ -61,7 +61,7 @@ public class PostController {
 
     @DeleteMapping("/{postId}")
     @ResponseBody
-    public Response<PostResponse> deleteAPost(@PathVariable Integer postId, Authentication authentication) {
+    public Response<PostResponse> delete(@PathVariable Integer postId, Authentication authentication) {
         PostResponse postResponse = postService.removeSinglePost(postId, authentication.getName());
 
         return Response.success(postResponse);
