@@ -317,7 +317,8 @@ class PostControllerTest {
     }
 
     private static Stream<Arguments> provideDeleteErrorCase() {
-        return Stream.of(Arguments.of(ErrorCode.USERNAME_NOT_FOUND, status().isInternalServerError()));
+        return Stream.of(Arguments.of(ErrorCode.USERNAME_NOT_FOUND, status().isNotFound()),
+                Arguments.of(ErrorCode.DATABASE_ERROR, status().isInternalServerError()));
     }
 
 }
