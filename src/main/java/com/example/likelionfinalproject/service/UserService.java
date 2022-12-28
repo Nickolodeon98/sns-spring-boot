@@ -27,7 +27,7 @@ public class UserService {
     @Value("${jwt.secret.key}")
     private String secretKey;
 
-    public UserJoinResponse registerUser(UserJoinRequest userJoinRequest) {
+    public UserJoinResponse register(UserJoinRequest userJoinRequest) {
 
         userRepository.findByUserName(userJoinRequest.getUserName()).ifPresent((user) -> {
             throw new UserException(ErrorCode.DUPLICATE_USERNAME,
@@ -44,7 +44,7 @@ public class UserService {
         return UserJoinResponse.of(savedUser);
     }
 
-    public UserLoginResponse verifyUser(UserLoginRequest userLoginRequest) {
+    public UserLoginResponse verify(UserLoginRequest userLoginRequest) {
         User user = userRepository.findByUserName(userLoginRequest.getUserName())
                 .orElseThrow(() -> new UserException(ErrorCode.USERNAME_NOT_FOUND,
                         userLoginRequest.getUserName() + "는 등록되지 않은 아이디입니다."));

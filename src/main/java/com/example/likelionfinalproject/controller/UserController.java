@@ -21,14 +21,14 @@ public class UserController {
 
     @PostMapping("/join")
     public Response<UserJoinResponse> join(@RequestBody(required = false) UserJoinRequest userJoinRequest) {
-        UserJoinResponse userJoinResponse = userService.registerUser(userJoinRequest);
+        UserJoinResponse userJoinResponse = userService.register(userJoinRequest);
 
         return Response.success(userJoinResponse);
     }
 
     @PostMapping("/login")
     public Response<UserLoginResponse> login(@RequestBody(required = false) UserLoginRequest userLoginRequest) {
-        UserLoginResponse userLoginResponse = userService.verifyUser(userLoginRequest);
+        UserLoginResponse userLoginResponse = userService.verify(userLoginRequest);
 
         return Response.success(userLoginResponse);
     }

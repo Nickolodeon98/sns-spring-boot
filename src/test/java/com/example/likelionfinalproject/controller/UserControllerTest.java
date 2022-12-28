@@ -68,7 +68,7 @@ class UserControllerTest {
     @DisplayName("회원가입에 성공한다.")
     @WithMockUser
     void success_join() throws Exception {
-        given(userService.registerUser(any())).willReturn(userJoinResponse);
+        given(userService.register(any())).willReturn(userJoinResponse);
 
         mockMvc.perform(post(joinUrl).contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsBytes(any()))
@@ -79,7 +79,7 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.result.userName").value("sjeon0730"))
                 .andDo(print());
 
-        verify(userService).registerUser(any());
+        verify(userService).register(any());
     }
 
     @Test
@@ -88,7 +88,7 @@ class UserControllerTest {
     void fail_join() throws Exception {
         UserJoinRequest duplicateUser = UserJoinRequest.builder().userName("sjeon0730").password("1q2w3e4r").build();
 
-        given(userService.registerUser(any()))
+        given(userService.register(any()))
                 .willThrow(new UserException(ErrorCode.DUPLICATE_USERNAME,
                         duplicateUser.getUserName() + "는 이미 존재하는 아이디입니다."));
 
@@ -101,14 +101,14 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.result.message").value(duplicateUser.getUserName() + "는 이미 존재하는 아이디입니다."))
                 .andDo(print());
 
-        verify(userService).registerUser(any());
+        verify(userService).register(any());
     }
 
     @Test
     @DisplayName("로그인에 성공한다.")
     @WithMockUser
     void success_login() throws Exception {
-        given(userService.verifyUser(any())).willReturn(userLoginResponse);
+        given(userService.verify(any())).willReturn(userLoginResponse);
 
         mockMvc.perform(post(loginUrl).contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsBytes(any())).with(csrf()))
@@ -117,14 +117,14 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.result.jwt").value("123456789"))
                 .andDo(print());
 
-        verify(userService).verifyUser(any());
+        verify(userService).verify(any());
     }
 
     @Test
     @DisplayName("로그인에 실패한다 - 회원가입 된 아이디 없음")
     @WithMockUser
     void fail_login_no_id() throws Exception {
-        given(userService.verifyUser(any())).willThrow(new UserException(ErrorCode.USERNAME_NOT_FOUND, "등록되지 않은 아이디입니다."));
+        given(userService.verify(any())).willThrow(new UserException(ErrorCode.USERNAME_NOT_FOUND, "등록되지 않은 아이디입니다."));
 
         mockMvc.perform(post(loginUrl).contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsBytes(any())).with(csrf()))
@@ -134,14 +134,14 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.result.message").value("등록되지 않은 아이디입니다."))
                 .andDo(print());
 
-        verify(userService).verifyUser(any());
+        verify(userService).verify(any());
     }
 
     @Test
     @DisplayName("로그인에 실패한다 - 비밀번호가 잘못됨")
     @WithMockUser
     void fail_login_wrong_password() throws Exception {
-        given(userService.verifyUser(any())).willThrow(new UserException(ErrorCode.INVALID_PASSWORD, "비밀번호가 잘못되었습니다."));
+        given(userService.verify(any())).willThrow(new UserException(ErrorCode.INVALID_PASSWORD, "비밀번호가 잘못되었습니다."));
 
         mockMvc.perform(post(loginUrl).contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(any())).with(csrf()))
@@ -151,6 +151,6 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.result.message").value("비밀번호가 잘못되었습니다."))
                 .andDo(print());
 
-        verify(userService).verifyUser(any());
+        verify(userService).verify(any());
     }
 }
