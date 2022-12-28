@@ -10,10 +10,7 @@ import com.example.likelionfinalproject.exception.UserException;
 import com.example.likelionfinalproject.service.PostService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -121,8 +118,17 @@ class PostControllerTest {
 
     }
 
+    private static Stream<Arguments> provideErrorCase() {
+        return Stream.of(Arguments.of(Named.of("작성자와 사용자 불일치", status().isNotFound()),
+                        ErrorCode.USERNAME_NOT_FOUND),
+                Arguments.of(Named.of("사용자 인증 실패", status().isUnauthorized()),
+                        ErrorCode.INVALID_PERMISSION),
+                Arguments.of(Named.of("DB 오류", status().isInternalServerError()),
+                        ErrorCode.DATABASE_ERROR));
+    }
+
     @Test
-    @DisplayName("포스트 작성에 성공한다")
+    @DisplayName("포스트 작성 성공")
     @WithMockUser
     public void post_success() throws Exception {
 
@@ -139,7 +145,7 @@ class PostControllerTest {
     }
 
     @Test
-    @DisplayName("포스트 작성에 실패한다")
+    @DisplayName("포스트 작성 실패")
     @WithMockUser
     public void post_fail() throws Exception {
         given(postService.createPost(any(), any()))
@@ -158,7 +164,7 @@ class PostControllerTest {
     }
 
     @Test
-    @DisplayName("주어진 고유 번호로 포스트를 조회한다")
+    @DisplayName("포스트 조회 성공")
     @WithMockUser
     public void find_post() throws Exception {
         given(postService.acquirePost(postId)).willReturn(selectedPostResponse);
@@ -168,7 +174,7 @@ class PostControllerTest {
         mockMvc.perform(get(selectUrl))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
-                .andExpect(jsonPath("$.result.id").value(1L))
+                .andExpect(jsonPath("$.result.id").value(1))
                 .andExpect(jsonPath("$.result.title").value("title"))
                 .andExpect(jsonPath("$.result.body").value("body"))
                 .andExpect(jsonPath("$.result.userName").value("username"))
@@ -181,7 +187,7 @@ class PostControllerTest {
     ArgumentCaptor<Pageable> postArgumentCaptor;
 
     @Test
-    @DisplayName("등록된 모든 포스트를 조회한다.")
+    @DisplayName("모든 포스트 조회 성공")
     @WithMockUser
     void find_every_posts() throws Exception {
         final int size = 20;
@@ -207,7 +213,7 @@ class PostControllerTest {
     }
 
     @Test
-    @DisplayName("고유 아이디로 찾은 특정 포스트의 내용 수정에 성공한다.")
+    @DisplayName("포스트 수정 성공")
     @WithMockUser
     void success_edit_post() throws Exception {
 
@@ -227,44 +233,27 @@ class PostControllerTest {
         verify(postService).editPost(any(), eq(postId), any());
     }
 
-    @Test
-    @DisplayName("로그인 하지 않았거나 작성자와 현재 로그인된 유저가 일치하지 않아 포스트 수정에 실패한다.")
+    @ParameterizedTest
+    @DisplayName("포스트 수정 실패")
     @WithMockUser
-    void fail_edit_post_inconsistent_user() throws Exception {
+    @MethodSource("provideErrorCase")
+    void fail_edit_post(ResultMatcher error, ErrorCode code) throws Exception {
 
         given(postService.editPost(any(), eq(postId), any()))
-                .willThrow(new UserException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다."));
+                .willThrow(new UserException(code, code.getMessage()));
 
         mockMvc.perform(put(editUrl).contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsBytes(editPostRequest))
                 .with(csrf()))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.result.errorCode").value("INVALID_PERMISSION"))
+                .andExpect(error)
+                .andExpect(jsonPath("$.result.errorCode").value(code.name()))
                 .andDo(print());
 
         verify(postService).editPost(any(), eq(postId), any());
     }
 
     @Test
-    @DisplayName("데이터베이스에서 수정할 포스트를 찾지 못하면 수정에 실패한다.")
-    @WithMockUser
-    void fail_edit_post_not_in_db() throws Exception {
-
-        given(postService.editPost(any(), eq(postId), any()))
-                .willThrow(new UserException(ErrorCode.DATABASE_ERROR, "DB 에러"));
-
-        mockMvc.perform(put(editUrl).contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsBytes(editPostRequest))
-                        .with(csrf()))
-                .andExpect(status().isInternalServerError())
-                .andDo(print());
-
-        verify(postService).editPost(any(), eq(postId), any());
-
-    }
-
-    @Test
-    @DisplayName("주어진 고유 번호를 갖는 포스트 삭제에 성공한다.")
+    @DisplayName("포스트 삭제 성공")
     @WithMockUser
     void success_delete_post() throws Exception {
 
@@ -280,45 +269,17 @@ class PostControllerTest {
         verify(postService).removePost(eq(postId), any());
     }
 
-    @Test
-    @DisplayName("인증되지 않은 사용자가 포스트를 삭제하면 실패한다.")
-    void fail_delete_post_unauthorized() throws Exception {
-        given(postService.removePost(eq(postId), any()))
-                .willThrow(new UserException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다."));
-
-        mockMvc.perform(delete(deleteUrl).with(csrf()))
-                .andExpect(status().isUnauthorized())
-                .andDo(print());
-    }
-
-//    @Test
-//    @DisplayName("로그인된 사용자와 삭제하려는 포스트의 작성자가 다르면 삭제에 실패한다.")
-//    @WithMockUser
-//    void fail_delete_post_inconsistent_author() throws Exception {
-//        given(postService.removePost(eq(postId), any()))
-//                .willThrow(new UserException(ErrorCode.USERNAME_NOT_FOUND, "Not Found."));
-//
-//        mockMvc.perform(delete(deleteUrl).with(csrf()))
-//                .andExpect(status().isNotFound())
-//                .andDo(print());
-//    }
-
     @ParameterizedTest
-    @DisplayName("DB 에 오류가 나면 포스트 삭제를 실패한다.")
+    @DisplayName("포스트 삭제 실패")
     @WithMockUser
-    @MethodSource("provideDeleteErrorCase")
-    void fail_delete_post(ErrorCode errorCode, ResultMatcher isError) throws Exception {
+    @MethodSource("provideErrorCase")
+    void fail_delete_post(ResultMatcher error, ErrorCode code) throws Exception {
         given(postService.removePost(eq(postId), any()))
-                .willThrow(new UserException(errorCode, errorCode.getMessage()));
+                .willThrow(new UserException(code, code.getMessage()));
 
         mockMvc.perform(delete(deleteUrl).with(csrf()))
-                .andExpect(isError)
+                .andExpect(error)
                 .andDo(print());
-    }
-
-    private static Stream<Arguments> provideDeleteErrorCase() {
-        return Stream.of(Arguments.of(ErrorCode.USERNAME_NOT_FOUND, status().isNotFound()),
-                Arguments.of(ErrorCode.DATABASE_ERROR, status().isInternalServerError()));
     }
 
 }
