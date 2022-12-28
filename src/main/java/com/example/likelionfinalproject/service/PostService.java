@@ -28,7 +28,7 @@ public class PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
 
-    public PostResponse createNewPost(PostRequest postRequest, String authorId) {
+    public PostResponse createPost(PostRequest postRequest, String authorId) {
         Post post = postRequest.toEntity();
         User user = userRepository.findByUserName(authorId)
                 .orElseThrow(()->new UserException(ErrorCode.USERNAME_NOT_FOUND, authorId + "은 없는 아이디입니다."));
@@ -42,7 +42,7 @@ public class PostService {
         return PostResponse.of(savedPost);
     }
 
-    public SelectedPostResponse acquireSinglePost(Integer postId) {
+    public SelectedPostResponse acquirePost(Integer postId) {
         Optional<Post> acquiredPost = postRepository.findById(postId);
         SelectedPostResponse response = SelectedPostResponse.of(acquiredPost.get());
         return response;
@@ -74,7 +74,7 @@ public class PostService {
         return PostResponse.of(editedPost);
     }
 
-    public PostResponse removeSinglePost(Integer postId, String userName) {
+    public PostResponse removePost(Integer postId, String userName) {
 
         Post post = postRepository.findById(postId)
                 .orElseThrow(()->new UserException(ErrorCode.POST_NOT_FOUND, "해당 포스트가 없습니다."));
