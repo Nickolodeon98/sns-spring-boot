@@ -9,4 +9,11 @@ public class UserFixture {
                 .userName("작성자")
                 .build();
     }
+
+    // 매개 변수가 있는 User 엔티티 생성 메서드
+    public static User get(String name) {
+        return User.builder()
+                .userName(name)
+                .build();
+    }
 }

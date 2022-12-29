@@ -22,4 +22,11 @@ public class PostResponse {
                 .message("포스트 등록 완료")
                 .build();
     }
+
+    public static PostResponse build(String message, Integer postId) {
+        return PostResponse.builder()
+                .postId(postId)
+                .message(message)
+                .build();
+    }
 }
