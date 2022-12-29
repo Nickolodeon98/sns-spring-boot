@@ -15,9 +15,14 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
+import org.springframework.test.web.servlet.ResultMatcher;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -34,8 +39,6 @@ class PostServiceTest {
     User mockUser;
     Post mockPost;
     Integer postId;
-    String mockAuthorId;
-    PostRequest editPostRequest;
     @BeforeEach
     void setUp() {
         postService = new PostService(postRepository, userRepository);
@@ -43,15 +46,8 @@ class PostServiceTest {
         postId = 1;
 
         mockUser = UserFixture.get();
-        mockAuthorId = "작성자";
 
         mockPost = PostFixture.get(postId);
-
-        editPostRequest = PostRequest.builder()
-                .body("body")
-                .title("title")
-                .build();
-
     }
 
     @Test
@@ -96,16 +92,38 @@ class PostServiceTest {
         verify(postRepository).findById(mockPost.getId());
     }
 
-    @Test
-    @DisplayName("수정하려는 포스트가 존재하지 않아 수정에 실패한다.")
-    void fail_edit_post_not_found() {
-        when(postRepository.findById(mockPost.getId())).thenReturn(Optional.empty());
+//    @Test
+//    @DisplayName("포스트 수정 실패 - 포스트 없음")
+//    void fail_edit_post_not_found() {
+//        when(postRepository.findById(mockPost.getId())).thenReturn(Optional.empty());
+//
+//        when(userRepository.findByUserName(mockPost.getAuthor().getUserName())).thenReturn(Optional.of(mockPost.getAuthor()));
+//
+//        UserException e = Assertions.assertThrows(UserException.class,
+//                ()->postService.editPost(mockPost.toRequest(), mockPost.getId(), mockUser.getUserName()));
+//
+//        Assertions.assertEquals(ErrorCode.POST_NOT_FOUND, e.getErrorCode());
+//
+//    }
+
+    private static Stream<Arguments> provideObjectAndErrorCase() {
+        Post mockPost = PostFixture.get();
+        return Stream.of(Arguments.of(ErrorCode.POST_NOT_FOUND, Optional.empty(), Optional.of(mockPost.getAuthor())),
+                Arguments.of( ErrorCode.USERNAME_NOT_FOUND, Optional.of(mockPost), Optional.empty()));
+    }
+
+    @ParameterizedTest
+    @DisplayName("포스트 수정 실패")
+    @MethodSource("provideObjectAndErrorCase")
+    void fail_edit_post(ErrorCode code, Optional optionalPost, Optional optionalUser) {
+        when(postRepository.findById(mockPost.getId())).thenReturn(optionalPost);
+
+        when(userRepository.findByUserName(mockPost.getAuthor().getUserName())).thenReturn(optionalUser);
 
         UserException e = Assertions.assertThrows(UserException.class,
-                ()->postService.editPost(editPostRequest, mockPost.getId(), mockUser.getUserName()));
+                ()->postService.editPost(mockPost.toRequest(), mockPost.getId(), mockUser.getUserName()));
 
-        Assertions.assertEquals(ErrorCode.POST_NOT_FOUND, e.getErrorCode());
-
+        Assertions.assertEquals(code, e.getErrorCode());
     }
 
     @Test
@@ -134,18 +152,7 @@ class PostServiceTest {
         Assertions.assertEquals(ErrorCode.INVALID_PERMISSION, e.getErrorCode());
     }
 
-    @Test
-    @DisplayName("현재 DB에 더 이상 포스트를 작성했던 사용자가 없어서 수정에 실패한다.")
-    void fail_edit_post_user_absent() {
-        when(postRepository.findById(mockPost.getId())).thenReturn(Optional.of(mockPost));
 
-        when(userRepository.findByUserName(mockPost.getAuthor().getUserName())).thenReturn(Optional.empty());
-
-        UserException e = Assertions.assertThrows(UserException.class,
-                ()->postService.editPost(editPostRequest, mockPost.getId(), any()));
-
-        Assertions.assertEquals(ErrorCode.USERNAME_NOT_FOUND, e.getErrorCode());
-    }
 
     @Test
     @DisplayName("사용자가 존재하지 않아 포스트 삭제에 실패한다.")

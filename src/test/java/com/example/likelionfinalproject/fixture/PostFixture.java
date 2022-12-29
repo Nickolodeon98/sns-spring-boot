@@ -14,4 +14,14 @@ public class PostFixture {
                 .body("내용")
                 .build();
     }
+
+    public static Post get() {
+        User user = UserFixture.get();
+        return Post.builder()
+                .id(1)
+                .author(user)
+                .title("제목")
+                .body("내용")
+                .build();
+    }
 }
