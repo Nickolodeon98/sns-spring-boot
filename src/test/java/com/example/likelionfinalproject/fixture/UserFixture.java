@@ -9,4 +9,10 @@ public class UserFixture {
                 .userName("작성자")
                 .build();
     }
+
+    public static User get(String name) {
+        return User.builder()
+                .userName(name)
+                .build();
+    }
 }
