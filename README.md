@@ -2,6 +2,18 @@
 
 http://ec2-13-209-88-90.ap-northeast-2.compute.amazonaws.com:8080/swagger-ui/
 
+# 🧾 API 목록
+
+방식 | API 주소 | 설명         |
+--- | --- |------------| 
+POST | api/v1/users/join | 회원가입       |
+POST | api/v1/users/login | 로그인        |
+POST | api/v1/posts | 포스트 등록     |
+GET | api/v1/posts/{postId} | 포스트 한 개 조회 |
+PUT | api/v1/posts | 포스트 수정     |
+DELETE | api/v1/posts | 포스트 삭제     |
+GET | api/v1/posts | 포스트 모두 조회  |
+
 # 💡 미션 요구사항 분석 & 체크리스트
 
 - Swagger 적용 [O]
