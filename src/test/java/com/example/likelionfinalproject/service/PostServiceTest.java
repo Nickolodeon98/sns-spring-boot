@@ -34,20 +34,17 @@ class PostServiceTest {
     User mockUser;
     Post mockPost;
     Integer postId;
-
-    User currentMockUser;
     @BeforeEach
     void setUp() {
         postService = new PostService(postRepository, userRepository);
         postId = 1;
         mockUser = UserFixture.get();
         mockPost = PostFixture.get(postId);
-        currentMockUser = UserFixture.get("다른 작성자");
     }
-
+    /* 테스트 코드마다 같은 패턴에 다른 인수들이 사용되고 있으므로 다른 인수를 주입하는 메서드를 정의한다. */
     private static Stream<Arguments> provideObjectAndErrorCase() {
         Post mockPost = PostFixture.get();
-        User mockUser = UserFixture.get("다른 작성자");
+        User mockCurrentUser = UserFixture.get("다른 작성자");
         return Stream.of(Arguments.of(Named.of("포스트 없음", ErrorCode.POST_NOT_FOUND),
                         Optional.empty(),
                         Optional.of(mockPost.getAuthor()),
@@ -59,12 +56,11 @@ class PostServiceTest {
                 Arguments.of( Named.of("작성자 사용자 불일치", ErrorCode.INVALID_PERMISSION),
                         Optional.of(mockPost),
                         Optional.of(mockPost.getAuthor()),
-                        mockUser.getUserName()));
+                        mockCurrentUser.getUserName()));
     }
     @Nested
     @DisplayName("포스트 등록")
     class PostCreation {
-
         @Test
         @DisplayName("성공")
         void success_add_post() {
@@ -127,56 +123,21 @@ class PostServiceTest {
             Assertions.assertEquals(code, e.getErrorCode());
         }
     }
+    @Nested
+    @DisplayName("포스트 삭제")
+    class PostRemoval {
+        @ParameterizedTest
+        @DisplayName("실패")
+        @MethodSource("com.example.likelionfinalproject.service.PostServiceTest#provideObjectAndErrorCase")
+        void fail_delete_post(ErrorCode code, Optional optionalPost, Optional optionalUser, String userName) {
+            when(postRepository.findById(mockPost.getId())).thenReturn(optionalPost);
 
-    @Test
-    @DisplayName("사용자가 존재하지 않아 포스트 삭제에 실패한다.")
-    void fail_delete_post_user_absent() {
-        when(postRepository.findById(mockPost.getId())).thenReturn(Optional.of(mockPost));
+            when(userRepository.findByUserName(mockPost.getAuthor().getUserName())).thenReturn(optionalUser);
 
-        when(userRepository.findByUserName(mockPost.getAuthor().getUserName())).thenReturn(Optional.empty());
+            UserException e = Assertions.assertThrows(UserException.class,
+                    () -> postService.removePost(mockPost.getId(), userName));
 
-        UserException e = Assertions.assertThrows(UserException.class,
-                ()->postService.removePost(mockPost.getId(), mockPost.getAuthor().getUserName()));
-
-        Assertions.assertEquals(ErrorCode.USERNAME_NOT_FOUND, e.getErrorCode());
+            Assertions.assertEquals(code, e.getErrorCode());
+        }
     }
-
-    @Test
-    @DisplayName("포스트가 존재하지 않아 포스트 삭제에 실패한다.")
-    void fail_delete_post_absent() {
-        when(postRepository.findById(mockPost.getId())).thenReturn(Optional.empty());
-
-        UserException e = Assertions.assertThrows(UserException.class,
-                ()->postService.removePost(mockPost.getId(), mockPost.getAuthor().getUserName()));
-
-        Assertions.assertEquals(ErrorCode.POST_NOT_FOUND, e.getErrorCode());
-    }
-
-    @Test
-    @DisplayName("작성자와 유저가 일치하지 않아 포스트 삭제에 실패한다.")
-    void fail_delete_inconsistent_author() {
-        User author = User.builder()
-                .userName("작성자1")
-                .build();
-
-        User currentUser = User.builder().userName("작성자2")
-                .build();
-
-        Post postWithAuthor = Post.builder()
-                .author(author)
-                .title("제목")
-                .body("내용")
-                .build();
-
-        when(postRepository.findById(mockPost.getId())).thenReturn(Optional.of(postWithAuthor));
-
-        when(userRepository.findByUserName(postWithAuthor.getAuthor().getUserName())).thenReturn(Optional.of(author));
-
-        UserException e = Assertions.assertThrows(UserException.class,
-                ()->postService.removePost(mockPost.getId(), currentUser.getUserName()));
-
-        Assertions.assertEquals(ErrorCode.INVALID_PERMISSION, e.getErrorCode());
-    }
-
-    
 }
