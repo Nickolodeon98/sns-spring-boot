@@ -1,6 +1,5 @@
 package com.example.likelionfinalproject.service;
 
-import com.example.likelionfinalproject.domain.dto.EditPostRequest;
 import com.example.likelionfinalproject.domain.dto.PostRequest;
 import com.example.likelionfinalproject.domain.dto.PostResponse;
 import com.example.likelionfinalproject.domain.dto.SelectedPostResponse;
@@ -55,7 +54,7 @@ public class PostService {
         return new PageImpl<>(posts.stream().map(SelectedPostResponse::of).collect(Collectors.toList()));
     }
 
-    public PostResponse editPost(EditPostRequest editPostRequest, Integer postId, String currentUser) {
+    public PostResponse editPost(PostRequest editPostRequest, Integer postId, String currentUser) {
         Post postToUpdate = postRepository.findById(postId)
                 .orElseThrow(()->new UserException(ErrorCode.POST_NOT_FOUND, "해당 포스트가 없습니다."));
 
