@@ -1,7 +1,6 @@
 package com.example.likelionfinalproject.controller;
 
 import com.example.likelionfinalproject.domain.Response;
-import com.example.likelionfinalproject.domain.dto.EditPostRequest;
 import com.example.likelionfinalproject.domain.dto.PostRequest;
 import com.example.likelionfinalproject.domain.dto.PostResponse;
 import com.example.likelionfinalproject.domain.dto.SelectedPostResponse;
@@ -50,7 +49,7 @@ public class PostController {
 
     @PutMapping("/{postId}")
     @ResponseBody
-    public Response<PostResponse> update(@RequestBody EditPostRequest editPostRequest,
+    public Response<PostResponse> update(@RequestBody PostRequest editPostRequest,
                                               @PathVariable Integer postId,
                                               Authentication authentication) {
 
