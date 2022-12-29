@@ -4,10 +4,12 @@ import lombok.Getter;
 
 @Getter
 public enum PostTestEssentials {
-    USER_NAME("sjeon0730"),
-    PASSWORD("1q2w3e4r"),
     POST_URL("/api/v1/posts/"),
-    TOKEN("123456789");
+    POST_TITLE("포스트 제목"),
+    POST_BODY("포스트 내용"),
+    POST_CREATE_MESSAGE("포스트 등록 완료"),
+    POST_EDIT_MESSAGE("포스트 수정 완료"),
+    POST_DELETE_MESSAGE("포스트 삭제 완료");
 
     private final String value;
     PostTestEssentials(String value) {

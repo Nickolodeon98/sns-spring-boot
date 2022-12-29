@@ -54,20 +54,20 @@ class PostControllerTest {
 
     SelectedPostResponse selectedPostResponse;
     Integer postId;
-    final String url = PostTestEssentials.POST_URL.getValue() + postId;
+    final String url = "/api/v1/posts/1";
     @BeforeEach
     void setUp() {
         postId = 1;
 
         postRequest = PostRequest.builder()
-                .title("포스트 제목")
-                .body("포스트 내용")
+                .title(PostTestEssentials.POST_TITLE.getValue())
+                .body(PostTestEssentials.POST_BODY.getValue())
                 .build();
 
         selectedPostResponse = SelectedPostResponse.builder()
                 .id(postId)
-                .title("title")
-                .body("body")
+                .title(PostTestEssentials.POST_TITLE.getValue())
+                .body(PostTestEssentials.POST_BODY.getValue())
                 .userName("username")
                 .createdAt(LocalDateTime.of(2022, 12, 26, 18, 03, 14))
                 .lastModifiedAt(LocalDateTime.of(2022, 12, 26, 18, 03, 14))
@@ -92,13 +92,14 @@ class PostControllerTest {
         @WithMockUser
         public void post_success() throws Exception {
 
-            given(postService.createPost(any(), any())).willReturn(PostResponse.build("포스트 등록 완료", postId));
+            given(postService.createPost(any(), any()))
+                    .willReturn(PostResponse.build(PostTestEssentials.POST_CREATE_MESSAGE.getValue(), postId));
 
             mockMvc.perform(post(PostTestEssentials.POST_URL.getValue()).contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsBytes(postRequest)).with(csrf()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
-                    .andExpect(jsonPath("$.result.message").value("포스트 등록 완료"))
+                    .andExpect(jsonPath("$.result.message").value(PostTestEssentials.POST_CREATE_MESSAGE.getValue()))
                     .andDo(print());
 
             verify(postService).createPost(any(), any());
@@ -138,10 +139,10 @@ class PostControllerTest {
             mockMvc.perform(get(url))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
-                    .andExpect(jsonPath("$.result.id").value(1))
-                    .andExpect(jsonPath("$.result.title").value("title"))
-                    .andExpect(jsonPath("$.result.body").value("body"))
-                    .andExpect(jsonPath("$.result.userName").value("username"))
+                    .andExpect(jsonPath("$.result.id").value(selectedPostResponse.getId()))
+                    .andExpect(jsonPath("$.result.title").value(selectedPostResponse.getTitle()))
+                    .andExpect(jsonPath("$.result.body").value(selectedPostResponse.getBody()))
+                    .andExpect(jsonPath("$.result.userName").value(selectedPostResponse.getUserName()))
                     .andDo(print());
 
             verify(postService).acquirePost(postId);
@@ -163,7 +164,7 @@ class PostControllerTest {
 
             given(postService.listAllPosts(pageable)).willReturn(posts);
 
-            mockMvc.perform(get(url).with(csrf()))
+            mockMvc.perform(get(PostTestEssentials.POST_URL.getValue()).with(csrf()))
                     .andExpect(status().isOk())
                     .andDo(print());
 
@@ -186,7 +187,8 @@ class PostControllerTest {
         @WithMockUser
         void success_edit_post() throws Exception {
 
-            given(postService.editPost(any(), eq(postId), any())).willReturn(PostResponse.build("포스트 수정 완료", postId));
+            given(postService.editPost(any(), eq(postId), any()))
+                    .willReturn(PostResponse.build(PostTestEssentials.POST_EDIT_MESSAGE.getValue(), postId));
 
             mockMvc.perform(put(url)
                             .contentType(MediaType.APPLICATION_JSON)
@@ -194,7 +196,7 @@ class PostControllerTest {
                             .with(csrf()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
-                    .andExpect(jsonPath("$.result.message").value("포스트 수정 완료"))
+                    .andExpect(jsonPath("$.result.message").value(PostTestEssentials.POST_EDIT_MESSAGE.getValue()))
                     .andExpect(jsonPath("$.result.postId").value(postId))
                     .andDo(print());
 
@@ -231,12 +233,13 @@ class PostControllerTest {
         @WithMockUser
         void success_delete_post() throws Exception {
 
-            given(postService.removePost(eq(postId), any())).willReturn(PostResponse.build("포스트 삭제 완료", postId));
+            given(postService.removePost(eq(postId), any()))
+                    .willReturn(PostResponse.build(PostTestEssentials.POST_DELETE_MESSAGE.getValue(), postId));
 
             mockMvc.perform(delete(url).with(csrf()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
-                    .andExpect(jsonPath("$.result.message").value("포스트 삭제 완료"))
+                    .andExpect(jsonPath("$.result.message").value(PostTestEssentials.POST_DELETE_MESSAGE.getValue()))
                     .andExpect(jsonPath("$.result.postId").value(postId))
                     .andDo(print());
 
