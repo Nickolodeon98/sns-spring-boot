@@ -114,41 +114,46 @@ class PostControllerTest {
                 Arguments.of(Named.of("DB 오류", status().isInternalServerError()),
                         ErrorCode.DATABASE_ERROR));
     }
+    
+    @Nested
+    @DisplayName("포스트 작성")
+    class PostAddition {
 
-    @Test
-    @DisplayName("포스트 작성 성공")
-    @WithMockUser
-    public void post_success() throws Exception {
+        @Test
+        @DisplayName("포스트 작성 성공")
+        @WithMockUser
+        public void post_success() throws Exception {
 
-        given(postService.createPost(any(), any())).willReturn(postResponse);
+            given(postService.createPost(any(), any())).willReturn(postResponse);
 
-        mockMvc.perform(post(postUrl).contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsBytes(postRequest)).with(csrf()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
-                .andExpect(jsonPath("$.result.message").value("포스트 등록 완료"))
-                .andDo(print());
+            mockMvc.perform(post(postUrl).contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsBytes(postRequest)).with(csrf()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
+                    .andExpect(jsonPath("$.result.message").value("포스트 등록 완료"))
+                    .andDo(print());
 
-        verify(postService).createPost(any(), any());
-    }
+            verify(postService).createPost(any(), any());
+        }
 
-    @Test
-    @DisplayName("포스트 작성 실패")
-    @WithMockUser
-    public void post_fail() throws Exception {
-        given(postService.createPost(any(), any()))
-                .willThrow(new UserException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다."));
+        @Test
+        @DisplayName("포스트 작성 실패")
+        @WithMockUser
+        public void post_fail() throws Exception {
+            given(postService.createPost(any(), any()))
+                    .willThrow(new UserException(ErrorCode.INVALID_PERMISSION, ErrorCode.INVALID_PERMISSION.getMessage()));
 
-        mockMvc.perform(post(postUrl).contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsBytes(any()))
-                        .content(objectMapper.writeValueAsBytes(any())).with(csrf()))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.resultCode").value("ERROR"))
-                .andExpect(jsonPath("$.result.errorCode").value("INVALID_PERMISSION"))
-                .andExpect(jsonPath("$.result.message").value("사용자가 권한이 없습니다."))
-                .andDo(print());
+            mockMvc.perform(post(postUrl).contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsBytes(any()))
+                            .content(objectMapper.writeValueAsBytes(any())).with(csrf()))
+                    .andExpect(status().isUnauthorized())
+                    .andExpect(jsonPath("$.resultCode").value("ERROR"))
+                    .andExpect(jsonPath("$.result.errorCode").value(ErrorCode.INVALID_PERMISSION.name()))
+                    .andExpect(jsonPath("$.result.message").value(ErrorCode.INVALID_PERMISSION.getMessage()))
+                    .andDo(print());
 
-//        verify(postService).createNewPost(any(), any());
+            verify(postService).createPost(any(), any());
+        }
     }
 
     @Test
