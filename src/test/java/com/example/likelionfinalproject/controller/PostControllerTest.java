@@ -120,7 +120,7 @@ class PostControllerTest {
     class PostAddition {
 
         @Test
-        @DisplayName("포스트 작성 성공")
+        @DisplayName("성공")
         @WithMockUser
         public void post_success() throws Exception {
 
@@ -137,7 +137,7 @@ class PostControllerTest {
         }
 
         @Test
-        @DisplayName("포스트 작성 실패")
+        @DisplayName("실패")
         @WithMockUser
         public void post_fail() throws Exception {
             given(postService.createPost(any(), any()))
@@ -215,7 +215,7 @@ class PostControllerTest {
     class PostEdition {
 
         @Test
-        @DisplayName("포스트 수정 성공")
+        @DisplayName("성공")
         @WithMockUser
         void success_edit_post() throws Exception {
 
@@ -236,7 +236,7 @@ class PostControllerTest {
         }
 
         @ParameterizedTest
-        @DisplayName("포스트 수정 실패")
+        @DisplayName("실패")
         @WithMockUser
         @MethodSource("com.example.likelionfinalproject.controller.PostControllerTest#provideErrorCase")
         void fail_edit_post(ResultMatcher error, ErrorCode code) throws Exception {
@@ -255,34 +255,39 @@ class PostControllerTest {
         }
     }
 
-    @Test
-    @DisplayName("포스트 삭제 성공")
-    @WithMockUser
-    void success_delete_post() throws Exception {
 
-        given(postService.removePost(eq(postId), any())).willReturn(deletedPostResponse);
+    @Nested
+    @DisplayName("포스트 삭제")
+    class PostRemoval {
+        @Test
+        @DisplayName("성공")
+        @WithMockUser
+        void success_delete_post() throws Exception {
 
-        mockMvc.perform(delete(deleteUrl).with(csrf()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
-                .andExpect(jsonPath("$.result.message").value("포스트 삭제 완료"))
-                .andExpect(jsonPath("$.result.postId").value(postId))
-                .andDo(print());
+            given(postService.removePost(eq(postId), any())).willReturn(deletedPostResponse);
 
-        verify(postService).removePost(eq(postId), any());
-    }
+            mockMvc.perform(delete(deleteUrl).with(csrf()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
+                    .andExpect(jsonPath("$.result.message").value("포스트 삭제 완료"))
+                    .andExpect(jsonPath("$.result.postId").value(postId))
+                    .andDo(print());
 
-    @ParameterizedTest
-    @DisplayName("포스트 삭제 실패")
-    @WithMockUser
-    @MethodSource("provideErrorCase")
-    void fail_delete_post(ResultMatcher error, ErrorCode code) throws Exception {
-        given(postService.removePost(eq(postId), any()))
-                .willThrow(new UserException(code, code.getMessage()));
+            verify(postService).removePost(eq(postId), any());
+        }
 
-        mockMvc.perform(delete(deleteUrl).with(csrf()))
-                .andExpect(error)
-                .andDo(print());
+        @ParameterizedTest
+        @DisplayName("실패")
+        @WithMockUser
+        @MethodSource("com.example.likelionfinalproject.controller.PostControllerTest#provideErrorCase")
+        void fail_delete_post(ResultMatcher error, ErrorCode code) throws Exception {
+            given(postService.removePost(eq(postId), any()))
+                    .willThrow(new UserException(code, code.getMessage()));
+
+            mockMvc.perform(delete(deleteUrl).with(csrf()))
+                    .andExpect(error)
+                    .andDo(print());
+        }
     }
 
 }
