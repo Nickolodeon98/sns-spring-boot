@@ -1,3 +1,9 @@
+# 🚩 Swagger 주소
+
+---
+
+http://ec2-13-209-88-90.ap-northeast-2.compute.amazonaws.com:8080/swagger-ui/
+
 # 💡 미션 요구사항 분석 & 체크리스트
 
 ---
