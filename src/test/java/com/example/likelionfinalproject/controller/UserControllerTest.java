@@ -23,6 +23,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -45,12 +46,12 @@ class UserControllerTest {
 
     UserLoginRequest userLoginRequest;
     UserLoginResponse userLoginResponse;
-
+    final Integer userId = 1;
     final String userName = "sjeon0730";
     final String password = "1q2w3e4r";
     final String joinUrl = "/api/v1/users/join";
     final String loginUrl = "/api/v1/users/login";
-
+    final String token = "123456789";
     @BeforeEach
     void setUp() {
         userJoinRequest = UserJoinRequest.builder()
@@ -60,11 +61,11 @@ class UserControllerTest {
 
         userJoinResponse = UserJoinResponse.builder()
                 .userName(userName)
-                .userId(1)
+                .userId(userId)
                 .build();
 
         userLoginRequest = UserLoginRequest.builder().userName(userName).password(password).build();
-        userLoginResponse = UserLoginResponse.builder().jwt("123456789").build();
+        userLoginResponse = UserLoginResponse.builder().jwt(token).build();
     }
 
     @Nested
@@ -77,12 +78,12 @@ class UserControllerTest {
             given(userService.register(any())).willReturn(userJoinResponse);
 
             mockMvc.perform(post(joinUrl).contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsBytes(any()))
+                            .content(objectMapper.writeValueAsBytes(userJoinRequest))
                             .with(csrf()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
-                    .andExpect(jsonPath("$.result.userId").value(1))
-                    .andExpect(jsonPath("$.result.userName").value("sjeon0730"))
+                    .andExpect(jsonPath("$.result.userId").value(userId))
+                    .andExpect(jsonPath("$.result.userName").value(userName))
                     .andDo(print());
 
             verify(userService).register(any());
@@ -92,14 +93,16 @@ class UserControllerTest {
         @DisplayName("실패")
         @WithMockUser
         void fail_join() throws Exception {
-            UserJoinRequest duplicateUser = UserJoinRequest.builder().userName("sjeon0730").password("1q2w3e4r").build();
+            // 아이디가 같고 비밀번호가 다르면 중복된 사용자이다.
+            userJoinRequest.setPassword(Double.toString(Math.random()));
+            UserJoinRequest duplicateUser = userJoinRequest;
 
             given(userService.register(any()))
                     .willThrow(new UserException(ErrorCode.DUPLICATE_USERNAME,
                             duplicateUser.getUserName() + "는 이미 존재하는 아이디입니다."));
 
             mockMvc.perform(post(joinUrl).contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsBytes(any()))
+                            .content(objectMapper.writeValueAsBytes(duplicateUser))
                             .with(csrf()))
                     .andExpect(status().isConflict())
                     .andExpect(jsonPath("$.resultCode").value("ERROR"))
