@@ -57,8 +57,6 @@ class PostControllerTest {
     String postUrl;
     String editUrl;
     String deleteUrl;
-    PostRequest editPostRequest;
-    PostResponse editedPost;
     PostResponse deletedPostResponse;
     @BeforeEach
     void setUp() {
@@ -85,16 +83,6 @@ class PostControllerTest {
 
         postUrl = "/api/v1/posts";
 
-        editPostRequest = PostRequest.builder()
-                .title("title")
-                .body("body")
-                .build();
-
-        editedPost = PostResponse.builder()
-                .message("포스트 수정 완료")
-                .postId(postId)
-                .build();
-
         deletedPostResponse = PostResponse.builder()
                 .message("포스트 삭제 완료")
                 .postId(postId)
@@ -102,8 +90,6 @@ class PostControllerTest {
 
         editUrl = String.format("%s/%d", postUrl, postId);
         deleteUrl = String.format("%s/%d", postUrl, postId);
-
-
     }
 
     private static Stream<Arguments> provideErrorCase() {
@@ -219,11 +205,11 @@ class PostControllerTest {
         @WithMockUser
         void success_edit_post() throws Exception {
 
-            given(postService.editPost(any(), eq(postId), any())).willReturn(editedPost);
+            given(postService.editPost(any(), eq(postId), any())).willReturn(postResponse);
 
             mockMvc.perform(put(editUrl)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsBytes(editPostRequest))
+                            .content(objectMapper.writeValueAsBytes(postRequest))
                             .with(csrf()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
@@ -245,7 +231,7 @@ class PostControllerTest {
                     .willThrow(new UserException(code, code.getMessage()));
 
             mockMvc.perform(put(editUrl).contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsBytes(editPostRequest))
+                            .content(objectMapper.writeValueAsBytes(postRequest))
                             .with(csrf()))
                     .andExpect(error)
                     .andExpect(jsonPath("$.result.errorCode").value(code.name()))
