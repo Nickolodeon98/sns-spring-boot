@@ -1,5 +1,8 @@
 package com.example.likelionfinalproject.service;
 
+import org.springframework.stereotype.Service;
+
+@Service
 public class TestService {
 
     public int addDigits(int num) {
