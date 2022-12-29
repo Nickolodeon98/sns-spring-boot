@@ -156,53 +156,58 @@ class PostControllerTest {
         }
     }
 
-    @Test
-    @DisplayName("포스트 조회 성공")
-    @WithMockUser
-    public void find_post() throws Exception {
-        given(postService.acquirePost(postId)).willReturn(selectedPostResponse);
 
-        String selectUrl = String.format("%s/%d", postUrl, postId);
+    @Nested
+    @DisplayName("포스트 조회")
+    class PostAcquisition {
+        @Test
+        @DisplayName("성공 - 단건")
+        @WithMockUser
+        public void find_post() throws Exception {
+            given(postService.acquirePost(postId)).willReturn(selectedPostResponse);
 
-        mockMvc.perform(get(selectUrl))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
-                .andExpect(jsonPath("$.result.id").value(1))
-                .andExpect(jsonPath("$.result.title").value("title"))
-                .andExpect(jsonPath("$.result.body").value("body"))
-                .andExpect(jsonPath("$.result.userName").value("username"))
-                .andDo(print());
+            String selectUrl = String.format("%s/%d", postUrl, postId);
 
-        verify(postService).acquirePost(postId);
-    }
+            mockMvc.perform(get(selectUrl))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
+                    .andExpect(jsonPath("$.result.id").value(1))
+                    .andExpect(jsonPath("$.result.title").value("title"))
+                    .andExpect(jsonPath("$.result.body").value("body"))
+                    .andExpect(jsonPath("$.result.userName").value("username"))
+                    .andDo(print());
 
-    @Captor
-    ArgumentCaptor<Pageable> postArgumentCaptor;
+            verify(postService).acquirePost(postId);
+        }
 
-    @Test
-    @DisplayName("모든 포스트 조회 성공")
-    @WithMockUser
-    void find_every_posts() throws Exception {
-        final int size = 20;
-        Pageable pageable = PageRequest.of(0, size, Sort.by("id").descending());
+        @Captor
+        ArgumentCaptor<Pageable> postArgumentCaptor;
 
-        List<SelectedPostResponse> multiplePosts = List.of(selectedPostResponse);
+        @Test
+        @DisplayName("성공 - 모든 포스트")
+        @WithMockUser
+        void find_every_posts() throws Exception {
+            final int size = 20;
+            Pageable pageable = PageRequest.of(0, size, Sort.by("id").descending());
 
-        Page<SelectedPostResponse> posts = new PageImpl<>(multiplePosts);
+            List<SelectedPostResponse> multiplePosts = List.of(selectedPostResponse);
 
-        given(postService.listAllPosts(pageable)).willReturn(posts);
+            Page<SelectedPostResponse> posts = new PageImpl<>(multiplePosts);
 
-        mockMvc.perform(get(postUrl).with(csrf()))
-                .andExpect(status().isOk())
-                .andDo(print());
+            given(postService.listAllPosts(pageable)).willReturn(posts);
 
-        verify(postService).listAllPosts(postArgumentCaptor.capture());
+            mockMvc.perform(get(postUrl).with(csrf()))
+                    .andExpect(status().isOk())
+                    .andDo(print());
 
-        Pageable createdPost = postArgumentCaptor.getValue();
+            verify(postService).listAllPosts(postArgumentCaptor.capture());
 
-        Assertions.assertEquals(pageable.getPageSize(), createdPost.getPageSize());
-        Assertions.assertEquals(pageable.getSort(), createdPost.getSort());
-        Assertions.assertEquals(pageable.getPageNumber(), createdPost.getPageNumber());
+            Pageable createdPost = postArgumentCaptor.getValue();
+
+            Assertions.assertEquals(pageable.getPageSize(), createdPost.getPageSize());
+            Assertions.assertEquals(pageable.getSort(), createdPost.getSort());
+            Assertions.assertEquals(pageable.getPageNumber(), createdPost.getPageNumber());
+        }
     }
 
     @Test
