@@ -210,44 +210,49 @@ class PostControllerTest {
         }
     }
 
-    @Test
-    @DisplayName("포스트 수정 성공")
-    @WithMockUser
-    void success_edit_post() throws Exception {
+    @Nested
+    @DisplayName("포스트 수정")
+    class PostEdition {
 
-        given(postService.editPost(any(), eq(postId), any())).willReturn(editedPost);
+        @Test
+        @DisplayName("포스트 수정 성공")
+        @WithMockUser
+        void success_edit_post() throws Exception {
 
-        mockMvc.perform(put(editUrl)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsBytes(editPostRequest))
-                        .with(csrf()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
-                .andExpect(jsonPath("$.result.message").value("포스트 수정 완료"))
-                .andExpect(jsonPath("$.result.postId").value(postId))
-                .andDo(print());
+            given(postService.editPost(any(), eq(postId), any())).willReturn(editedPost);
+
+            mockMvc.perform(put(editUrl)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsBytes(editPostRequest))
+                            .with(csrf()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
+                    .andExpect(jsonPath("$.result.message").value("포스트 수정 완료"))
+                    .andExpect(jsonPath("$.result.postId").value(postId))
+                    .andDo(print());
 
 
-        verify(postService).editPost(any(), eq(postId), any());
-    }
+            verify(postService).editPost(any(), eq(postId), any());
+        }
 
-    @ParameterizedTest
-    @DisplayName("포스트 수정 실패")
-    @WithMockUser
-    @MethodSource("provideErrorCase")
-    void fail_edit_post(ResultMatcher error, ErrorCode code) throws Exception {
+        @ParameterizedTest
+        @DisplayName("포스트 수정 실패")
+        @WithMockUser
+        @MethodSource("com.example.likelionfinalproject.controller.PostControllerTest#provideErrorCase")
+        void fail_edit_post(ResultMatcher error, ErrorCode code) throws Exception {
 
-        given(postService.editPost(any(), eq(postId), any()))
-                .willThrow(new UserException(code, code.getMessage()));
+            given(postService.editPost(any(), eq(postId), any()))
+                    .willThrow(new UserException(code, code.getMessage()));
 
-        mockMvc.perform(put(editUrl).contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsBytes(editPostRequest))
-                .with(csrf()))
-                .andExpect(error)
-                .andExpect(jsonPath("$.result.errorCode").value(code.name()))
-                .andDo(print());
+            mockMvc.perform(put(editUrl).contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsBytes(editPostRequest))
+                            .with(csrf()))
+                    .andExpect(error)
+                    .andExpect(jsonPath("$.result.errorCode").value(code.name()))
+                    .andDo(print());
 
-        verify(postService).editPost(any(), eq(postId), any());
+            verify(postService).editPost(any(), eq(postId), any());
+        }
     }
 
     @Test
