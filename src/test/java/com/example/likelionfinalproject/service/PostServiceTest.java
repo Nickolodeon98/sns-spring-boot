@@ -12,10 +12,15 @@ import com.example.likelionfinalproject.fixture.UserFixture;
 import com.example.likelionfinalproject.repository.PostRepository;
 import com.example.likelionfinalproject.repository.UserRepository;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.lang.Nullable;
 import org.springframework.test.web.servlet.ResultMatcher;
 
 import java.util.Optional;
@@ -26,17 +31,19 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
-
+@ExtendWith(MockitoExtension.class)
 class PostServiceTest {
-    PostRepository postRepository = Mockito.mock(PostRepository.class);
-    UserRepository userRepository = Mockito.mock(UserRepository.class);
+    @Mock
+    PostRepository postRepository;
+    @Mock
+    UserRepository userRepository;
+    @InjectMocks
     PostService postService;
     User mockUser;
     Post mockPost;
     Integer postId;
     @BeforeEach
     void setUp() {
-        postService = new PostService(postRepository, userRepository);
         postId = 1;
         mockUser = UserFixture.get();
         mockPost = PostFixture.get(postId);
@@ -113,9 +120,9 @@ class PostServiceTest {
         @DisplayName("실패")
         @MethodSource("com.example.likelionfinalproject.service.PostServiceTest#provideObjectAndErrorCase")
         void fail_edit_post(ErrorCode code, Optional optionalPost, Optional optionalUser, String userName) {
-            when(postRepository.findById(mockPost.getId())).thenReturn(optionalPost);
+            Mockito.lenient().when(postRepository.findById(mockPost.getId())).thenReturn(optionalPost);
 
-            when(userRepository.findByUserName(mockPost.getAuthor().getUserName())).thenReturn(optionalUser);
+            Mockito.lenient().when(userRepository.findByUserName(mockPost.getAuthor().getUserName())).thenReturn(optionalUser);
 
             UserException e = Assertions.assertThrows(UserException.class,
                     () -> postService.editPost(mockPost.toRequest(), mockPost.getId(), userName));
@@ -130,9 +137,9 @@ class PostServiceTest {
         @DisplayName("실패")
         @MethodSource("com.example.likelionfinalproject.service.PostServiceTest#provideObjectAndErrorCase")
         void fail_delete_post(ErrorCode code, Optional optionalPost, Optional optionalUser, String userName) {
-            when(postRepository.findById(mockPost.getId())).thenReturn(optionalPost);
+            Mockito.lenient().when(postRepository.findById(mockPost.getId())).thenReturn(optionalPost);
 
-            when(userRepository.findByUserName(mockPost.getAuthor().getUserName())).thenReturn(optionalUser);
+            Mockito.lenient().when(userRepository.findByUserName(mockPost.getAuthor().getUserName())).thenReturn(optionalUser);
 
             UserException e = Assertions.assertThrows(UserException.class,
                     () -> postService.removePost(mockPost.getId(), userName));
