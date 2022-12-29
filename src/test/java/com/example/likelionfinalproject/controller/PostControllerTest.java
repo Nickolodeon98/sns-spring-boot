@@ -3,6 +3,7 @@ package com.example.likelionfinalproject.controller;
 import com.example.likelionfinalproject.domain.dto.PostRequest;
 import com.example.likelionfinalproject.domain.dto.PostResponse;
 import com.example.likelionfinalproject.domain.dto.SelectedPostResponse;
+import com.example.likelionfinalproject.enums.PostTestEssentials;
 import com.example.likelionfinalproject.exception.ErrorCode;
 import com.example.likelionfinalproject.exception.UserException;
 import com.example.likelionfinalproject.service.PostService;
@@ -51,13 +52,9 @@ class PostControllerTest {
 
     PostRequest postRequest;
 
-    PostResponse postResponse;
     SelectedPostResponse selectedPostResponse;
     Integer postId;
-    String postUrl;
-    String editUrl;
-    String deleteUrl;
-    PostResponse deletedPostResponse;
+    final String url = PostTestEssentials.POST_URL.getValue() + postId;
     @BeforeEach
     void setUp() {
         postId = 1;
@@ -65,11 +62,6 @@ class PostControllerTest {
         postRequest = PostRequest.builder()
                 .title("포스트 제목")
                 .body("포스트 내용")
-                .build();
-
-        postResponse = PostResponse.builder()
-                .message("포스트 등록 완료")
-                .postId(postId)
                 .build();
 
         selectedPostResponse = SelectedPostResponse.builder()
@@ -80,16 +72,6 @@ class PostControllerTest {
                 .createdAt(LocalDateTime.of(2022, 12, 26, 18, 03, 14))
                 .lastModifiedAt(LocalDateTime.of(2022, 12, 26, 18, 03, 14))
                 .build();
-
-        postUrl = "/api/v1/posts";
-
-        deletedPostResponse = PostResponse.builder()
-                .message("포스트 삭제 완료")
-                .postId(postId)
-                .build();
-
-        editUrl = String.format("%s/%d", postUrl, postId);
-        deleteUrl = String.format("%s/%d", postUrl, postId);
     }
 
     private static Stream<Arguments> provideErrorCase() {
@@ -110,9 +92,9 @@ class PostControllerTest {
         @WithMockUser
         public void post_success() throws Exception {
 
-            given(postService.createPost(any(), any())).willReturn(postResponse);
+            given(postService.createPost(any(), any())).willReturn(PostResponse.build("포스트 등록 완료", postId));
 
-            mockMvc.perform(post(postUrl).contentType(MediaType.APPLICATION_JSON)
+            mockMvc.perform(post(PostTestEssentials.POST_URL.getValue()).contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsBytes(postRequest)).with(csrf()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
@@ -129,7 +111,7 @@ class PostControllerTest {
             given(postService.createPost(any(), any()))
                     .willThrow(new UserException(ErrorCode.INVALID_PERMISSION, ErrorCode.INVALID_PERMISSION.getMessage()));
 
-            mockMvc.perform(post(postUrl).contentType(MediaType.APPLICATION_JSON)
+            mockMvc.perform(post(PostTestEssentials.POST_URL.getValue()).contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsBytes(any()))
                             .content(objectMapper.writeValueAsBytes(any())).with(csrf()))
                     .andExpect(status().isUnauthorized())
@@ -152,9 +134,8 @@ class PostControllerTest {
         public void find_post() throws Exception {
             given(postService.acquirePost(postId)).willReturn(selectedPostResponse);
 
-            String selectUrl = String.format("%s/%d", postUrl, postId);
 
-            mockMvc.perform(get(selectUrl))
+            mockMvc.perform(get(url))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
                     .andExpect(jsonPath("$.result.id").value(1))
@@ -182,7 +163,7 @@ class PostControllerTest {
 
             given(postService.listAllPosts(pageable)).willReturn(posts);
 
-            mockMvc.perform(get(postUrl).with(csrf()))
+            mockMvc.perform(get(url).with(csrf()))
                     .andExpect(status().isOk())
                     .andDo(print());
 
@@ -205,9 +186,9 @@ class PostControllerTest {
         @WithMockUser
         void success_edit_post() throws Exception {
 
-            given(postService.editPost(any(), eq(postId), any())).willReturn(postResponse);
+            given(postService.editPost(any(), eq(postId), any())).willReturn(PostResponse.build("포스트 수정 완료", postId));
 
-            mockMvc.perform(put(editUrl)
+            mockMvc.perform(put(url)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsBytes(postRequest))
                             .with(csrf()))
@@ -230,7 +211,7 @@ class PostControllerTest {
             given(postService.editPost(any(), eq(postId), any()))
                     .willThrow(new UserException(code, code.getMessage()));
 
-            mockMvc.perform(put(editUrl).contentType(MediaType.APPLICATION_JSON)
+            mockMvc.perform(put(url).contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsBytes(postRequest))
                             .with(csrf()))
                     .andExpect(error)
@@ -250,9 +231,9 @@ class PostControllerTest {
         @WithMockUser
         void success_delete_post() throws Exception {
 
-            given(postService.removePost(eq(postId), any())).willReturn(deletedPostResponse);
+            given(postService.removePost(eq(postId), any())).willReturn(PostResponse.build("포스트 삭제 완료", postId));
 
-            mockMvc.perform(delete(deleteUrl).with(csrf()))
+            mockMvc.perform(delete(url).with(csrf()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
                     .andExpect(jsonPath("$.result.message").value("포스트 삭제 완료"))
@@ -270,7 +251,7 @@ class PostControllerTest {
             given(postService.removePost(eq(postId), any()))
                     .willThrow(new UserException(code, code.getMessage()));
 
-            mockMvc.perform(delete(deleteUrl).with(csrf()))
+            mockMvc.perform(delete(url).with(csrf()))
                     .andExpect(error)
                     .andDo(print());
         }
