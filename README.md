@@ -1,12 +1,8 @@
 # 🚩 Swagger 주소
 
----
-
 http://ec2-13-209-88-90.ap-northeast-2.compute.amazonaws.com:8080/swagger-ui/
 
 # 💡 미션 요구사항 분석 & 체크리스트
-
----
 
 - Swagger 적용 [O]
   - API 문서 자동화
@@ -29,11 +25,7 @@ http://ec2-13-209-88-90.ap-northeast-2.compute.amazonaws.com:8080/swagger-ui/
 
 # 🎨 1주차 미션 요약
 
----
-
 ## 준비 단계
-
----
 
 ### 1. 브랜치 및 이슈 트래커 사용
 
@@ -58,14 +50,12 @@ http://ec2-13-209-88-90.ap-northeast-2.compute.amazonaws.com:8080/swagger-ui/
 3. Docker Build 후 이미지를 생성하였으므로 docker docs 공식문서를 참고하여 Dockerfile 을 작성
 ```
 - **참고 문헌**
-```
+
 https://www.tutorialspoint.com/yaml/yaml_indentation_and_separation.htm
 https://stackoverflow.com/questions/42247535/yaml-how-many-spaces-per-indent
-```
+
 
 ## 구현 단계
-
----
 
 ### 회원가입 및 로그인 기능
 
@@ -108,11 +98,10 @@ https://stackoverflow.com/questions/42247535/yaml-how-many-spaces-per-indent
  
  1. 회원가입 되지 않은 사용자 아이디가 입력되었을 때
  2. 아이디와 비밀번호가 회원가입 시에 입력한 내용과 일치하지 않을 때
-
+```
 참고 문헌:
 
 https://itistori.tistory.com/37
-```
 
 3) **POST api/v1/posts**
 ```
@@ -133,11 +122,10 @@ https://itistori.tistory.com/37
 중점 사항:
 
 - 토큰 필터에서 발생한 예외를 클라이언트가 알아볼 수 있는 JSON 형태로 반환하도록 구현 
-
+```
 참고 문헌:
 
 https://medium.com/@mypascal2000/custom-handling-of-invalid-jwt-in-spring-boot-f66e60d59230
-```
 
 4) **GET api/v1/posts/{postId}**
 ```
@@ -201,8 +189,6 @@ https://medium.com/@mypascal2000/custom-handling-of-invalid-jwt-in-spring-boot-f
 
 # 📝 회고
 
----
-
 ## 1. 테스트 코드
 - ``Fixture`` 클래스를 사용해서 서비스 테스트 내에서 매번 ``setUp()`` 에서 객체를 생성하는 일을 줄여야 했는데, 결국 시간 관계상 지저분하게 내버려두었다.
 - ``PostControllerTest`` 에서 모든 등록된 포스트를 조회할 때 최신순으로 포스트 정보들이 나열되는지를 테스트하지 못했다.
@@ -233,8 +219,6 @@ https://medium.com/@mypascal2000/custom-handling-of-invalid-jwt-in-spring-boot-f
 <hr>
 
 # 🔍 해 보고 싶은 사항
-
----
 
 ## AOP 적용
 
