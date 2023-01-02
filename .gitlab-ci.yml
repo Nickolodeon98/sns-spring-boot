@@ -12,5 +12,8 @@ package:
       - echo $GITLAB_USER 로 로그인했습니다. 스크립트를 실행합니다.
       - docker build -t registry.gitlab.com/$GITLAB_USER/$PROJECT_NAME . 
       - docker push registry.gitlab.com/$GITLAB_USER/$PROJECT_NAME
+  only:
+      - sprint1
+      - main
   after_script:
       - docker logout
