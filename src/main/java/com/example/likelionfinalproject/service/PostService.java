@@ -16,7 +16,8 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import java.sql.SQLDataException;
+import java.sql.SQLException;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,23 +29,32 @@ public class PostService {
     private final UserRepository userRepository;
 
     public PostResponse createPost(PostRequest postRequest, String authorId) {
-        Post post = postRequest.toEntity();
-        User user = userRepository.findByUserName(authorId)
-                .orElseThrow(()->new UserException(ErrorCode.USERNAME_NOT_FOUND, authorId + "은 없는 아이디입니다."));
-        // TODO: 이후에 에러를 어떻게 처리할 지 생각
-        // 필터에서 다 걸러져서 아이디가 오는 것이라 아이디가 없을 수는 없음!!!
+        Post savedPost = null;
+        try {
+            Post post = postRequest.toEntity();
+            User user = userRepository.findByUserName(authorId)
+                    .orElseThrow(()->new UserException(ErrorCode.USERNAME_NOT_FOUND, authorId + "은 없는 아이디입니다."));
 
-        post.setAuthor(user);
+            post.setAuthor(user);
 
-        Post savedPost = postRepository.save(post);
+            savedPost = postRepository.save(post);
+        } catch (Exception e) {
+            throw new UserException(ErrorCode.DATABASE_ERROR, ErrorCode.DATABASE_ERROR.getMessage());
+        }
 
         return PostResponse.of(savedPost);
     }
 
     public SelectedPostResponse acquirePost(Integer postId) {
-        Optional<Post> acquiredPost = postRepository.findById(postId);
-        SelectedPostResponse response = SelectedPostResponse.of(acquiredPost.get());
-        return response;
+        Post acquiredPost;
+        try {
+            acquiredPost = postRepository.findById(postId)
+                    .orElseThrow(() -> new UserException(ErrorCode.POST_NOT_FOUND, ErrorCode.POST_NOT_FOUND.getMessage()));
+        } catch (Exception e) {
+            throw new UserException(ErrorCode.DATABASE_ERROR, ErrorCode.DATABASE_ERROR.getMessage());
+        }
+
+        return SelectedPostResponse.of(acquiredPost);
     }
 
     public Page<SelectedPostResponse> listAllPosts(Pageable pageable) {
@@ -55,36 +65,45 @@ public class PostService {
     }
 
     public PostResponse editPost(PostRequest editPostRequest, Integer postId, String currentUser) {
-        Post postToUpdate = postRepository.findById(postId)
-                .orElseThrow(()->new UserException(ErrorCode.POST_NOT_FOUND, "해당 포스트가 없습니다."));
+        Post postToUpdate;
+        Post editedPost;
+        try {
+            postToUpdate = postRepository.findById(postId)
+                    .orElseThrow(() -> new UserException(ErrorCode.POST_NOT_FOUND, "해당 포스트가 없습니다."));
 
-        /* 포스트의 작성자로 등록되어 있는 사용자를 못 찾을 때 */
-        userRepository.findByUserName(postToUpdate.getAuthor().getUserName())
-                .orElseThrow(()->new UserException(ErrorCode.USERNAME_NOT_FOUND, "Not Found"));
+            /* 포스트의 작성자로 등록되어 있는 사용자를 못 찾을 때 */
+            userRepository.findByUserName(postToUpdate.getAuthor().getUserName())
+                    .orElseThrow(() -> new UserException(ErrorCode.USERNAME_NOT_FOUND, "Not Found"));
 
-        /* 작성자와 사용자가 일치하지 않을 때 */
-        if (!currentUser.equals(postToUpdate.getAuthor().getUserName()))
-            throw new UserException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다.");
+            /* 작성자와 사용자가 일치하지 않을 때 */
+            if (!currentUser.equals(postToUpdate.getAuthor().getUserName()))
+                throw new UserException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다.");
 
-        /* TODO: 데이터베이스 오류가 나는 상황을 처리하는 코드 구현 */
-
-        Post editedPost = postRepository.save(editPostRequest.toEntity(postId, postToUpdate.getAuthor()));
+            editedPost = postRepository.save(editPostRequest.toEntity(postId, postToUpdate.getAuthor()));
+        } catch (Exception e) {
+            throw new UserException(ErrorCode.DATABASE_ERROR, ErrorCode.DATABASE_ERROR.getMessage());
+        }
 
         return PostResponse.of(editedPost);
     }
 
     public PostResponse removePost(Integer postId, String userName) {
+        Post post;
 
-        Post post = postRepository.findById(postId)
-                .orElseThrow(()->new UserException(ErrorCode.POST_NOT_FOUND, "해당 포스트가 없습니다."));
+        try {
+            post = postRepository.findById(postId)
+                    .orElseThrow(()->new UserException(ErrorCode.POST_NOT_FOUND, "해당 포스트가 없습니다."));
 
-        User user = userRepository.findByUserName(post.getAuthor().getUserName())
-                .orElseThrow(()->new UserException(ErrorCode.USERNAME_NOT_FOUND, "Not Found."));
+            User user = userRepository.findByUserName(post.getAuthor().getUserName())
+                    .orElseThrow(()->new UserException(ErrorCode.USERNAME_NOT_FOUND, "Not Found."));
 
-        if (!userName.equals(user.getUserName()))
-            throw new UserException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다.");
+            if (!userName.equals(user.getUserName()))
+                throw new UserException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다.");
 
-        postRepository.deleteById(postId);
+            postRepository.deleteById(postId);
+        } catch (Exception e) {
+            throw new UserException(ErrorCode.DATABASE_ERROR, ErrorCode.DATABASE_ERROR.getMessage());
+        }
 
         return PostResponse.builder()
                 .message("포스트 삭제 완료")
