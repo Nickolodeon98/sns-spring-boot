@@ -2,8 +2,10 @@ package com.example.likelionfinalproject.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
+import springfox.documentation.service.ApiInfo;
 import springfox.documentation.service.ApiKey;
 import springfox.documentation.service.AuthorizationScope;
 import springfox.documentation.service.SecurityReference;
@@ -23,9 +25,10 @@ public class SwaggerConfig {
                 .securityContexts(Arrays.asList(securityContext()))
                 .securitySchemes(Arrays.asList(apiKey()))
                 .select()
-                .apis(RequestHandlerSelectors.any())
+                .apis(RequestHandlerSelectors.basePackage("com.example.likelionfinalproject.controller"))
                 .paths(PathSelectors.any())
-                .build();
+                .build()
+                .apiInfo(apiInfo());
     }
 
     private SecurityContext securityContext() {
@@ -43,5 +46,16 @@ public class SwaggerConfig {
 
     private ApiKey apiKey() {
         return new ApiKey("Authorization", "Authorization", "header");
+    }
+
+    private ApiInfo apiInfo() {
+        return new ApiInfoBuilder()
+                .title("Pseudo-SNS App API Docs")
+                .description("API Docs for a Multi-functional Social Web Application BY Nickolodeon98")
+                .version("1.0.0")
+                .termsOfServiceUrl("")
+                .license("")
+                .licenseUrl("")
+                .build();
     }
 }
