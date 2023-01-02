@@ -5,6 +5,7 @@ import com.example.likelionfinalproject.domain.dto.PostRequest;
 import com.example.likelionfinalproject.domain.dto.PostResponse;
 import com.example.likelionfinalproject.domain.dto.SelectedPostResponse;
 import com.example.likelionfinalproject.service.PostService;
+import io.swagger.annotations.Api;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/posts")
 @RequiredArgsConstructor
 @Slf4j
+@Api(tags = "POST Endpoints")
 public class PostController {
 
     private final PostService postService;

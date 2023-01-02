@@ -5,6 +5,7 @@ import com.example.likelionfinalproject.domain.dto.UserJoinResponse;
 import com.example.likelionfinalproject.domain.dto.UserLoginResponse;
 import com.example.likelionfinalproject.domain.dto.UserRequest;
 import com.example.likelionfinalproject.service.UserService;
+import io.swagger.annotations.Api;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
+@Api(tags="USER Endpoints")
 public class UserController {
 
     private final UserService userService;
