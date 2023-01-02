@@ -51,7 +51,7 @@ public class SwaggerConfig {
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
                 .title("Pseudo-SNS App API Docs")
-                .description("API Docs for a Multi-functional Social Web Application")
+                .description("API Docs for a Multi-functional Social Web Application BY Nickolodeon98")
                 .version("1.0.0")
                 .termsOfServiceUrl("")
                 .license("")
