@@ -1,9 +1,8 @@
 package com.example.likelionfinalproject.controller;
 
-import com.example.likelionfinalproject.domain.dto.UserJoinRequest;
 import com.example.likelionfinalproject.domain.dto.UserJoinResponse;
-import com.example.likelionfinalproject.domain.dto.UserLoginRequest;
 import com.example.likelionfinalproject.domain.dto.UserLoginResponse;
+import com.example.likelionfinalproject.domain.dto.UserRequest;
 import com.example.likelionfinalproject.enums.UserTestEssentials;
 import com.example.likelionfinalproject.exception.ErrorCode;
 import com.example.likelionfinalproject.exception.UserException;
@@ -46,15 +45,14 @@ class UserControllerTest {
     ObjectMapper objectMapper;
 
     UserJoinResponse userJoinResponse;
-    UserJoinRequest userJoinRequest;
-    UserLoginRequest userLoginRequest;
+    UserRequest userRequest;
     UserLoginResponse userLoginResponse;
     final Integer userId = 1;
     final String joinUrl = UserTestEssentials.USER_URL.getValue() + "join";
     final String loginUrl = UserTestEssentials.USER_URL.getValue() + "login";
     @BeforeEach
     void setUp() {
-        userJoinRequest = UserJoinRequest.builder()
+        userRequest = UserRequest.builder()
                 .userName(UserTestEssentials.USER_NAME.getValue())
                 .password(UserTestEssentials.PASSWORD.getValue())
                 .build();
@@ -63,10 +61,6 @@ class UserControllerTest {
                 .userName(UserTestEssentials.USER_NAME.getValue())
                 .userId(userId)
                 .build();
-
-        userLoginRequest = UserLoginRequest.builder()
-                .userName(UserTestEssentials.USER_NAME.getValue())
-                .password(UserTestEssentials.PASSWORD.getValue()).build();
 
         userLoginResponse = UserLoginResponse.builder().jwt(UserTestEssentials.TOKEN.getValue()).build();
     }
@@ -87,7 +81,7 @@ class UserControllerTest {
             given(userService.register(any())).willReturn(userJoinResponse);
 
             mockMvc.perform(post(joinUrl).contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsBytes(userJoinRequest))
+                            .content(objectMapper.writeValueAsBytes(userRequest))
                             .with(csrf()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
@@ -103,8 +97,8 @@ class UserControllerTest {
         @WithMockUser
         void fail_join() throws Exception {
             // 아이디가 같고 비밀번호가 다르면 중복된 사용자이다.
-            userJoinRequest.setPassword(Double.toString(Math.random()));
-            UserJoinRequest duplicateUser = userJoinRequest;
+            userRequest.setPassword(Double.toString(Math.random()));
+            UserRequest duplicateUser = userRequest;
 
             given(userService.register(any()))
                     .willThrow(new UserException(ErrorCode.DUPLICATE_USERNAME,
@@ -150,7 +144,7 @@ class UserControllerTest {
             given(userService.verify(any())).willThrow(new UserException(code, code.getMessage()));
 
             mockMvc.perform(post(loginUrl).contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsBytes(userLoginRequest)).with(csrf()))
+                            .content(objectMapper.writeValueAsBytes(userRequest)).with(csrf()))
                     .andExpect(error)
                     .andExpect(jsonPath("$.resultCode").value("ERROR"))
                     .andExpect(jsonPath("$.result.errorCode").value(code.name()))
