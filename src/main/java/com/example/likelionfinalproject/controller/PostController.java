@@ -5,6 +5,7 @@ import com.example.likelionfinalproject.domain.dto.PostRequest;
 import com.example.likelionfinalproject.domain.dto.PostResponse;
 import com.example.likelionfinalproject.domain.dto.SelectedPostResponse;
 import com.example.likelionfinalproject.service.PostService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -23,6 +24,7 @@ public class PostController {
 
     private final PostService postService;
 
+    @Operation(summary = "포스트 작성", description = "로그인 한 사용자는 포스트 제목과 내용을 작성하여 등록할 수 있다.")
     @PostMapping
     @ResponseBody
     public Response<PostResponse> uploadPost(Authentication authentication, @RequestBody(required = false) PostRequest postRequest) {
@@ -32,6 +34,7 @@ public class PostController {
     }
 
     /* id, 제목, 내용, 작성자, 작성날짜, 수정날짜 조회 */
+    @Operation(summary = "포스트 조회", description = "포스트 고유 아이디를 입력하면 포스트 정보를 조회할 수 있다.")
     @GetMapping("/{postId}")
     @ResponseBody
     public Response<SelectedPostResponse> getSinglePost(@PathVariable Integer postId) {
@@ -39,6 +42,7 @@ public class PostController {
         return Response.success(selectedPostResponse);
     }
 
+    @Operation(summary = "전체 포스트 조회", description = "현재까지 작성된 모든 포스트를 조회할 수 있다.")
     @GetMapping
     @ResponseBody
     public Response<Page<SelectedPostResponse>> getEveryPost(@PageableDefault(size=20, sort="id", direction = Sort.Direction.DESC) Pageable pageable) {
@@ -46,7 +50,7 @@ public class PostController {
         log.info("Responses:{}", responses);
         return Response.success(responses);
     }
-
+    @Operation(summary = "포스트 수정", description = "로그인되어 있을 시 자신이 작성한 포스트의 고유 아이디를 입력하면 수정할 수 있다.")
     @PutMapping("/{postId}")
     @ResponseBody
     public Response<PostResponse> update(@RequestBody PostRequest editPostRequest,
@@ -57,7 +61,7 @@ public class PostController {
 
         return Response.success(response);
     }
-
+    @Operation(summary = "포스트 삭제", description = "로그인되어 있을 시 자신이 작성한 포스트의 고유 아이디를 입력하면 삭제할 수 있다.")
     @DeleteMapping("/{postId}")
     @ResponseBody
     public Response<PostResponse> delete(@PathVariable Integer postId, Authentication authentication) {
