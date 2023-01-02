@@ -1,10 +1,9 @@
 package com.example.likelionfinalproject.controller;
 
 import com.example.likelionfinalproject.domain.Response;
-import com.example.likelionfinalproject.domain.dto.UserJoinRequest;
 import com.example.likelionfinalproject.domain.dto.UserJoinResponse;
-import com.example.likelionfinalproject.domain.dto.UserLoginRequest;
 import com.example.likelionfinalproject.domain.dto.UserLoginResponse;
+import com.example.likelionfinalproject.domain.dto.UserRequest;
 import com.example.likelionfinalproject.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,14 +19,14 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/join")
-    public Response<UserJoinResponse> join(@RequestBody(required = false) UserJoinRequest userJoinRequest) {
+    public Response<UserJoinResponse> join(@RequestBody(required = false) UserRequest userJoinRequest) {
         UserJoinResponse userJoinResponse = userService.register(userJoinRequest);
 
         return Response.success(userJoinResponse);
     }
 
     @PostMapping("/login")
-    public Response<UserLoginResponse> login(@RequestBody(required = false) UserLoginRequest userLoginRequest) {
+    public Response<UserLoginResponse> login(@RequestBody(required = false) UserRequest userLoginRequest) {
         UserLoginResponse userLoginResponse = userService.verify(userLoginRequest);
 
         return Response.success(userLoginResponse);
