@@ -189,13 +189,49 @@ https://medium.com/@mypascal2000/custom-handling-of-invalid-jwt-in-spring-boot-f
 - 포스트 수정이 되면 작성자와 고유 아이디는 그대로 남고 제목과 내용 및 수정 날짜/시간만 업데이트 되게 구현  
 ```
 
-6) **DELETE api/v1/posts**
-```
+### 6) **DELETE api/v1/posts**
+
 기능:
 
-- 포스트를 삭제함
+> 포스트를 삭제함
+
+요구 사항:
+
+> 포스트 삭제에 성공하는 경우:
+
+```json
+{
+  "resultCode": "SUCCESS",
+  "result": {
+    "message": "포스트 삭제 완료",
+    "postId": 66
+  }
+}
 ```
-7) **GET api/v1/posts**
+
+> 포스트 삭제에 실패하는 경우:<br>
+1. 입력된 아이디의 포스트가 존재하지 않을 때 
+```json
+{
+  "resultCode": "ERROR",
+  "result": {
+    "errorCode": "POST_NOT_FOUND",
+    "message": "해당 포스트가 없습니다."
+  }
+}
+```
+2. 입력된 아이디로 찾은 포스트를 작성한 사용자로 로그인 되어 있지 않을 때 
+```json
+{
+  "resultCode": "ERROR",
+  "result": {
+    "errorCode": "INVALID_PERMISSION",
+    "message": "사용자가 권한이 없습니다."
+  }
+}
+```
+
+### 7) **GET api/v1/posts**
 
 ```
 기능:
