@@ -75,30 +75,43 @@ https://stackoverflow.com/questions/42247535/yaml-how-many-spaces-per-indent
 
 ### 회원가입 및 로그인 기능
 
-1) **POST api/v1/users/join**
-```
+### 1) **POST api/v1/users/join**
+
 기능:
 
 - 사용할 아이디와 비밀번호로 사용자를 회원으로 등록
 
 요구 사항:
 
-- 회원 가입이 성공하는 경우:
+> 회원 가입에 성공하는 경우:
 
- "SUCCESS" 메시지와 함께 DB 의 User 테이블에 다음 정보가 저장된다:
- 
- 1. 등록된 사용자 아이디
- 2. 비밀번호
- 3. 등록이 이루어진 날짜와 시간
- 
-- 회원 가입에 실패하는 경우:
- 
- 1. 중복된 아이디로 회원가입 시도가 발생한 경우
- 
- "ERROR" 메시지와 함께 상세한 에러 정보를 포함한 JSON 데이터로 응답한다.
+```json
+{
+  "resultCode": "SUCCESS",
+  "result": {
+    "userId": 23,
+    "userName": "itsme"
+  }
+}
 ```
-2) **POST api/v1/users/login**
+ 
+> 회원 가입에 실패하는 경우:
+ 
+ 1. 중복된 아이디로 회원가입 시도가 발생했을 때
+
+```json
+{
+  "resultCode": "ERROR",
+  "result": {
+    "errorCode": "DUPLICATE_USERNAME",
+    "message": "itsme는 이미 존재하는 아이디입니다."
+  }
+}
 ```
+
+
+### 2) **POST api/v1/users/login**
+
 기능:
 
 - 입력된 아이디와 비밀번호로 로그인하여 토큰을 발급
@@ -108,19 +121,50 @@ https://stackoverflow.com/questions/42247535/yaml-how-many-spaces-per-indent
 - 로그인이 성공적으로 이루어졌을 때 다음과 같이 동작한다:
  
  1. 입력한 아이디 정보가 들어 있는 JSON Web token 이 발급된다.
- 2. "SUCCESS" 메시지와 토큰 값이 함께 JSON 형태 데이터로 응답된다. 
+ 2. "SUCCESS" 메시지와 토큰 값이 함께 JSON 형태 데이터로 응답된다.
+
+> 로그인에 성공하는 경우:
+
+```json
+{
+  "resultCode": "SUCCESS",
+  "result": {
+    "jwt": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdHJpbmcyIiwiaWF0IjoxNjcyNjUwMzUwLCJleHAiOjE2NzI2NTM5NTB9.Zum-eL9J-eVODdQoTM2zRQs3qkoQXWV2UFfV00DxWsk"
+  }
+}
+```
  
-- 다음과 같은 상황은 예외로 처리한다:
+> 로그인에 실패하는 경우:
  
  1. 회원가입 되지 않은 사용자 아이디가 입력되었을 때
- 2. 아이디와 비밀번호가 회원가입 시에 입력한 내용과 일치하지 않을 때
+```json
+{
+  "resultCode": "ERROR",
+  "result": {
+    "errorCode": "USERNAME_NOT_FOUND",
+    "message": "strig는 등록되지 않은 아이디입니다."
+  }
+}
 ```
+
+ 2. 아이디와 비밀번호가 회원가입 시에 입력한 내용과 일치하지 않을 때
+
+```json
+{
+  "resultCode": "ERROR",
+  "result": {
+    "errorCode": "INVALID_PASSWORD",
+    "message": "패스워드가 잘못되었습니다."
+  }
+}
+```
+
 참고 문헌:
 
 https://itistori.tistory.com/37
 
-3) **POST api/v1/posts**
-```
+### 3) **POST api/v1/posts**
+
 기능:
 
 - 포스트를 등록함
@@ -128,23 +172,56 @@ https://itistori.tistory.com/37
 요구 사항:
 
 - Spring Security 를 활용해 토큰을 가지고 인증 절차를 거쳐야만 포스트 등록이 가능하도록 구현:
+
+1. JWT 를 사용하여, Bearer 로 시작하는 토큰 값을 서버에서 요청 시 헤더에 담는다.
+
+> 포스트 등록에 성공하는 경우:
+
+```json
+{
+  "resultCode": "SUCCESS",
+  "result": {
+    "message": "포스트 등록 완료",
+    "postId": 68
+  }
+}
+```
+
+> 포스트 등록에 실패하는 경우:
  
- 1. JWT 를 사용하여, Bearer 로 시작하는 토큰 값을 서버에서 요청 시 헤더에 담는다. 
- 
-- 다음과 같은 상황은 예외로 처리한다:
- 
- 1. 토큰으로 인증 절차를 거치지 않은 사용자가 API 를 호출해 등록을 시도할 때  
+1. 토큰으로 인증 절차를 거치지 않은 사용자가 API 를 호출해 등록을 시도할 때
+
+```json
+{
+  "timestamp": "2023-01-02T09:25:30.413+00:00",
+  "status": 403,
+  "error": "Forbidden",
+  "path": "/api/v1/posts"
+}
+```
+
+2. 만료된 토큰을 사용하는 사용자가 API 를 호출해 등록을 시도할 때
+
+```json
+{
+  "resultCode": "ERROR",
+  "result": {
+    "errorCode": "INVALID_PERMISSION",
+    "message": "사용자가 권한이 없습니다."
+  }
+}
+```
 
 중점 사항:
 
 - 토큰 필터에서 발생한 예외를 클라이언트가 알아볼 수 있는 JSON 형태로 반환하도록 구현 
-```
+
 참고 문헌:
 
 https://medium.com/@mypascal2000/custom-handling-of-invalid-jwt-in-spring-boot-f66e60d59230
 
-4) **GET api/v1/posts/{postId}**
-```
+### 4) **GET api/v1/posts/{postId}**
+
 기능:
 
 - 아이디 postId 의 포스트의 상세 정보를 조회함 
@@ -153,41 +230,95 @@ https://medium.com/@mypascal2000/custom-handling-of-invalid-jwt-in-spring-boot-f
 
 - 조회 시 포스트의 다음 정보를 알 수 있다:
  
-  > 아이디
-  > 제목
-  > 내용
-  > 등록 날짜
-  > 마지막 수정 날짜
-  > 작성자 
- 
-- 다음과 같은 상황은 예외로 처리한다:
- 
- 1. 아이디가 DB에 없을 때
+  - 아이디<br>
+  - 제목<br>
+  - 내용<br>
+  - 작성자<br>
+  - 등록 날짜<br>
+  - 마지막 수정 날짜
+
+> 포스트 조회에 성공하는 경우:
+
+```json
+{
+  "resultCode": "SUCCESS",
+  "result": {
+    "id": 1,
+    "title": "title",
+    "body": "body",
+    "userName": "userName",
+    "createdAt": "2022-12-26T17:44:24.595322",
+    "lastModifiedAt": null // 수정한 적이 없음
+  }
+}
+```
+
+> 포스트 조회에 실패하는 경우:
+1. 입력된 아이디로 조회되는 포스트가 없을 때
+```json
+{
+  "resultCode": "ERROR",
+  "result": {
+    "errorCode": "POST_NOT_FOUND",
+    "message": "해당 포스트가 없습니다."
+  }
+}
+```
 
 중점 사항:
 
 - 성공 시와 에러 시 모두 JSON 형태의 응답을 반환하도록 구현 
-```
 
-5) **PUT api/v1/posts**
-```
+
+### 5) **PUT api/v1/posts**
+
 기능:
 
-- 포스트를 수정함
+> 포스트를 수정함
 
-요구 사항:
+요구 사항: 포스트를 작성한 사용자로 로그인 되어 있을 때만 포스트 수정이 가능하도록 구현
 
-- 포스트를 작성한 사용자로 로그인 되어 있을 때만 포스트 수정이 가능하도록 구현
-  
-- 다음과 같은 상황은 예외로 처리한다:
+> 포스트 수정에 성공하는 경우:
+
+```json
+{
+  "resultCode": "SUCCESS",
+  "result": {
+    "message": "포스트 등록 완료",
+    "postId": 67
+  }
+}
+```
+
+> 포스트 수정에 실패하는 경우:
  
  1. 현재 로그인한 사용자가 작성자가 아닐 때
+
+```json
+{
+  "resultCode": "ERROR",
+  "result": {
+    "errorCode": "INVALID_PERMISSION",
+    "message": "사용자가 권한이 없습니다."
+  }
+}
+```
+
  2. 입력된 고유 아이디로 수정하고자 하는 포스트를 찾을 수 없을 때 
 
+```json
+{
+  "resultCode": "ERROR",
+  "result": {
+    "errorCode": "POST_NOT_FOUND",
+    "message": "해당 포스트가 없습니다."
+  }
+}
+```
 중점 사항:
 
 - 포스트 수정이 되면 작성자와 고유 아이디는 그대로 남고 제목과 내용 및 수정 날짜/시간만 업데이트 되게 구현  
-```
+
 
 ### 6) **DELETE api/v1/posts**
 
@@ -233,10 +364,197 @@ https://medium.com/@mypascal2000/custom-handling-of-invalid-jwt-in-spring-boot-f
 
 ### 7) **GET api/v1/posts**
 
-```
+
 기능:
 
-- DB에 등록된 모든 포스트를 조회함 
+- DB에 등록된 모든 포스트를 조회함
+
+요구사항:
+
+> 모든 포스트 조회에 성공하는 경우:
+
+```json
+{
+  "resultCode": "SUCCESS",
+  "result": {
+    "content": [
+      {
+        "id": 68,
+        "title": "test title",
+        "body": "test body",
+        "userName": "string2",
+        "createdAt": "2023-01-02T09:27:51.670942",
+        "lastModifiedAt": "2023-01-02T09:27:51.670942"
+      },
+      {
+        "id": 67,
+        "title": "string2",
+        "body": "string",
+        "userName": "string2",
+        "createdAt": "2023-01-02T09:06:11.887259",
+        "lastModifiedAt": "2023-01-02T09:06:11.887259"
+      },
+      {
+        "id": 51,
+        "title": "hello-title",
+        "body": "hello-body",
+        "userName": "kyeongrok22",
+        "createdAt": "2022-12-27T08:11:08.499926",
+        "lastModifiedAt": "2022-12-27T08:11:08.499926"
+      },
+      {
+        "id": 50,
+        "title": "hello-title",
+        "body": "hello-body",
+        "userName": "kyeongrok22",
+        "createdAt": "2022-12-27T08:09:12.490571",
+        "lastModifiedAt": "2022-12-27T08:09:12.490571"
+      },
+      {
+        "id": 49,
+        "title": "hello-title",
+        "body": "hello-body",
+        "userName": "kyeongrok22",
+        "createdAt": "2022-12-27T07:58:21.248993",
+        "lastModifiedAt": "2022-12-27T07:58:21.248993"
+      },
+      {
+        "id": 48,
+        "title": "hello-title",
+        "body": "hello-body",
+        "userName": "kyeongrok22",
+        "createdAt": "2022-12-27T07:46:17.102629",
+        "lastModifiedAt": "2022-12-27T07:46:17.102629"
+      },
+      {
+        "id": 46,
+        "title": "hello-title",
+        "body": "hello-body",
+        "userName": "kyeongrok22",
+        "createdAt": "2022-12-27T07:22:20.020946",
+        "lastModifiedAt": "2022-12-27T07:22:20.020946"
+      },
+      {
+        "id": 45,
+        "title": "hello-title",
+        "body": "hello-body",
+        "userName": "kyeongrok22",
+        "createdAt": "2022-12-27T07:19:58.592971",
+        "lastModifiedAt": "2022-12-27T07:19:58.592971"
+      },
+      {
+        "id": 44,
+        "title": "hello-title",
+        "body": "hello-body",
+        "userName": "kyeongrok22",
+        "createdAt": "2022-12-27T07:18:13.441116",
+        "lastModifiedAt": "2022-12-27T07:18:13.441116"
+      },
+      {
+        "id": 43,
+        "title": "hello-title",
+        "body": "hello-body",
+        "userName": "kyeongrok22",
+        "createdAt": "2022-12-27T07:17:20.79841",
+        "lastModifiedAt": "2022-12-27T07:17:20.79841"
+      },
+      {
+        "id": 42,
+        "title": "hello-title",
+        "body": "hello-body",
+        "userName": "kyeongrok22",
+        "createdAt": "2022-12-27T07:16:04.743408",
+        "lastModifiedAt": "2022-12-27T07:16:04.743408"
+      },
+      {
+        "id": 41,
+        "title": "hello-title",
+        "body": "hello-body",
+        "userName": "kyeongrok22",
+        "createdAt": "2022-12-27T07:13:54.795969",
+        "lastModifiedAt": "2022-12-27T07:13:54.795969"
+      },
+      {
+        "id": 40,
+        "title": "hello-title",
+        "body": "hello-body",
+        "userName": "kyeongrok22",
+        "createdAt": "2022-12-27T07:12:09.968914",
+        "lastModifiedAt": "2022-12-27T07:12:09.968914"
+      },
+      {
+        "id": 39,
+        "title": "hello-title",
+        "body": "hello-body",
+        "userName": "kyeongrok22",
+        "createdAt": "2022-12-27T07:10:24.596607",
+        "lastModifiedAt": "2022-12-27T07:10:24.596607"
+      },
+      {
+        "id": 38,
+        "title": "hello-title",
+        "body": "hello-body",
+        "userName": "kyeongrok22",
+        "createdAt": "2022-12-27T07:09:06.23095",
+        "lastModifiedAt": "2022-12-27T07:09:06.23095"
+      },
+      {
+        "id": 37,
+        "title": "hello-title",
+        "body": "hello-body",
+        "userName": "kyeongrok22",
+        "createdAt": "2022-12-27T07:08:06.889224",
+        "lastModifiedAt": "2022-12-27T07:08:06.889224"
+      },
+      {
+        "id": 36,
+        "title": "hello-title",
+        "body": "hello-body",
+        "userName": "kyeongrok22",
+        "createdAt": "2022-12-27T07:06:41.100342",
+        "lastModifiedAt": "2022-12-27T07:06:41.100342"
+      },
+      {
+        "id": 35,
+        "title": "hello-title",
+        "body": "hello-body",
+        "userName": "kyeongrok22",
+        "createdAt": "2022-12-27T07:03:24.656661",
+        "lastModifiedAt": "2022-12-27T07:03:24.656661"
+      },
+      {
+        "id": 34,
+        "title": "hello-title",
+        "body": "hello-body",
+        "userName": "kyeongrok22",
+        "createdAt": "2022-12-27T07:01:31.318696",
+        "lastModifiedAt": "2022-12-27T07:01:31.318696"
+      },
+      {
+        "id": 33,
+        "title": "hello-title",
+        "body": "hello-body",
+        "userName": "kyeongrok22",
+        "createdAt": "2022-12-27T06:50:32.575795",
+        "lastModifiedAt": "2022-12-27T06:50:32.575795"
+      }
+    ],
+    "pageable": "INSTANCE",
+    "last": true,
+    "totalPages": 1,
+    "totalElements": 20,
+    "size": 20,
+    "number": 0,
+    "sort": {
+      "empty": true,
+      "sorted": false,
+      "unsorted": true
+    },
+    "first": true,
+    "numberOfElements": 20,
+    "empty": false
+  }
+}
 ```
 
 # 📝 회고
