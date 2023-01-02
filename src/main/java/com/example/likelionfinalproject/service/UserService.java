@@ -1,9 +1,8 @@
 package com.example.likelionfinalproject.service;
 
-import com.example.likelionfinalproject.domain.dto.UserJoinRequest;
 import com.example.likelionfinalproject.domain.dto.UserJoinResponse;
-import com.example.likelionfinalproject.domain.dto.UserLoginRequest;
 import com.example.likelionfinalproject.domain.dto.UserLoginResponse;
+import com.example.likelionfinalproject.domain.dto.UserRequest;
 import com.example.likelionfinalproject.domain.entity.User;
 import com.example.likelionfinalproject.exception.ErrorCode;
 import com.example.likelionfinalproject.exception.UserException;
@@ -27,7 +26,7 @@ public class UserService {
     @Value("${jwt.secret.key}")
     private String secretKey;
 
-    public UserJoinResponse register(UserJoinRequest userJoinRequest) {
+    public UserJoinResponse register(UserRequest userJoinRequest) {
 
         userRepository.findByUserName(userJoinRequest.getUserName()).ifPresent((user) -> {
             throw new UserException(ErrorCode.DUPLICATE_USERNAME,
@@ -44,7 +43,7 @@ public class UserService {
         return UserJoinResponse.of(savedUser);
     }
 
-    public UserLoginResponse verify(UserLoginRequest userLoginRequest) {
+    public UserLoginResponse verify(UserRequest userLoginRequest) {
         User user = userRepository.findByUserName(userLoginRequest.getUserName())
                 .orElseThrow(() -> new UserException(ErrorCode.USERNAME_NOT_FOUND,
                         userLoginRequest.getUserName() + "는 등록되지 않은 아이디입니다."));
