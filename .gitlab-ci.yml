@@ -14,5 +14,6 @@ package:
       - docker push registry.gitlab.com/$GITLAB_USER/$PROJECT_NAME
   only:
       - sprint1
+      - main
   after_script:
       - docker logout
