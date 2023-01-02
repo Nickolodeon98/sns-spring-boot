@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Builder
 public class SelectedPostResponse {
 
-    private Long id;
+    private Integer id;
 
     private String title;
     private String body;

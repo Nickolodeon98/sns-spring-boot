@@ -1,20 +1,24 @@
 package com.example.likelionfinalproject.controller;
 
+import com.example.likelionfinalproject.service.TestService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 @Controller
 @RequestMapping("/api/v1")
+@RequiredArgsConstructor
+@ApiIgnore
 public class TestController {
+
+    private final TestService testService;
 
     @GetMapping("/hello")
     @ResponseBody
     public String hello() {
-        return "happy_new_year";
+        return "전승환";
     }
 
 
@@ -29,4 +33,13 @@ public class TestController {
     public String test(Authentication authentication) {
         return authentication.getName();
     }
+
+    @GetMapping("/hello/{num}")
+    @ResponseBody
+    public String sumOfDigit(@PathVariable int num) {
+        int result = testService.addDigits(num);
+
+        return Integer.toString(result);
+    }
+
 }

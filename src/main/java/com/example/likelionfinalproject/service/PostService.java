@@ -11,9 +11,14 @@ import com.example.likelionfinalproject.repository.PostRepository;
 import com.example.likelionfinalproject.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import java.sql.SQLDataException;
+import java.sql.SQLException;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -23,23 +28,74 @@ public class PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
 
-    public PostResponse createNewPost(PostRequest postRequest, String authorId) {
+    public PostResponse createPost(PostRequest postRequest, String authorId) {
+        Post savedPost;
         Post post = postRequest.toEntity();
         User user = userRepository.findByUserName(authorId)
-                .orElseThrow(()->new UserException(ErrorCode.USERNAME_NOT_FOUND, authorId + "은 없는 아이디입니다."));
-        // TODO: 이후에 에러를 어떻게 처리할 지 생각
-        // 필터에서 다 걸러져서 아이디가 오는 것이라 아이디가 없을 수는 없음!!!
+                .orElseThrow(() -> new UserException(ErrorCode.USERNAME_NOT_FOUND, authorId + "은 없는 아이디입니다."));
 
         post.setAuthor(user);
 
-        Post savedPost = postRepository.save(post);
+        savedPost = postRepository.save(post);
+
 
         return PostResponse.of(savedPost);
     }
 
-    public SelectedPostResponse acquireSinglePost(Long postsId) {
-        Optional<Post> acquiredPost = postRepository.findById(postsId);
-        SelectedPostResponse response = SelectedPostResponse.of(acquiredPost.get());
-        return response;
+    public SelectedPostResponse acquirePost(Integer postId) {
+        Post acquiredPost;
+
+        acquiredPost = postRepository.findById(postId)
+                .orElseThrow(() -> new UserException(ErrorCode.POST_NOT_FOUND));
+
+
+        return SelectedPostResponse.of(acquiredPost);
+    }
+
+    public Page<SelectedPostResponse> listAllPosts(Pageable pageable) {
+
+        Page<Post> posts = postRepository.findAll(pageable);
+
+        return new PageImpl<>(posts.stream().map(SelectedPostResponse::of).collect(Collectors.toList()));
+    }
+
+    public PostResponse editPost(PostRequest editPostRequest, Integer postId, String currentUser) {
+        Post postToUpdate;
+        Post editedPost;
+
+        postToUpdate = postRepository.findById(postId)
+                .orElseThrow(() -> new UserException(ErrorCode.POST_NOT_FOUND));
+
+        /* 포스트의 작성자로 등록되어 있는 사용자를 못 찾을 때 */
+        userRepository.findByUserName(postToUpdate.getAuthor().getUserName())
+                .orElseThrow(() -> new UserException(ErrorCode.USERNAME_NOT_FOUND));
+
+        /* 작성자와 사용자가 일치하지 않을 때 */
+        if (!currentUser.equals(postToUpdate.getAuthor().getUserName()))
+            throw new UserException(ErrorCode.INVALID_PERMISSION);
+
+        editedPost = postRepository.save(editPostRequest.toEntity(postId, postToUpdate.getAuthor()));
+
+        return PostResponse.of(editedPost);
+    }
+
+    public PostResponse removePost(Integer postId, String userName) {
+        Post post;
+
+        post = postRepository.findById(postId)
+                .orElseThrow(() -> new UserException(ErrorCode.POST_NOT_FOUND));
+
+        User user = userRepository.findByUserName(post.getAuthor().getUserName())
+                .orElseThrow(() -> new UserException(ErrorCode.USERNAME_NOT_FOUND));
+
+        if (!userName.equals(user.getUserName()))
+            throw new UserException(ErrorCode.INVALID_PERMISSION);
+
+        postRepository.deleteById(postId);
+
+        return PostResponse.builder()
+                .message("포스트 삭제 완료")
+                .postId(postId)
+                .build();
     }
 }

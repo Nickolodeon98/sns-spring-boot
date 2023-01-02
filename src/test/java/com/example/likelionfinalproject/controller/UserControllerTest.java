@@ -1,27 +1,32 @@
 package com.example.likelionfinalproject.controller;
 
-import com.example.likelionfinalproject.domain.dto.UserJoinRequest;
 import com.example.likelionfinalproject.domain.dto.UserJoinResponse;
-import com.example.likelionfinalproject.domain.dto.UserLoginRequest;
 import com.example.likelionfinalproject.domain.dto.UserLoginResponse;
+import com.example.likelionfinalproject.domain.dto.UserRequest;
+import com.example.likelionfinalproject.enums.UserTestEssentials;
 import com.example.likelionfinalproject.exception.ErrorCode;
 import com.example.likelionfinalproject.exception.UserException;
 import com.example.likelionfinalproject.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultMatcher;
+
+import java.util.stream.Stream;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -40,117 +45,113 @@ class UserControllerTest {
     ObjectMapper objectMapper;
 
     UserJoinResponse userJoinResponse;
-    UserJoinRequest userJoinRequest;
-
-    UserLoginRequest userLoginRequest;
+    UserRequest userRequest;
     UserLoginResponse userLoginResponse;
-
-    final String joinUrl = "/api/v1/users/join";
-    final String loginUrl = "/api/v1/users/login";
-
+    final Integer userId = 1;
+    final String joinUrl = UserTestEssentials.USER_URL.getValue() + "join";
+    final String loginUrl = UserTestEssentials.USER_URL.getValue() + "login";
     @BeforeEach
     void setUp() {
-        userJoinRequest = UserJoinRequest.builder()
-                .userName("sjeon0730")
-                .password("1q2w3e4r")
+        userRequest = UserRequest.builder()
+                .userName(UserTestEssentials.USER_NAME.getValue())
+                .password(UserTestEssentials.PASSWORD.getValue())
                 .build();
 
         userJoinResponse = UserJoinResponse.builder()
-                .userName("sjeon0730")
-                .message("회원가입에 성공했습니다.")
+                .userName(UserTestEssentials.USER_NAME.getValue())
+                .userId(userId)
                 .build();
 
-        userLoginRequest = UserLoginRequest.builder().userName("sjeon0730").password("1q2w3e4r").build();
-        userLoginResponse = UserLoginResponse.builder().jwt("123456789").build();
+        userLoginResponse = UserLoginResponse.builder().jwt(UserTestEssentials.TOKEN.getValue()).build();
     }
 
-    @Test
-    @DisplayName("회원가입에 성공한다.")
-    @WithMockUser
-    void success_join() throws Exception {
-        given(userService.registerUser(any())).willReturn(userJoinResponse);
-
-        mockMvc.perform(post(joinUrl).contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsBytes(any()))
-                .with(csrf()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
-                .andExpect(jsonPath("$.result.userId").value("sjeon0730"))
-                .andExpect(jsonPath("$.result.message").value("회원가입에 성공했습니다."))
-                .andDo(print());
-
-        verify(userService).registerUser(any());
+    private static Stream<Arguments> provideErrorCases() {
+        return Stream.of(
+                Arguments.of(Named.of("아이디가 없음", status().isNotFound()), ErrorCode.USERNAME_NOT_FOUND),
+                Arguments.of(Named.of("비밀번호가 잘못됨", status().isUnauthorized()), ErrorCode.INVALID_PASSWORD));
     }
 
-    @Test
-    @DisplayName("회원가입에 실패한다.")
-    @WithMockUser
-    void fail_join() throws Exception {
-        UserJoinRequest duplicateUser = UserJoinRequest.builder().userName("sjeon0730").password("1q2w3e4r").build();
+    @Nested
+    @DisplayName("회원가입")
+    class Joining {
+        @Test
+        @DisplayName("성공")
+        @WithMockUser
+        void success_join() throws Exception {
+            given(userService.register(any())).willReturn(userJoinResponse);
 
-        given(userService.registerUser(any()))
-                .willThrow(new UserException(ErrorCode.DUPLICATE_USERNAME,
-                        duplicateUser.getUserName() + "는 이미 존재하는 아이디입니다."));
+            mockMvc.perform(post(joinUrl).contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsBytes(userRequest))
+                            .with(csrf()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
+                    .andExpect(jsonPath("$.result.userId").value(userId))
+                    .andExpect(jsonPath("$.result.userName").value(UserTestEssentials.USER_NAME.getValue()))
+                    .andDo(print());
 
-        mockMvc.perform(post(joinUrl).contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsBytes(any()))
-                .with(csrf()))
-                .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.resultCode").value("ERROR"))
-                .andExpect(jsonPath("$.result.errorCode").value("DUPLICATE_USERNAME"))
-                .andExpect(jsonPath("$.result.message").value(duplicateUser.getUserName() + "는 이미 존재하는 아이디입니다."))
-                .andDo(print());
+            verify(userService).register(any());
+        }
 
-        verify(userService).registerUser(any());
+        @Test
+        @DisplayName("실패")
+        @WithMockUser
+        void fail_join() throws Exception {
+            // 아이디가 같고 비밀번호가 다르면 중복된 사용자이다.
+            userRequest.setPassword(Double.toString(Math.random()));
+            UserRequest duplicateUser = userRequest;
+
+            given(userService.register(any()))
+                    .willThrow(new UserException(ErrorCode.DUPLICATE_USERNAME,
+                            duplicateUser.getUserName() + "는 이미 존재하는 아이디입니다."));
+
+            mockMvc.perform(post(joinUrl).contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsBytes(duplicateUser))
+                            .with(csrf()))
+                    .andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.resultCode").value("ERROR"))
+                    .andExpect(jsonPath("$.result.errorCode").value(ErrorCode.DUPLICATE_USERNAME.name()))
+                    .andExpect(jsonPath("$.result.message").value(duplicateUser.getUserName() + "는 이미 존재하는 아이디입니다."))
+                    .andDo(print());
+
+            verify(userService).register(any());
+        }
     }
 
-    @Test
-    @DisplayName("로그인에 성공한다.")
-    @WithMockUser
-    void success_login() throws Exception {
-        given(userService.verifyUser(any())).willReturn(userLoginResponse);
+    @Nested
+    @DisplayName("로그인")
+    class LoggingIn {
+        @Test
+        @DisplayName("성공")
+        @WithMockUser
+        void success_login() throws Exception {
+            given(userService.verify(any())).willReturn(userLoginResponse);
 
-        mockMvc.perform(post(loginUrl).contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsBytes(any())).with(csrf()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
-                .andExpect(jsonPath("$.result.token").value("123456789"))
-                .andDo(print());
+            mockMvc.perform(post(loginUrl).contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsBytes(any())).with(csrf()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
+                    .andExpect(jsonPath("$.result.jwt").value(UserTestEssentials.TOKEN.getValue()))
+                    .andDo(print());
 
-        verify(userService).verifyUser(any());
-    }
+            verify(userService).verify(any());
+        }
 
-    @Test
-    @DisplayName("로그인에 실패한다 - 회원가입 된 아이디 없음")
-    @WithMockUser
-    void fail_login_no_id() throws Exception {
-        given(userService.verifyUser(any())).willThrow(new UserException(ErrorCode.USERNAME_NOT_FOUND, "등록되지 않은 아이디입니다."));
+        @ParameterizedTest
+        @DisplayName("실패")
+        @WithMockUser
+        @MethodSource("com.example.likelionfinalproject.controller.UserControllerTest#provideErrorCases")
+        void fail_login(ResultMatcher error, ErrorCode code) throws Exception {
+            given(userService.verify(any())).willThrow(new UserException(code, code.getMessage()));
 
-        mockMvc.perform(post(loginUrl).contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsBytes(any())).with(csrf()))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.resultCode").value("ERROR"))
-                .andExpect(jsonPath("$.result.errorCode").value("USERNAME_NOT_FOUND"))
-                .andExpect(jsonPath("$.result.message").value("등록되지 않은 아이디입니다."))
-                .andDo(print());
+            mockMvc.perform(post(loginUrl).contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsBytes(userRequest)).with(csrf()))
+                    .andExpect(error)
+                    .andExpect(jsonPath("$.resultCode").value("ERROR"))
+                    .andExpect(jsonPath("$.result.errorCode").value(code.name()))
+                    .andExpect(jsonPath("$.result.message").value(code.getMessage()))
+                    .andDo(print());
 
-        verify(userService).verifyUser(any());
-    }
-
-    @Test
-    @DisplayName("로그인에 실패한다 - 비밀번호가 잘못됨")
-    @WithMockUser
-    void fail_login_wrong_password() throws Exception {
-        given(userService.verifyUser(any())).willThrow(new UserException(ErrorCode.INVALID_PASSWORD, "비밀번호가 잘못되었습니다."));
-
-        mockMvc.perform(post(loginUrl).contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsBytes(any())).with(csrf()))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.resultCode").value("ERROR"))
-                .andExpect(jsonPath("$.result.errorCode").value("INVALID_PASSWORD"))
-                .andExpect(jsonPath("$.result.message").value("비밀번호가 잘못되었습니다."))
-                .andDo(print());
-
-        verify(userService).verifyUser(any());
+            verify(userService).verify(any());
+        }
     }
 }
