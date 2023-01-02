@@ -16,6 +16,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 @Controller
 @RequestMapping("/api/v1/posts")
@@ -29,7 +30,7 @@ public class PostController {
     @Operation(summary = "포스트 작성", description = "로그인 한 사용자는 포스트 제목과 내용을 작성하여 등록할 수 있다.")
     @PostMapping
     @ResponseBody
-    public Response<PostResponse> uploadPost(Authentication authentication, @RequestBody(required = false) PostRequest postRequest) {
+    public Response<PostResponse> uploadPost(@ApiIgnore Authentication authentication, @RequestBody(required = false) PostRequest postRequest) {
         PostResponse postResponse = postService.createPost(postRequest, authentication.getName());
 
         return Response.success(postResponse);
@@ -57,7 +58,7 @@ public class PostController {
     @ResponseBody
     public Response<PostResponse> update(@RequestBody PostRequest editPostRequest,
                                               @PathVariable Integer postId,
-                                              Authentication authentication) {
+                                              @ApiIgnore Authentication authentication) {
 
         PostResponse response = postService.editPost(editPostRequest, postId, authentication.getName());
 
@@ -66,7 +67,7 @@ public class PostController {
     @Operation(summary = "포스트 삭제", description = "로그인되어 있을 시 자신이 작성한 포스트의 고유 아이디를 입력하면 삭제할 수 있다.")
     @DeleteMapping("/{postId}")
     @ResponseBody
-    public Response<PostResponse> delete(@PathVariable Integer postId, Authentication authentication) {
+    public Response<PostResponse> delete(@PathVariable Integer postId, @ApiIgnore Authentication authentication) {
         PostResponse postResponse = postService.removePost(postId, authentication.getName());
 
         return Response.success(postResponse);
