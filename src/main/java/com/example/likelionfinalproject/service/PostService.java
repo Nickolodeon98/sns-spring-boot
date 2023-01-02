@@ -29,30 +29,25 @@ public class PostService {
     private final UserRepository userRepository;
 
     public PostResponse createPost(PostRequest postRequest, String authorId) {
-        Post savedPost = null;
-        try {
-            Post post = postRequest.toEntity();
-            User user = userRepository.findByUserName(authorId)
-                    .orElseThrow(()->new UserException(ErrorCode.USERNAME_NOT_FOUND, authorId + "은 없는 아이디입니다."));
+        Post savedPost;
+        Post post = postRequest.toEntity();
+        User user = userRepository.findByUserName(authorId)
+                .orElseThrow(() -> new UserException(ErrorCode.USERNAME_NOT_FOUND, authorId + "은 없는 아이디입니다."));
 
-            post.setAuthor(user);
+        post.setAuthor(user);
 
-            savedPost = postRepository.save(post);
-        } catch (Exception e) {
-            throw new UserException(ErrorCode.DATABASE_ERROR);
-        }
+        savedPost = postRepository.save(post);
+
 
         return PostResponse.of(savedPost);
     }
 
     public SelectedPostResponse acquirePost(Integer postId) {
         Post acquiredPost;
-        try {
-            acquiredPost = postRepository.findById(postId)
-                    .orElseThrow(() -> new UserException(ErrorCode.POST_NOT_FOUND));
-        } catch (Exception e) {
-            throw new UserException(ErrorCode.DATABASE_ERROR);
-        }
+
+        acquiredPost = postRepository.findById(postId)
+                .orElseThrow(() -> new UserException(ErrorCode.POST_NOT_FOUND));
+
 
         return SelectedPostResponse.of(acquiredPost);
     }
@@ -67,22 +62,19 @@ public class PostService {
     public PostResponse editPost(PostRequest editPostRequest, Integer postId, String currentUser) {
         Post postToUpdate;
         Post editedPost;
-        try {
-            postToUpdate = postRepository.findById(postId)
-                    .orElseThrow(() -> new UserException(ErrorCode.POST_NOT_FOUND));
 
-            /* 포스트의 작성자로 등록되어 있는 사용자를 못 찾을 때 */
-            userRepository.findByUserName(postToUpdate.getAuthor().getUserName())
-                    .orElseThrow(() -> new UserException(ErrorCode.USERNAME_NOT_FOUND));
+        postToUpdate = postRepository.findById(postId)
+                .orElseThrow(() -> new UserException(ErrorCode.POST_NOT_FOUND));
 
-            /* 작성자와 사용자가 일치하지 않을 때 */
-            if (!currentUser.equals(postToUpdate.getAuthor().getUserName()))
-                throw new UserException(ErrorCode.INVALID_PERMISSION);
+        /* 포스트의 작성자로 등록되어 있는 사용자를 못 찾을 때 */
+        userRepository.findByUserName(postToUpdate.getAuthor().getUserName())
+                .orElseThrow(() -> new UserException(ErrorCode.USERNAME_NOT_FOUND));
 
-            editedPost = postRepository.save(editPostRequest.toEntity(postId, postToUpdate.getAuthor()));
-        } catch (Exception e) {
-            throw new UserException(ErrorCode.DATABASE_ERROR);
-        }
+        /* 작성자와 사용자가 일치하지 않을 때 */
+        if (!currentUser.equals(postToUpdate.getAuthor().getUserName()))
+            throw new UserException(ErrorCode.INVALID_PERMISSION);
+
+        editedPost = postRepository.save(editPostRequest.toEntity(postId, postToUpdate.getAuthor()));
 
         return PostResponse.of(editedPost);
     }
@@ -90,20 +82,16 @@ public class PostService {
     public PostResponse removePost(Integer postId, String userName) {
         Post post;
 
-        try {
-            post = postRepository.findById(postId)
-                    .orElseThrow(()->new UserException(ErrorCode.POST_NOT_FOUND));
+        post = postRepository.findById(postId)
+                .orElseThrow(() -> new UserException(ErrorCode.POST_NOT_FOUND));
 
-            User user = userRepository.findByUserName(post.getAuthor().getUserName())
-                    .orElseThrow(()->new UserException(ErrorCode.USERNAME_NOT_FOUND));
+        User user = userRepository.findByUserName(post.getAuthor().getUserName())
+                .orElseThrow(() -> new UserException(ErrorCode.USERNAME_NOT_FOUND));
 
-            if (!userName.equals(user.getUserName()))
-                throw new UserException(ErrorCode.INVALID_PERMISSION);
+        if (!userName.equals(user.getUserName()))
+            throw new UserException(ErrorCode.INVALID_PERMISSION);
 
-            postRepository.deleteById(postId);
-        } catch (Exception e) {
-            throw new UserException(ErrorCode.DATABASE_ERROR);
-        }
+        postRepository.deleteById(postId);
 
         return PostResponse.builder()
                 .message("포스트 삭제 완료")
