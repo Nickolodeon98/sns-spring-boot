@@ -21,7 +21,7 @@ public class SocialAppException {
     @ResponseBody
     @ExceptionHandler(ExpiredJwtException.class)
     public ResponseEntity<?> expiredTokenExceptionHandler(ExpiredJwtException exception) {
-        ErrorResponse errorResponse = new ErrorResponse(ErrorCode.INVALID_PERMISSION, ErrorCode.INVALID_PERMISSION.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse(ErrorCode.INVALID_PERMISSION);
         return ResponseEntity.status(errorResponse.getErrorCode().getHttpStatus())
                 .body(Response.fail(errorResponse));
     }

@@ -39,7 +39,7 @@ public class PostService {
 
             savedPost = postRepository.save(post);
         } catch (Exception e) {
-            throw new UserException(ErrorCode.DATABASE_ERROR, ErrorCode.DATABASE_ERROR.getMessage());
+            throw new UserException(ErrorCode.DATABASE_ERROR);
         }
 
         return PostResponse.of(savedPost);
@@ -49,9 +49,9 @@ public class PostService {
         Post acquiredPost;
         try {
             acquiredPost = postRepository.findById(postId)
-                    .orElseThrow(() -> new UserException(ErrorCode.POST_NOT_FOUND, ErrorCode.POST_NOT_FOUND.getMessage()));
+                    .orElseThrow(() -> new UserException(ErrorCode.POST_NOT_FOUND));
         } catch (Exception e) {
-            throw new UserException(ErrorCode.DATABASE_ERROR, ErrorCode.DATABASE_ERROR.getMessage());
+            throw new UserException(ErrorCode.DATABASE_ERROR);
         }
 
         return SelectedPostResponse.of(acquiredPost);
@@ -69,19 +69,19 @@ public class PostService {
         Post editedPost;
         try {
             postToUpdate = postRepository.findById(postId)
-                    .orElseThrow(() -> new UserException(ErrorCode.POST_NOT_FOUND, "해당 포스트가 없습니다."));
+                    .orElseThrow(() -> new UserException(ErrorCode.POST_NOT_FOUND));
 
             /* 포스트의 작성자로 등록되어 있는 사용자를 못 찾을 때 */
             userRepository.findByUserName(postToUpdate.getAuthor().getUserName())
-                    .orElseThrow(() -> new UserException(ErrorCode.USERNAME_NOT_FOUND, "Not Found"));
+                    .orElseThrow(() -> new UserException(ErrorCode.USERNAME_NOT_FOUND));
 
             /* 작성자와 사용자가 일치하지 않을 때 */
             if (!currentUser.equals(postToUpdate.getAuthor().getUserName()))
-                throw new UserException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다.");
+                throw new UserException(ErrorCode.INVALID_PERMISSION);
 
             editedPost = postRepository.save(editPostRequest.toEntity(postId, postToUpdate.getAuthor()));
         } catch (Exception e) {
-            throw new UserException(ErrorCode.DATABASE_ERROR, ErrorCode.DATABASE_ERROR.getMessage());
+            throw new UserException(ErrorCode.DATABASE_ERROR);
         }
 
         return PostResponse.of(editedPost);
@@ -92,17 +92,17 @@ public class PostService {
 
         try {
             post = postRepository.findById(postId)
-                    .orElseThrow(()->new UserException(ErrorCode.POST_NOT_FOUND, "해당 포스트가 없습니다."));
+                    .orElseThrow(()->new UserException(ErrorCode.POST_NOT_FOUND));
 
             User user = userRepository.findByUserName(post.getAuthor().getUserName())
-                    .orElseThrow(()->new UserException(ErrorCode.USERNAME_NOT_FOUND, "Not Found."));
+                    .orElseThrow(()->new UserException(ErrorCode.USERNAME_NOT_FOUND));
 
             if (!userName.equals(user.getUserName()))
-                throw new UserException(ErrorCode.INVALID_PERMISSION, "사용자가 권한이 없습니다.");
+                throw new UserException(ErrorCode.INVALID_PERMISSION);
 
             postRepository.deleteById(postId);
         } catch (Exception e) {
-            throw new UserException(ErrorCode.DATABASE_ERROR, ErrorCode.DATABASE_ERROR.getMessage());
+            throw new UserException(ErrorCode.DATABASE_ERROR);
         }
 
         return PostResponse.builder()
