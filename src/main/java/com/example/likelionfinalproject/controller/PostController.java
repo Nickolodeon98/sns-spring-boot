@@ -76,7 +76,7 @@ public class PostController {
     @ResponseBody
     @PostMapping("/{postId}/comments")
     public Response<CommentResponse> addComment(@PathVariable Integer postId, @ApiIgnore Authentication authentication,
-                                                @RequestBody CommentRequest commentRequest) {
+                                                @RequestBody(required = false) CommentRequest commentRequest) {
         CommentResponse commentResponse = commentService.uploadComment(commentRequest, authentication.getName(), postId);
 
         return Response.success(commentResponse);
