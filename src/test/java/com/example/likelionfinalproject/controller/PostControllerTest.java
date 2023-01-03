@@ -47,21 +47,24 @@ class PostControllerTest {
     @MockBean
     PostService postService;
 
+    @MockBean
+    CommentService commentService;
+
     @Autowired
     ObjectMapper objectMapper;
 
     PostRequest postRequest;
 
     SelectedPostResponse selectedPostResponse;
-    Integer postId;
     final String url = "/api/v1/posts/1";
-    @MockBean
-    CommentService commentService;
+    final String userName = "username";
+    final Integer postId = 1;
+    final LocalDateTime timeInfo = LocalDateTime.of(2022, 12, 26, 18, 03, 14);
+    CommentRequest commentRequest;
+    CommentResponse commentResponse;
 
     @BeforeEach
     void setUp() {
-        postId = 1;
-
         postRequest = PostRequest.builder()
                 .title(PostTestEssentials.POST_TITLE.getValue())
                 .body(PostTestEssentials.POST_BODY.getValue())
@@ -71,9 +74,16 @@ class PostControllerTest {
                 .id(postId)
                 .title(PostTestEssentials.POST_TITLE.getValue())
                 .body(PostTestEssentials.POST_BODY.getValue())
-                .userName("username")
-                .createdAt(LocalDateTime.of(2022, 12, 26, 18, 03, 14))
-                .lastModifiedAt(LocalDateTime.of(2022, 12, 26, 18, 03, 14))
+                .userName(userName)
+                .createdAt(timeInfo)
+                .lastModifiedAt(timeInfo)
+                .build();
+
+        commentRequest = CommentRequest.builder().comment("comment test").build();
+
+        commentResponse = CommentResponse.builder()
+                .id(1).comment("comment test").userName(userName).postId(postId)
+                .createdAt(timeInfo)
                 .build();
     }
 
@@ -266,20 +276,14 @@ class PostControllerTest {
     @Nested
     @DisplayName("댓글 작성")
     class CommentAddition {
+        /* 리팩토링 필요함 */
         @Test
         @DisplayName("성공")
         @WithMockUser
         void success_add_comment() throws Exception {
-            CommentRequest commentRequest = CommentRequest.builder().comment("comment test").build();
-            String userName = "author";
-            CommentResponse commentResponse = CommentResponse.builder()
-                    .id(1).comment("comment test").userName("author").postId(2)
-                    .createdAt(LocalDateTime.of(2022, 12, 26, 18, 03, 14))
-                    .build();
-            String commentUrl = "/api/v1/posts/2/comments";
-            given(commentService.uploadComment(any(), any(), eq(2))).willReturn(commentResponse);
+            given(commentService.uploadComment(any(), any(), eq(1))).willReturn(commentResponse);
 
-            mockMvc.perform(post(commentUrl)
+            mockMvc.perform(post(url + "/comments")
                     .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsBytes(commentRequest)).with(csrf()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
@@ -290,7 +294,25 @@ class PostControllerTest {
                     .andExpect(jsonPath("$.result.createdAt").exists())
                     .andDo(print());
 
-            verify(commentService).uploadComment(any(), any(), eq(2));
+            verify(commentService).uploadComment(any(), any(), eq(1));
+        }
+
+        @Test
+        @DisplayName("실패")
+        @WithMockUser
+        void fail_add_comment_no_post() throws Exception {
+            given(commentService.uploadComment(any(), any(), eq(1)))
+                    .willThrow(new UserException(ErrorCode.POST_NOT_FOUND, ErrorCode.POST_NOT_FOUND.getMessage()));
+
+            mockMvc.perform(post(url + "/comments").contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsBytes(commentRequest)).with(csrf()))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.resultCode").value("ERROR"))
+                    .andExpect(jsonPath("$.result.errorCode").value(ErrorCode.POST_NOT_FOUND.name()))
+                    .andExpect(jsonPath("$.result.message").value(ErrorCode.POST_NOT_FOUND.getMessage()))
+                    .andDo(print());
+
+            verify(commentService).uploadComment(any(), any(), eq(1));
         }
     }
 
