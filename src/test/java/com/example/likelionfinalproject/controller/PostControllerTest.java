@@ -1,12 +1,10 @@
 package com.example.likelionfinalproject.controller;
 
-import com.example.likelionfinalproject.domain.dto.CommentRequest;
-import com.example.likelionfinalproject.domain.dto.PostRequest;
-import com.example.likelionfinalproject.domain.dto.PostResponse;
-import com.example.likelionfinalproject.domain.dto.SelectedPostResponse;
+import com.example.likelionfinalproject.domain.dto.*;
 import com.example.likelionfinalproject.enums.PostTestEssentials;
 import com.example.likelionfinalproject.exception.ErrorCode;
 import com.example.likelionfinalproject.exception.UserException;
+import com.example.likelionfinalproject.service.CommentService;
 import com.example.likelionfinalproject.service.PostService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.*;
@@ -56,6 +54,9 @@ class PostControllerTest {
     SelectedPostResponse selectedPostResponse;
     Integer postId;
     final String url = "/api/v1/posts/1";
+    @MockBean
+    CommentService commentService;
+
     @BeforeEach
     void setUp() {
         postId = 1;
@@ -268,7 +269,7 @@ class PostControllerTest {
         @DisplayName("성공")
         @WithMockUser
         void success_add_comment() {
-            CommentRequest commentRequest = CommentRequest.builder().comment().build();
+            CommentRequest commentRequest = CommentRequest.builder().comment("comment test").build();
             String userName = "author";
             CommentResponse commentResponse = CommentResponse.builder()
                     .id(1).comment("comment test").userName("author").postId(2)
