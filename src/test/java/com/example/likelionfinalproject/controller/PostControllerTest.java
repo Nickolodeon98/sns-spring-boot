@@ -1,12 +1,12 @@
 package com.example.likelionfinalproject.controller;
 
-import com.example.likelionfinalproject.domain.dto.PostRequest;
-import com.example.likelionfinalproject.domain.dto.PostResponse;
-import com.example.likelionfinalproject.domain.dto.SelectedPostResponse;
+import com.example.likelionfinalproject.domain.dto.*;
 import com.example.likelionfinalproject.enums.PostTestEssentials;
 import com.example.likelionfinalproject.exception.ErrorCode;
 import com.example.likelionfinalproject.exception.UserException;
+import com.example.likelionfinalproject.service.CommentService;
 import com.example.likelionfinalproject.service.PostService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -47,18 +47,24 @@ class PostControllerTest {
     @MockBean
     PostService postService;
 
+    @MockBean
+    CommentService commentService;
+
     @Autowired
     ObjectMapper objectMapper;
 
     PostRequest postRequest;
 
     SelectedPostResponse selectedPostResponse;
-    Integer postId;
     final String url = "/api/v1/posts/1";
+    final String userName = "username";
+    final Integer postId = 1;
+    final LocalDateTime timeInfo = LocalDateTime.of(2022, 12, 26, 18, 03, 14);
+    CommentRequest commentRequest;
+    CommentResponse commentResponse;
+
     @BeforeEach
     void setUp() {
-        postId = 1;
-
         postRequest = PostRequest.builder()
                 .title(PostTestEssentials.POST_TITLE.getValue())
                 .body(PostTestEssentials.POST_BODY.getValue())
@@ -68,9 +74,16 @@ class PostControllerTest {
                 .id(postId)
                 .title(PostTestEssentials.POST_TITLE.getValue())
                 .body(PostTestEssentials.POST_BODY.getValue())
-                .userName("username")
-                .createdAt(LocalDateTime.of(2022, 12, 26, 18, 03, 14))
-                .lastModifiedAt(LocalDateTime.of(2022, 12, 26, 18, 03, 14))
+                .userName(userName)
+                .createdAt(timeInfo)
+                .lastModifiedAt(timeInfo)
+                .build();
+
+        commentRequest = CommentRequest.builder().comment("comment test").build();
+
+        commentResponse = CommentResponse.builder()
+                .id(1).comment("comment test").userName(userName).postId(postId)
+                .createdAt(timeInfo)
                 .build();
     }
 
@@ -257,6 +270,73 @@ class PostControllerTest {
             mockMvc.perform(delete(url).with(csrf()))
                     .andExpect(error)
                     .andDo(print());
+        }
+    }
+
+    @Nested
+    @DisplayName("댓글 작성")
+    class CommentAddition {
+        /* 리팩토링 필요함 */
+        @Test
+        @DisplayName("성공")
+        @WithMockUser
+        void success_add_comment() throws Exception {
+            given(commentService.uploadComment(any(), any(), eq(1))).willReturn(commentResponse);
+
+            mockMvc.perform(post(url + "/comments")
+                    .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsBytes(commentRequest)).with(csrf()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
+                    .andExpect(jsonPath("$.result.id").value(1))
+                    .andExpect(jsonPath("$.result.comment").value("comment test"))
+                    .andExpect(jsonPath("$.result.userName").exists())
+                    .andExpect(jsonPath("$.result.postId").exists())
+                    .andExpect(jsonPath("$.result.createdAt").exists())
+                    .andDo(print());
+
+            verify(commentService).uploadComment(any(), any(), eq(1));
+        }
+
+        @Test
+        @DisplayName("실패")
+        @WithMockUser
+        void fail_add_comment_no_post() throws Exception {
+            given(commentService.uploadComment(any(), any(), eq(1)))
+                    .willThrow(new UserException(ErrorCode.POST_NOT_FOUND, ErrorCode.POST_NOT_FOUND.getMessage()));
+
+            mockMvc.perform(post(url + "/comments").contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsBytes(commentRequest)).with(csrf()))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.resultCode").value("ERROR"))
+                    .andExpect(jsonPath("$.result.errorCode").value(ErrorCode.POST_NOT_FOUND.name()))
+                    .andExpect(jsonPath("$.result.message").value(ErrorCode.POST_NOT_FOUND.getMessage()))
+                    .andDo(print());
+
+            verify(commentService).uploadComment(any(), any(), eq(1));
+        }
+
+
+        @Test
+        @DisplayName("실패 - 로그인하지 않음")
+        @WithMockUser
+        void fail_add_comment_not_a_user() throws Exception {
+            /* 사실 서비스 단에서 에러가 던져지는 것은 아니기 때문에, 불완전하게 테스트한다고 할 수 있다.
+             * 만일 mock user 가 아니라 anonymous user 로 테스트 해보면 어떨까?
+             * anonymous user 로 테스트한 결과: 상태 코드는 401 unauthorized 가 나오지만, json 형태로 에러를 반환하지는 않는다.
+             * 컨트롤러의 반환 값으로 인식하지 않아서 그런 듯 하다. */
+            given(commentService.uploadComment(any(), any(), eq(1)))
+//                    .willReturn(commentResponse);
+                    .willThrow(new UserException(ErrorCode.INVALID_PERMISSION, ErrorCode.INVALID_PERMISSION.getMessage()));
+
+            mockMvc.perform(post(url + "/comments")
+                    .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsBytes(commentRequest)).with(csrf()))
+                    .andExpect(status().isUnauthorized())
+                    .andExpect(jsonPath("$.resultCode").value("ERROR"))
+                    .andExpect(jsonPath("$.result.errorCode").value(ErrorCode.INVALID_PERMISSION.name()))
+                    .andExpect(jsonPath("$.result.message").value(ErrorCode.INVALID_PERMISSION.getMessage()))
+                    .andDo(print());
+
+            verify(commentService).uploadComment(any(), any(), eq(1));
         }
     }
 

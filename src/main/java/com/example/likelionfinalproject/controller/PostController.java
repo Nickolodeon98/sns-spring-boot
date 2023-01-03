@@ -1,9 +1,8 @@
 package com.example.likelionfinalproject.controller;
 
 import com.example.likelionfinalproject.domain.Response;
-import com.example.likelionfinalproject.domain.dto.PostRequest;
-import com.example.likelionfinalproject.domain.dto.PostResponse;
-import com.example.likelionfinalproject.domain.dto.SelectedPostResponse;
+import com.example.likelionfinalproject.domain.dto.*;
+import com.example.likelionfinalproject.service.CommentService;
 import com.example.likelionfinalproject.service.PostService;
 import io.swagger.annotations.Api;
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,6 +25,7 @@ import springfox.documentation.annotations.ApiIgnore;
 public class PostController {
 
     private final PostService postService;
+    private final CommentService commentService;
 
     @Operation(summary = "포스트 작성", description = "로그인 한 사용자는 포스트 제목과 내용을 작성하여 등록할 수 있다.")
     @PostMapping
@@ -72,5 +72,14 @@ public class PostController {
 
         return Response.success(postResponse);
     }
+    
+    @Operation(summary = "댓글 작성", description = "로그인 되어 있을 시 특정 포스트의 고유 아이디를 입력하여 댓글을 작성할 수 있다.")
+    @ResponseBody
+    @PostMapping("/{postId}/comments")
+    public Response<CommentResponse> addComment(@PathVariable Integer postId, @ApiIgnore Authentication authentication,
+                                                @RequestBody(required = false) CommentRequest commentRequest) {
+        CommentResponse commentResponse = commentService.uploadComment(commentRequest, authentication.getName(), postId);
 
+        return Response.success(commentResponse);
+    }
 }
