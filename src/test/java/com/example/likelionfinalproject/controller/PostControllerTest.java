@@ -276,8 +276,8 @@ class PostControllerTest {
                     .id(1).comment("comment test").userName("author").postId(2)
                     .createdAt(LocalDateTime.of(2022, 12, 26, 18, 03, 14))
                     .build();
-            String commentUrl = "api/v1/posts/2/comments";
-            given(commentService.uploadComment(any(), any(), 2)).willReturn(commentResponse);
+            String commentUrl = "/api/v1/posts/2/comments";
+            given(commentService.uploadComment(any(), any(), eq(2))).willReturn(commentResponse);
 
             mockMvc.perform(post(commentUrl)
                     .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsBytes(commentRequest)).with(csrf()))
@@ -290,7 +290,7 @@ class PostControllerTest {
                     .andExpect(jsonPath("$.result.createdAt").exists())
                     .andDo(print());
 
-            verify(commentService).uploadComment(any(), any(), 2);
+            verify(commentService).uploadComment(any(), any(), eq(2));
         }
     }
 
