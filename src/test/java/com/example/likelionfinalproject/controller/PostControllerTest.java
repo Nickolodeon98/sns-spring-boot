@@ -1,5 +1,6 @@
 package com.example.likelionfinalproject.controller;
 
+import com.example.likelionfinalproject.domain.dto.CommentRequest;
 import com.example.likelionfinalproject.domain.dto.PostRequest;
 import com.example.likelionfinalproject.domain.dto.PostResponse;
 import com.example.likelionfinalproject.domain.dto.SelectedPostResponse;
@@ -257,6 +258,37 @@ class PostControllerTest {
             mockMvc.perform(delete(url).with(csrf()))
                     .andExpect(error)
                     .andDo(print());
+        }
+    }
+
+    @Nested
+    @DisplayName("댓글 작성")
+    class CommentAddition {
+        @Test
+        @DisplayName("성공")
+        @WithMockUser
+        void success_add_comment() {
+            CommentRequest commentRequest = CommentRequest.builder().comment().build();
+            String userName = "author";
+            CommentResponse commentResponse = CommentResponse.builder()
+                    .id(1).comment("comment test").userName("author").postId(2)
+                    .createdAt(LocalDateTime.of(2022, 12, 26, 18, 03, 14))
+                    .build();
+            String commentUrl = "api/v1/posts/2/comments";
+            given(commentService.uploadComment(commentRequest, userName)).willReturn(commentResponse);
+
+            mockMvc.perform(post(commentUrl)
+                    .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsBytes(commentRequest)).with(csrf()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
+                    .andExpect(jsonPath("$.result.id").value(1))
+                    .andExpect(jsonPath("$.result.comment").value("comment test"))
+                    .andExpect(jsonPath("$.result.userName").exists())
+                    .andExpect(jsonPath("$.result.postId").exists())
+                    .andExpect(jsonPath("$.result.createdAt").exists())
+                    .andDo(print());
+
+            verify(commentService).uploadComment(any(), any());
         }
     }
 
