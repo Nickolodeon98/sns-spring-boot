@@ -72,7 +72,8 @@ public class PostController {
 
         return Response.success(postResponse);
     }
-
+    
+    @Operation(summary = "댓글 작성", description = "로그인 되어 있을 시 특정 포스트의 고유 아이디를 입력하여 댓글을 작성할 수 있다.")
     @ResponseBody
     @PostMapping("/{postId}/comments")
     public Response<CommentResponse> addComment(@PathVariable Integer postId, @ApiIgnore Authentication authentication,
