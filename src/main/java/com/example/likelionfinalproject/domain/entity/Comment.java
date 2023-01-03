@@ -1,19 +1,26 @@
 package com.example.likelionfinalproject.domain.entity;
 
+import lombok.*;
+
 import javax.persistence.*;
 
 @Entity
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
 public class Comment extends BaseEntityForPost {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Integer id;
+    private Integer id;
 
-    String comment;
-
-    @ManyToOne
-    Post postId;
+    private String comment;
 
     @ManyToOne
-    User userId;
+    private Post postId;
+
+    @ManyToOne
+    private User userId;
 }
