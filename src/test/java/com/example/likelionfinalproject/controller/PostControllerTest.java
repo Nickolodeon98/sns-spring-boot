@@ -314,6 +314,30 @@ class PostControllerTest {
 
             verify(commentService).uploadComment(any(), any(), eq(1));
         }
+
+
+        @Test
+        @DisplayName("실패 - 로그인하지 않음")
+        @WithMockUser
+        void fail_add_comment_not_a_user() throws Exception {
+            /* 사실 서비스 단에서 에러가 던져지는 것은 아니기 때문에, 불완전하게 테스트한다고 할 수 있다.
+             * 만일 mock user 가 아니라 anonymous user 로 테스트 해보면 어떨까?
+             * anonymous user 로 테스트한 결과: 상태 코드는 401 unauthorized 가 나오지만, json 형태로 에러를 반환하지는 않는다.
+             * 컨트롤러의 반환 값으로 인식하지 않아서 그런 듯 하다. */
+            given(commentService.uploadComment(any(), any(), eq(1)))
+//                    .willReturn(commentResponse);
+                    .willThrow(new UserException(ErrorCode.INVALID_PERMISSION, ErrorCode.INVALID_PERMISSION.getMessage()));
+
+            mockMvc.perform(post(url + "/comments")
+                    .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsBytes(commentRequest)).with(csrf()))
+                    .andExpect(status().isUnauthorized())
+                    .andExpect(jsonPath("$.resultCode").value("ERROR"))
+                    .andExpect(jsonPath("$.result.errorCode").value(ErrorCode.INVALID_PERMISSION.name()))
+                    .andExpect(jsonPath("$.result.message").value(ErrorCode.INVALID_PERMISSION.getMessage()))
+                    .andDo(print());
+
+            verify(commentService).uploadComment(any(), any(), eq(1));
+        }
     }
 
 }
