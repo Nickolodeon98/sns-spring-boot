@@ -22,5 +22,6 @@ public class Comment extends BaseEntityForPost {
     private Post post;
 
     @ManyToOne
+    @JoinColumn(referencedColumnName = "userName")
     private User author;
 }
