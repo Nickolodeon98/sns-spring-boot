@@ -29,7 +29,7 @@ public class Post extends BaseEntityForPost {
     // 사용자 아이디 흔히 말하는 아이디 패스워드 할 때 아이디를 Post 테이블에서 저장하고 있도록 만드려면 어떻게 해요?
     private User author;
 
-    @OneToMany(mappedBy = "postId")
+    @OneToMany(mappedBy = "post")
     private List<Comment> comments;
 
     public PostRequest toRequest() {

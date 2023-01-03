@@ -17,8 +17,8 @@ public class CommentRequest {
     public Comment toEntity(Post post, User user) {
         return Comment.builder()
                 .comment(comment)
-                .postId(post)
-                .userId(user)
+                .post(post)
+                .author(user)
                 .build();
     }
 }

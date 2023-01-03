@@ -19,8 +19,8 @@ public class Comment extends BaseEntityForPost {
     private String comment;
 
     @ManyToOne
-    private Post postId;
+    private Post post;
 
     @ManyToOne
-    private User userId;
+    private User author;
 }
