@@ -1,5 +1,6 @@
 package com.example.likelionfinalproject.configuration;
 
+import com.example.likelionfinalproject.exception.CustomAuthenticationEntryPoint;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,6 +34,9 @@ public class SecurityConfig {
                 .httpBasic().disable()
                 .csrf().disable()
                 .cors()
+                .and()
+                .exceptionHandling()
+                .authenticationEntryPoint(new CustomAuthenticationEntryPoint())
                 .and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
