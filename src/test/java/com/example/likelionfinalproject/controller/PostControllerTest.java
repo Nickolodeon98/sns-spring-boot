@@ -6,6 +6,7 @@ import com.example.likelionfinalproject.exception.ErrorCode;
 import com.example.likelionfinalproject.exception.UserException;
 import com.example.likelionfinalproject.service.CommentService;
 import com.example.likelionfinalproject.service.PostService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -268,7 +269,7 @@ class PostControllerTest {
         @Test
         @DisplayName("성공")
         @WithMockUser
-        void success_add_comment() {
+        void success_add_comment() throws Exception {
             CommentRequest commentRequest = CommentRequest.builder().comment("comment test").build();
             String userName = "author";
             CommentResponse commentResponse = CommentResponse.builder()
@@ -276,7 +277,7 @@ class PostControllerTest {
                     .createdAt(LocalDateTime.of(2022, 12, 26, 18, 03, 14))
                     .build();
             String commentUrl = "api/v1/posts/2/comments";
-            given(commentService.uploadComment(commentRequest, userName)).willReturn(commentResponse);
+            given(commentService.uploadComment(any(), any(), 2)).willReturn(commentResponse);
 
             mockMvc.perform(post(commentUrl)
                     .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsBytes(commentRequest)).with(csrf()))
@@ -289,7 +290,7 @@ class PostControllerTest {
                     .andExpect(jsonPath("$.result.createdAt").exists())
                     .andDo(print());
 
-            verify(commentService).uploadComment(any(), any());
+            verify(commentService).uploadComment(any(), any(), 2);
         }
     }
 
