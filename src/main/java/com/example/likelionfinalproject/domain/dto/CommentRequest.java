@@ -3,13 +3,13 @@ package com.example.likelionfinalproject.domain.dto;
 import com.example.likelionfinalproject.domain.entity.Comment;
 import com.example.likelionfinalproject.domain.entity.Post;
 import com.example.likelionfinalproject.domain.entity.User;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 @Getter
 @AllArgsConstructor
 @Builder
+@Setter
+@NoArgsConstructor
 public class CommentRequest {
 
     private String comment;
