@@ -1,5 +1,6 @@
 package com.example.likelionfinalproject.controller;
 
+import com.example.likelionfinalproject.domain.Response;
 import com.example.likelionfinalproject.domain.dto.*;
 import com.example.likelionfinalproject.enums.PostTestEssentials;
 import com.example.likelionfinalproject.exception.ErrorCode;
@@ -435,7 +436,7 @@ class PostControllerTest {
         }
     }
 
-    private void confirmSuccess(MockHttpServletRequestBuilder httpType, Dto<?> responseDto) throws Exception {
+    private void confirmSuccess(MockHttpServletRequestBuilder httpType, ResponseDto responseDto) throws Exception {
         mockMvc.perform(httpType.with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
@@ -452,10 +453,8 @@ class PostControllerTest {
         @DisplayName("성공")
         @WithMockUser
         void success_delete_comment() throws Exception {
-            CommentDeleteResponse deleteResponse = CommentDeleteResponse.builder()
-                    .message("댓글 삭제 완료")
-                    .id(commentId)
-                    .build();
+            CommentDeleteResponse deleteResponse = CommentDeleteResponse.builder().id(commentId).build();
+            deleteResponse.setMessage("댓글 삭제 완료");
             
             given(commentService.removeComment(eq(commentId))).willReturn(deleteResponse);
 
