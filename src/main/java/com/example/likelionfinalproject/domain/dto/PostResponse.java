@@ -10,7 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 @NoArgsConstructor
 @Setter
 @Slf4j
-public class PostResponse extends ResponseDto {
+public class PostResponse extends ResponseObject implements ResponseDto {
 
     private Integer postId;
 
@@ -18,5 +18,15 @@ public class PostResponse extends ResponseDto {
         PostResponse postResponse = PostResponse.builder().postId(post.getId()).build();
         postResponse.setMessage(message);
         return postResponse;
+    }
+
+    @Override
+    public void setMessage(String message) {
+        super.message = message;
+    }
+
+    @Override
+    public Integer getId() {
+        return postId;
     }
 }
