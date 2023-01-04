@@ -7,7 +7,6 @@ import com.example.likelionfinalproject.exception.UserException;
 import com.example.likelionfinalproject.fixture.PostFixture;
 import com.example.likelionfinalproject.service.CommentService;
 import com.example.likelionfinalproject.service.PostService;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -23,6 +22,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultMatcher;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -435,6 +435,15 @@ class PostControllerTest {
         }
     }
 
+    private void confirmSuccess(MockHttpServletRequestBuilder httpType, Dto<?> responseDto) throws Exception {
+        mockMvc.perform(httpType.with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
+                .andExpect(jsonPath("$.result.message").value(responseDto.getMessage()))
+                .andExpect(jsonPath("$.result.id").value(responseDto.getId()))
+                .andDo(print());
+    }
+
     @Nested
     @DisplayName("댓글 삭제")
     class CommentRemoval {
@@ -450,12 +459,13 @@ class PostControllerTest {
             
             given(commentService.removeComment(eq(commentId))).willReturn(deleteResponse);
 
-            mockMvc.perform(delete(url + "/comments/" + commentId).with(csrf()))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
-                    .andExpect(jsonPath("$.result.message").value(deleteResponse.getMessage()))
-                    .andExpect(jsonPath("$.result.id").value(deleteResponse.getId()))
-                    .andDo(print());
+            confirmSuccess(delete(url + "/comments/" + commentId), deleteResponse);
+//            mockMvc.perform(delete(url + "/comments/" + commentId).with(csrf()))
+//                    .andExpect(status().isOk())
+//                    .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
+//                    .andExpect(jsonPath("$.result.message").value(deleteResponse.getMessage()))
+//                    .andExpect(jsonPath("$.result.id").value(deleteResponse.getId()))
+//                    .andDo(print());
 
             verify(commentService).removeComment(eq(commentId));
         }
