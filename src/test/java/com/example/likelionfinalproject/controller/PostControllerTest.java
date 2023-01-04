@@ -376,7 +376,7 @@ class PostControllerTest {
         @DisplayName("성공")
         @WithMockUser
         void success_edit_a_comment() throws Exception {
-            given(commentService.modifyComment(any(), eq(commentId))).willReturn(commentResponse);
+            given(commentService.modifyComment(any(), eq(commentId), any())).willReturn(commentResponse);
 
             mockMvc.perform(put(url + "/comments/" + commentId)
                     .contentType(MediaType.APPLICATION_JSON)
@@ -390,7 +390,7 @@ class PostControllerTest {
                     .andExpect(jsonPath("$.result.createdAt").value(commentResponse.getCreatedAt()))
                     .andDo(print());
 
-            verify(commentService).modifyComment(any(), eq(commentId));
+            verify(commentService).modifyComment(any(), eq(commentId), any());
         }
     }
 }
