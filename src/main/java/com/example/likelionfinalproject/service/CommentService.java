@@ -1,5 +1,6 @@
 package com.example.likelionfinalproject.service;
 
+import com.example.likelionfinalproject.domain.dto.CommentDeleteResponse;
 import com.example.likelionfinalproject.domain.dto.CommentRequest;
 import com.example.likelionfinalproject.domain.dto.CommentResponse;
 import com.example.likelionfinalproject.domain.entity.Comment;
@@ -72,5 +73,13 @@ public class CommentService {
         Comment savedComment = commentRepository.save(comment);
 
         return CommentResponse.of(savedComment);
+    }
+
+    public CommentDeleteResponse removeComment(Integer commentId, String userName) {
+        Comment comment = validate(commentId, userName);
+
+        commentRepository.delete(comment);
+
+        return CommentDeleteResponse.of(comment);
     }
 }

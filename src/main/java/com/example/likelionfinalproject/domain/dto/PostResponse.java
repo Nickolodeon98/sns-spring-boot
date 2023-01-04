@@ -1,25 +1,32 @@
 package com.example.likelionfinalproject.domain.dto;
 
 import com.example.likelionfinalproject.domain.entity.Post;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 @Getter
 @AllArgsConstructor
 @Builder
+@NoArgsConstructor
+@Setter
 @Slf4j
-public class PostResponse {
+public class PostResponse extends ResponseObject implements ResponseDto {
 
-    private String message;
     private Integer postId;
 
     public static PostResponse of(Post post, String message) {
+        PostResponse postResponse = PostResponse.builder().postId(post.getId()).build();
+        postResponse.setMessage(message);
+        return postResponse;
+    }
 
-        return PostResponse.builder()
-                .postId(post.getId())
-                .message(message)
-                .build();
+    @Override
+    public void setMessage(String message) {
+        super.message = message;
+    }
+
+    @Override
+    public Integer getId() {
+        return postId;
     }
 }

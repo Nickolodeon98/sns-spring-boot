@@ -107,4 +107,13 @@ public class PostController {
         return Response.success(commentResponse);
     }
 
+    @Operation(summary = "댓글 삭제", description = "인증된 사용자는 자신이 작성한 댓글을 삭제할 수 있다.")
+    @ResponseBody
+    @DeleteMapping("/{postId}/comments/{id}")
+    public Response<CommentDeleteResponse> deleteComment(@PathVariable Integer postId, @PathVariable Integer id,
+                                                         @ApiIgnore Authentication authentication) {
+        CommentDeleteResponse response = commentService.removeComment(id, authentication.getName());
+
+        return Response.success(response);
+    }
 }
