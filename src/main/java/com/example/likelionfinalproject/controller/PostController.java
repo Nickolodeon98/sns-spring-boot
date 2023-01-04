@@ -82,4 +82,15 @@ public class PostController {
 
         return Response.success(commentResponse);
     }
+
+    @ResponseBody
+    @GetMapping("/{postId}/comments")
+    public Response<Page<CommentResponse>> showComments(@PathVariable Integer postId,
+                                                        @PageableDefault(direction=Sort.Direction.DESC, sort="createdAt")
+                                                        Pageable pageable) {
+
+        Page<CommentResponse> comments = commentService.fetchComments(pageable, postId);
+
+        return Response.success(comments);
+    }
 }
