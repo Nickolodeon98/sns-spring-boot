@@ -434,4 +434,30 @@ class PostControllerTest {
 
         }
     }
+
+    @Nested
+    @DisplayName("댓글 삭제")
+    class CommentRemoval {
+
+        @Test
+        @DisplayName("성공")
+        @WithMockUser
+        void success_delete_comment() throws Exception {
+            CommentDeleteResponse deleteResponse = CommentDeleteResponse.builder()
+                    .message("댓글 삭제 완료")
+                    .id(commentId)
+                    .build();
+            
+            given(commentService.removeComment(eq(commentId))).willReturn(deleteResponse);
+
+            mockMvc.perform(delete(url + "/comments/" + commentId).with(csrf()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
+                    .andExpect(jsonPath("$.result.message").value(deleteResponse.getMessage()))
+                    .andExpect(jsonPath("$.result.id").value(deleteResponse.getId()))
+                    .andDo(print());
+
+            verify(commentService).removeComment(eq(commentId));
+        }
+    }
 }
