@@ -2,6 +2,7 @@ package com.example.likelionfinalproject.controller;
 
 import com.example.likelionfinalproject.domain.Response;
 import com.example.likelionfinalproject.domain.dto.*;
+import com.example.likelionfinalproject.domain.entity.Post;
 import com.example.likelionfinalproject.enums.PostTestEssentials;
 import com.example.likelionfinalproject.exception.ErrorCode;
 import com.example.likelionfinalproject.exception.UserException;
@@ -65,7 +66,9 @@ class PostControllerTest {
     CommentRequest commentRequest;
     CommentResponse commentResponse;
     final Integer commentId = 1;
-
+    Page<SelectedPostResponse> posts;
+    Pageable pageable;
+    final int size = 20;
     @BeforeEach
     void setUp() {
         postRequest = PostRequest.builder()
@@ -88,6 +91,10 @@ class PostControllerTest {
                 .id(commentId).comment("comment test").userName(userName).postId(postId)
                 .createdAt(timeInfo)
                 .build();
+
+        pageable = PageRequest.of(0, size, Sort.by("createdAt").descending());
+
+        posts = new PageImpl<>(List.of(selectedPostResponse));
     }
 
     private static Stream<Arguments> provideErrorCase() {
@@ -173,13 +180,6 @@ class PostControllerTest {
         @DisplayName("성공 - 모든 포스트")
         @WithMockUser
         void find_every_posts() throws Exception {
-            final int size = 20;
-            Pageable pageable = PageRequest.of(0, size, Sort.by("id").descending());
-
-            List<SelectedPostResponse> multiplePosts = List.of(selectedPostResponse);
-
-            Page<SelectedPostResponse> posts = new PageImpl<>(multiplePosts);
-
             given(postService.listAllPosts(pageable)).willReturn(posts);
 
             mockMvc.perform(get(PostTestEssentials.POST_URL.getValue()).with(csrf()))
@@ -463,6 +463,20 @@ class PostControllerTest {
 
             verify(commentService).removeComment(eq(commentId), any());
 
+        }
+    }
+
+    @Nested
+    @DisplayName("마이 피드 조회")
+    class PersonalPosts {
+
+        @Test
+        @DisplayName("성공")
+        @WithMockUser
+        void success_show_my_posts() {
+            Page<Post>
+
+            given()
         }
     }
 }
