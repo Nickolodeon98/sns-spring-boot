@@ -4,6 +4,7 @@ import com.example.likelionfinalproject.domain.dto.*;
 import com.example.likelionfinalproject.enums.PostTestEssentials;
 import com.example.likelionfinalproject.exception.ErrorCode;
 import com.example.likelionfinalproject.exception.UserException;
+import com.example.likelionfinalproject.fixture.PostFixture;
 import com.example.likelionfinalproject.service.CommentService;
 import com.example.likelionfinalproject.service.PostService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -106,7 +107,7 @@ class PostControllerTest {
         public void post_success() throws Exception {
 
             given(postService.createPost(any(), any()))
-                    .willReturn(PostResponse.build(PostTestEssentials.POST_CREATE_MESSAGE.getValue(), postId));
+                    .willReturn(PostResponse.of(PostFixture.get(postId), PostTestEssentials.POST_CREATE_MESSAGE.getValue()));
 
             mockMvc.perform(post(PostTestEssentials.POST_URL.getValue()).contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsBytes(postRequest)).with(csrf()))
@@ -201,7 +202,7 @@ class PostControllerTest {
         void success_edit_post() throws Exception {
 
             given(postService.editPost(any(), eq(postId), any()))
-                    .willReturn(PostResponse.build(PostTestEssentials.POST_EDIT_MESSAGE.getValue(), postId));
+                    .willReturn(PostResponse.of(PostFixture.get(postId), PostTestEssentials.POST_EDIT_MESSAGE.getValue()));
 
             mockMvc.perform(put(url)
                             .contentType(MediaType.APPLICATION_JSON)
@@ -247,7 +248,7 @@ class PostControllerTest {
         void success_delete_post() throws Exception {
 
             given(postService.removePost(eq(postId), any()))
-                    .willReturn(PostResponse.build(PostTestEssentials.POST_DELETE_MESSAGE.getValue(), postId));
+                    .willReturn(PostResponse.of(PostFixture.get(postId), PostTestEssentials.POST_DELETE_MESSAGE.getValue()));
 
             mockMvc.perform(delete(url).with(csrf()))
                     .andExpect(status().isOk())
