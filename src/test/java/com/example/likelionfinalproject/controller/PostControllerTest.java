@@ -341,4 +341,30 @@ class PostControllerTest {
         }
     }
 
+    @Nested
+    @Order(1)
+    @DisplayName("댓글 조회")
+    class CommentAcquisition {
+
+        @Test
+        @DisplayName("성공")
+        @WithMockUser
+        void success_list_comments() throws Exception {
+            Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "createdAt"));
+            List<CommentResponse> comments = List.of(commentResponse);
+
+            Page<CommentResponse> pagedComments = new PageImpl<>(comments);
+
+            given(commentService.fetchComments(any(), eq(postId))).willReturn(pagedComments);
+
+            mockMvc.perform(get(url + "/comments")
+                            .content(objectMapper.writeValueAsBytes(pageable)).with(csrf()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
+                    .andExpect(jsonPath("$.result.content").exists())
+                    .andDo(print());
+
+            verify(commentService).fetchComments(any(), eq(postId));
+        }
+    }
 }
