@@ -1,5 +1,6 @@
 package com.example.likelionfinalproject.controller;
 
+import com.example.likelionfinalproject.domain.Response;
 import com.example.likelionfinalproject.domain.dto.*;
 import com.example.likelionfinalproject.enums.PostTestEssentials;
 import com.example.likelionfinalproject.exception.ErrorCode;
@@ -7,7 +8,6 @@ import com.example.likelionfinalproject.exception.UserException;
 import com.example.likelionfinalproject.fixture.PostFixture;
 import com.example.likelionfinalproject.service.CommentService;
 import com.example.likelionfinalproject.service.PostService;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -23,6 +23,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultMatcher;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -94,6 +95,8 @@ class PostControllerTest {
                         ErrorCode.USERNAME_NOT_FOUND),
                 Arguments.of(Named.of("사용자 인증 실패", status().isUnauthorized()),
                         ErrorCode.INVALID_PERMISSION),
+                Arguments.of(Named.of("포스트 없음", status().isNotFound()),
+                        ErrorCode.POST_NOT_FOUND),
                 Arguments.of(Named.of("DB 오류", status().isInternalServerError()),
                         ErrorCode.DATABASE_ERROR));
     }
@@ -393,26 +396,6 @@ class PostControllerTest {
             verify(commentService).modifyComment(any(), eq(commentId), any());
         }
 
-        @Test
-        @DisplayName("실패 - 댓글 없음")
-        @WithMockUser
-        void fail_edit_a_comment_not_found() throws Exception {
-            given(commentService.modifyComment(any(), eq(commentId), any()))
-                    .willThrow(new UserException(ErrorCode.COMMENT_NOT_FOUND, ErrorCode.COMMENT_NOT_FOUND.getMessage()));
-
-            mockMvc.perform(put(url + "/comments/" + commentId)
-                            .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsBytes(commentRequest))
-                            .with(csrf()))
-                    .andExpect(status().isNotFound())
-                    .andExpect(jsonPath("$.resultCode").value("ERROR"))
-                    .andExpect(jsonPath("$.result.errorCode").value(ErrorCode.COMMENT_NOT_FOUND.name()))
-                    .andExpect(jsonPath("$.result.message").value(ErrorCode.COMMENT_NOT_FOUND.getMessage()))
-                    .andDo(print());
-
-            verify(commentService).modifyComment(any(), eq(commentId), any());
-        }
-
-
         @ParameterizedTest
         @DisplayName("실패")
         @WithMockUser
@@ -431,6 +414,54 @@ class PostControllerTest {
                     .andDo(print());
 
             verify(commentService).modifyComment(any(), eq(commentId), any());
+
+        }
+    }
+
+    private void confirmSuccess(MockHttpServletRequestBuilder httpType, ResponseDto responseDto) throws Exception {
+        mockMvc.perform(httpType.with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
+                .andExpect(jsonPath("$.result.message").value(responseDto.getMessage()))
+                .andExpect(jsonPath("$.result.id").value(responseDto.getId()))
+                .andDo(print());
+    }
+
+    @Nested
+    @DisplayName("댓글 삭제")
+    class CommentRemoval {
+
+        @Test
+        @DisplayName("성공")
+        @WithMockUser
+        void success_delete_comment() throws Exception {
+            CommentDeleteResponse deleteResponse = CommentDeleteResponse.builder().id(commentId).build();
+            deleteResponse.setMessage("댓글 삭제 완료");
+            
+            given(commentService.removeComment(eq(commentId), any())).willReturn(deleteResponse);
+
+            confirmSuccess(delete(url + "/comments/" + commentId), deleteResponse);
+
+            verify(commentService).removeComment(eq(commentId), any());
+        }
+
+        @ParameterizedTest
+        @DisplayName("실패")
+        @WithMockUser
+        @MethodSource("com.example.likelionfinalproject.controller.PostControllerTest#provideErrorCase")
+        void fail_delete_a_comment(ResultMatcher error, ErrorCode code) throws Exception {
+            given(commentService.removeComment(eq(commentId), any()))
+                    .willThrow(new UserException(code, code.getMessage()));
+
+            mockMvc.perform(delete(url + "/comments/" + commentId)
+                            .with(csrf()))
+                    .andExpect(error)
+                    .andExpect(jsonPath("$.resultCode").value("ERROR"))
+                    .andExpect(jsonPath("$.result.errorCode").value(code.name()))
+                    .andExpect(jsonPath("$.result.message").value(code.getMessage()))
+                    .andDo(print());
+
+            verify(commentService).removeComment(eq(commentId), any());
 
         }
     }
