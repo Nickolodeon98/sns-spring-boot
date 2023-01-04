@@ -456,7 +456,7 @@ class PostControllerTest {
             CommentDeleteResponse deleteResponse = CommentDeleteResponse.builder().id(commentId).build();
             deleteResponse.setMessage("댓글 삭제 완료");
             
-            given(commentService.removeComment(eq(commentId))).willReturn(deleteResponse);
+            given(commentService.removeComment(eq(commentId), any())).willReturn(deleteResponse);
 
             confirmSuccess(delete(url + "/comments/" + commentId), deleteResponse);
 //            mockMvc.perform(delete(url + "/comments/" + commentId).with(csrf()))
@@ -466,7 +466,7 @@ class PostControllerTest {
 //                    .andExpect(jsonPath("$.result.id").value(deleteResponse.getId()))
 //                    .andDo(print());
 
-            verify(commentService).removeComment(eq(commentId));
+            verify(commentService).removeComment(eq(commentId), any());
         }
     }
 }
