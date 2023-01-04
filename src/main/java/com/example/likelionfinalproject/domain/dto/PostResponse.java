@@ -15,17 +15,10 @@ public class PostResponse {
     private String message;
     private Integer postId;
 
-    public static PostResponse of(Post savedPost) {
+    public static PostResponse of(Post post, String message) {
 
         return PostResponse.builder()
-                .postId(savedPost.getId())
-                .message("포스트 등록 완료")
-                .build();
-    }
-
-    public static PostResponse build(String message, Integer postId) {
-        return PostResponse.builder()
-                .postId(postId)
+                .postId(post.getId())
                 .message(message)
                 .build();
     }
