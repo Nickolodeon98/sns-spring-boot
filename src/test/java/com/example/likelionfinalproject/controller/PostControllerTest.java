@@ -387,7 +387,7 @@ class PostControllerTest {
                     .andExpect(jsonPath("$.result.comment").value(commentResponse.getComment()))
                     .andExpect(jsonPath("$.result.userName").value(commentResponse.getUserName()))
                     .andExpect(jsonPath("$.result.postId").value(commentResponse.getPostId()))
-                    .andExpect(jsonPath("$.result.createdAt").value(commentResponse.getCreatedAt()))
+                    .andExpect(jsonPath("$.result.createdAt").value(commentResponse.getCreatedAt().toString()))
                     .andDo(print());
 
             verify(commentService).modifyComment(any(), eq(commentId), any());
