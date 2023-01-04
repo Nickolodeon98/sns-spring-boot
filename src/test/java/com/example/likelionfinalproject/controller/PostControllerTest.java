@@ -459,12 +459,6 @@ class PostControllerTest {
             given(commentService.removeComment(eq(commentId), any())).willReturn(deleteResponse);
 
             confirmSuccess(delete(url + "/comments/" + commentId), deleteResponse);
-//            mockMvc.perform(delete(url + "/comments/" + commentId).with(csrf()))
-//                    .andExpect(status().isOk())
-//                    .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
-//                    .andExpect(jsonPath("$.result.message").value(deleteResponse.getMessage()))
-//                    .andExpect(jsonPath("$.result.id").value(deleteResponse.getId()))
-//                    .andDo(print());
 
             verify(commentService).removeComment(eq(commentId), any());
         }
