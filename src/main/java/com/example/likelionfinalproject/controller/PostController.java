@@ -83,6 +83,7 @@ public class PostController {
         return Response.success(commentResponse);
     }
 
+    @Operation(summary = "특정 포스트 댓글 모두 조회", description = "모든 사용자는 특정 포스트의 댓글을 모두 조회할 수 있다.")
     @ResponseBody
     @GetMapping("/{postId}/comments")
     public Response<Page<CommentResponse>> showComments(@PathVariable Integer postId,
