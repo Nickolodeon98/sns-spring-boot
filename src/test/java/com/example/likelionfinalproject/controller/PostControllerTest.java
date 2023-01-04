@@ -444,9 +444,25 @@ class PostControllerTest {
 
             verify(commentService).removeComment(eq(commentId), any());
         }
-        
-//        @Test
-//        @DisplayName("실패")
-//        @WithMockUser
+
+        @ParameterizedTest
+        @DisplayName("실패")
+        @WithMockUser
+        @MethodSource("com.example.likelionfinalproject.controller.PostControllerTest#provideErrorCase")
+        void fail_delete_a_comment(ResultMatcher error, ErrorCode code) throws Exception {
+            given(commentService.removeComment(eq(commentId), any()))
+                    .willThrow(new UserException(code, code.getMessage()));
+
+            mockMvc.perform(delete(url + "/comments/" + commentId)
+                            .with(csrf()))
+                    .andExpect(error)
+                    .andExpect(jsonPath("$.resultCode").value("ERROR"))
+                    .andExpect(jsonPath("$.result.errorCode").value(code.name()))
+                    .andExpect(jsonPath("$.result.message").value(code.getMessage()))
+                    .andDo(print());
+
+            verify(commentService).removeComment(eq(commentId), any());
+
+        }
     }
 }
