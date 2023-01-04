@@ -95,6 +95,8 @@ class PostControllerTest {
                         ErrorCode.USERNAME_NOT_FOUND),
                 Arguments.of(Named.of("사용자 인증 실패", status().isUnauthorized()),
                         ErrorCode.INVALID_PERMISSION),
+                Arguments.of(Named.of("포스트 없음", status().isNotFound()),
+                        ErrorCode.POST_NOT_FOUND),
                 Arguments.of(Named.of("DB 오류", status().isInternalServerError()),
                         ErrorCode.DATABASE_ERROR));
     }
@@ -394,26 +396,6 @@ class PostControllerTest {
             verify(commentService).modifyComment(any(), eq(commentId), any());
         }
 
-        @Test
-        @DisplayName("실패 - 댓글 없음")
-        @WithMockUser
-        void fail_edit_a_comment_not_found() throws Exception {
-            given(commentService.modifyComment(any(), eq(commentId), any()))
-                    .willThrow(new UserException(ErrorCode.COMMENT_NOT_FOUND, ErrorCode.COMMENT_NOT_FOUND.getMessage()));
-
-            mockMvc.perform(put(url + "/comments/" + commentId)
-                            .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsBytes(commentRequest))
-                            .with(csrf()))
-                    .andExpect(status().isNotFound())
-                    .andExpect(jsonPath("$.resultCode").value("ERROR"))
-                    .andExpect(jsonPath("$.result.errorCode").value(ErrorCode.COMMENT_NOT_FOUND.name()))
-                    .andExpect(jsonPath("$.result.message").value(ErrorCode.COMMENT_NOT_FOUND.getMessage()))
-                    .andDo(print());
-
-            verify(commentService).modifyComment(any(), eq(commentId), any());
-        }
-
-
         @ParameterizedTest
         @DisplayName("실패")
         @WithMockUser
@@ -462,5 +444,9 @@ class PostControllerTest {
 
             verify(commentService).removeComment(eq(commentId), any());
         }
+        
+//        @Test
+//        @DisplayName("실패")
+//        @WithMockUser
     }
 }
