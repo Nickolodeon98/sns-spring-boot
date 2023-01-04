@@ -392,5 +392,46 @@ class PostControllerTest {
 
             verify(commentService).modifyComment(any(), eq(commentId), any());
         }
+
+        @Test
+        @DisplayName("실패 - 댓글 없음")
+        @WithMockUser
+        void fail_edit_a_comment_not_found() throws Exception {
+            given(commentService.modifyComment(any(), eq(commentId), any()))
+                    .willThrow(new UserException(ErrorCode.COMMENT_NOT_FOUND, ErrorCode.COMMENT_NOT_FOUND.getMessage()));
+
+            mockMvc.perform(put(url + "/comments/" + commentId)
+                            .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsBytes(commentRequest))
+                            .with(csrf()))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.resultCode").value("ERROR"))
+                    .andExpect(jsonPath("$.result.errorCode").value(ErrorCode.COMMENT_NOT_FOUND.name()))
+                    .andExpect(jsonPath("$.result.message").value(ErrorCode.COMMENT_NOT_FOUND.getMessage()))
+                    .andDo(print());
+
+            verify(commentService).modifyComment(any(), eq(commentId), any());
+        }
+
+
+        @ParameterizedTest
+        @DisplayName("실패")
+        @WithMockUser
+        @MethodSource("com.example.likelionfinalproject.controller.PostControllerTest#provideErrorCase")
+        void fail_edit_a_comment(ResultMatcher error, ErrorCode code) throws Exception {
+            given(commentService.modifyComment(any(), eq(commentId), any()))
+                    .willThrow(new UserException(code, code.getMessage()));
+
+            mockMvc.perform(put(url + "/comments/" + commentId)
+                    .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsBytes(commentRequest))
+                    .with(csrf()))
+                    .andExpect(error)
+                    .andExpect(jsonPath("$.resultCode").value("ERROR"))
+                    .andExpect(jsonPath("$.result.errorCode").value(code.name()))
+                    .andExpect(jsonPath("$.result.message").value(code.getMessage()))
+                    .andDo(print());
+
+            verify(commentService).modifyComment(any(), eq(commentId), any());
+
+        }
     }
 }
