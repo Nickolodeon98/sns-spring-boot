@@ -21,6 +21,8 @@ public class LikeService {
 
     public String pushThumbsUp(Integer postId, String userName) {
 
+        /* 사용자가 현재 요청된 포스트에 좋아요를 이미 눌렀을 때, 한 번 더 누른 상황이면 좋아요가 삭제된다. */
+
         User user = userRepository.findByUserName(userName)
                 .orElseThrow(()->new UserException(ErrorCode.USERNAME_NOT_FOUND, ErrorCode.USERNAME_NOT_FOUND.getMessage()));
 
