@@ -11,6 +11,8 @@ import com.example.likelionfinalproject.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class LikeService {
@@ -28,9 +30,6 @@ public class LikeService {
         User user = userRepository.findByUserName(userName)
                 .orElseThrow(()->new UserException(ErrorCode.USERNAME_NOT_FOUND, ErrorCode.USERNAME_NOT_FOUND.getMessage()));
 
-        likeRepository.findByPostIdAndUserId(postId, user.getId())
-                .ifPresent(likeRepository::delete);
-
         Post post = postRepository.findById(postId)
                 .orElseThrow(()->new UserException(ErrorCode.POST_NOT_FOUND, ErrorCode.POST_NOT_FOUND.getMessage()));
 
@@ -40,8 +39,16 @@ public class LikeService {
                 .user(user)
                 .build();
 
-        likeRepository.save(like);
+//        likeRepository.findByPostIdAndUserId(postId, user.getId())
+//                .ifPresentOrElse(likeRepository::delete, () -> likeRepository.save(like));
 
+        Optional<Like> duplicateLike = likeRepository.findByPostIdAndUserId(postId, user.getId());
+
+        if (duplicateLike.isPresent()) {
+            likeRepository.delete(duplicateLike.get());
+            return "좋아요를 해제했습니다.";
+        }
+        likeRepository.save(like);
         return "좋아요를 눌렀습니다.";
     }
 }
