@@ -149,7 +149,8 @@ class PostControllerTest {
             verify(postService).createPost(any(), any());
         }
     }
-
+    @Captor
+    ArgumentCaptor<Pageable> postArgumentCaptor;
 
     @Nested
     @DisplayName("포스트 조회")
@@ -172,9 +173,6 @@ class PostControllerTest {
 
             verify(postService).acquirePost(postId);
         }
-
-        @Captor
-        ArgumentCaptor<Pageable> postArgumentCaptor;
 
         @Test
         @DisplayName("성공 - 모든 포스트")
@@ -474,7 +472,7 @@ class PostControllerTest {
         @DisplayName("성공")
         @WithMockUser
         void success_show_my_posts() throws Exception {
-            given(postService.showMyPosts(any(), pageable)).willReturn(posts);
+            given(postService.showMyPosts(any(), any())).willReturn(posts);
 
             mockMvc.perform(get("/api/v1/posts/my").with(csrf()))
                     .andExpect(status().isOk())
@@ -482,7 +480,7 @@ class PostControllerTest {
                     .andExpect(jsonPath("$.result.content").exists())
                     .andDo(print());
 
-            verify(postService).showMyPosts(any(), pageable);
+            verify(postService).showMyPosts(any(), any());
         }
     }
 }
