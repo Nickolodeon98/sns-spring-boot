@@ -17,6 +17,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.client.RestClientTest;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.*;
@@ -493,6 +494,31 @@ class PostControllerTest {
                             .header(HttpHeaders.AUTHORIZATION, "").with(csrf()))
                     .andExpect(status().isUnauthorized())
                     .andDo(print());
+        }
+    }
+
+    @Nested
+    @DisplayName("좋아요 등록")
+    class LikeGeneration {
+
+        /* 좋아요가 눌릴 시 서비스단 likeService 에서 성공 메시지를 반환하는 상황을 가정한다. */
+        @Test
+        @DisplayName("성공")
+        @WithMockUser
+        void success_generate_like() throws Exception {
+            String response = "좋아요를 눌렀습니다.";
+
+            /* 서비스에서는 포스트 아이디와 사용자 아이디를 매개 변수로 받는다. */
+            given(likeService.pushThumbsUp(any(), any())).willReturn(response);
+
+            mockMvc.perform(post(url + "/likes")
+                    .contentType(MediaType.APPLICATION_JSON).with(csrf()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
+                    .andExpect(jsonPath("$.result").value(response))
+                    .andDo(print());
+
+            verify(likeService).pushThumbsUp(any(), any());
         }
     }
 }
