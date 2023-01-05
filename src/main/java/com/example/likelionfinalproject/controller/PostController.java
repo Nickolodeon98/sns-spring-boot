@@ -120,8 +120,10 @@ public class PostController {
     @Operation(summary = "마이 피드", description = "인증된 사용자는 자신이 작성한 포스트를 모아서 볼 수 있다.")
     @ResponseBody
     @GetMapping("/my")
-    public Response<Page<SelectedPostResponse>> retrievePast(@ApiIgnore Authentication authentication) {
-        Page<SelectedPostResponse> recalled = postService.showMyPosts(authentication.getName());
+    public Response<Page<SelectedPostResponse>> retrievePast(@ApiIgnore Authentication authentication,
+                                                             @PageableDefault(size = 20, direction = Sort.Direction.DESC, sort = "lastModifiedAt")
+                                                             Pageable pageable) {
+        Page<SelectedPostResponse> recalled = postService.showMyPosts(authentication.getName(), pageable);
 
         return Response.success(recalled);
     }
