@@ -89,4 +89,11 @@ public class PostService {
 
         return PostResponse.of(postToDelete, "포스트 삭제 완료");
     }
+
+    public Page<SelectedPostResponse> showMyPosts(String userName, Pageable pageable) {
+
+        Page<Post> myPosts = postRepository.findAllByAuthorUserName(userName, pageable);
+
+        return myPosts.map(SelectedPostResponse::of);
+    }
 }
