@@ -21,10 +21,15 @@ public class LikeService {
 
     public String pushThumbsUp(Integer postId, String userName) {
 
-        /* 사용자가 현재 요청된 포스트에 좋아요를 이미 눌렀을 때, 한 번 더 누른 상황이면 좋아요가 삭제된다. */
+        /* TODO: 사용자가 현재 요청된 포스트에 좋아요를 이미 눌렀을 때, 한 번 더 누른 상황이면 좋아요가 삭제된다.
+         * 매개 변수로 받은 포스트 아이디와 사용자 아이디를 사용해서 레코드를 조회했을 때 하나 이상의 레코드가 반환되면
+         * 이미 좋아요를 눌렀다는 사실을 확인할 수 있다. */
 
         User user = userRepository.findByUserName(userName)
                 .orElseThrow(()->new UserException(ErrorCode.USERNAME_NOT_FOUND, ErrorCode.USERNAME_NOT_FOUND.getMessage()));
+
+        likeRepository.findByPostIdAndUserId(postId, user.getId())
+                .ifPresent(likeRepository::delete);
 
         Post post = postRepository.findById(postId)
                 .orElseThrow(()->new UserException(ErrorCode.POST_NOT_FOUND, ErrorCode.POST_NOT_FOUND.getMessage()));
