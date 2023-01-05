@@ -8,6 +8,7 @@ import com.example.likelionfinalproject.exception.ErrorCode;
 import com.example.likelionfinalproject.exception.UserException;
 import com.example.likelionfinalproject.fixture.PostFixture;
 import com.example.likelionfinalproject.service.CommentService;
+import com.example.likelionfinalproject.service.LikeService;
 import com.example.likelionfinalproject.service.PostService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.*;
@@ -17,6 +18,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.client.RestClientTest;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.*;
@@ -55,6 +57,9 @@ class PostControllerTest {
     @MockBean
     CommentService commentService;
 
+    @MockBean
+    LikeService likeService;
+
     @Autowired
     ObjectMapper objectMapper;
 
@@ -71,6 +76,7 @@ class PostControllerTest {
     Page<SelectedPostResponse> posts;
     Pageable pageable;
     final int size = 20;
+
     @BeforeEach
     void setUp() {
         postRequest = PostRequest.builder()
@@ -493,6 +499,59 @@ class PostControllerTest {
                             .header(HttpHeaders.AUTHORIZATION, "").with(csrf()))
                     .andExpect(status().isUnauthorized())
                     .andDo(print());
+        }
+    }
+
+    @Nested
+    @DisplayName("좋아요 등록")
+    class LikeGeneration {
+
+        /* 좋아요가 눌릴 시 서비스단 likeService 에서 성공 메시지를 반환하는 상황을 가정한다. */
+        @Test
+        @DisplayName("성공")
+        @WithMockUser
+        void success_generate_like() throws Exception {
+            String response = "좋아요를 눌렀습니다.";
+
+            /* 서비스에서는 포스트 아이디와 사용자 아이디를 매개 변수로 받는다. */
+            given(likeService.pushThumbsUp(any(), any())).willReturn(response);
+
+            mockMvc.perform(post(url + "/likes")
+                    .contentType(MediaType.APPLICATION_JSON).with(csrf()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
+                    .andExpect(jsonPath("$.result").value(response))
+                    .andDo(print());
+
+            verify(likeService).pushThumbsUp(any(), any());
+        }
+
+        @Test
+        @DisplayName("실패 - 로그인 하지 않음")
+        @WithAnonymousUser
+        void fail_generate_like_not_a_user() throws Exception {
+            mockMvc.perform(post(url + "/likes")
+                    .contentType(MediaType.APPLICATION_JSON).with(csrf()))
+                    .andExpect(status().isUnauthorized())
+                    .andDo(print());
+        }
+
+        @Test
+        @DisplayName("실패 - 포스트 없음")
+        @WithMockUser
+        void fail_generate_like_no_post() throws Exception {
+            given(likeService.pushThumbsUp(eq(1), any()))
+                    .willThrow(new UserException(ErrorCode.POST_NOT_FOUND, ErrorCode.POST_NOT_FOUND.getMessage()));
+
+            mockMvc.perform(post(url + "/likes")
+                            .contentType(MediaType.APPLICATION_JSON).with(csrf()))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.resultCode").value("ERROR"))
+                    .andExpect(jsonPath("$.result.errorCode").value(ErrorCode.POST_NOT_FOUND.name()))
+                    .andExpect(jsonPath("$.result.message").value(ErrorCode.POST_NOT_FOUND.getMessage()))
+                    .andDo(print());
+
+            verify(likeService).pushThumbsUp(eq(1), any());
         }
     }
 }

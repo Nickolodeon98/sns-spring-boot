@@ -28,4 +28,7 @@ public class User extends BaseEntityForUser implements Serializable  {
 
     @OneToMany(mappedBy = "author")
     private List<Comment> comments;
+
+    @OneToMany(mappedBy="user")
+    private List<Like> likes;
 }

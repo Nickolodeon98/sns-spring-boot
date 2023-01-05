@@ -32,6 +32,9 @@ public class Post extends BaseEntityForPost {
     @OneToMany(mappedBy = "post")
     private List<Comment> comments;
 
+    @OneToMany(mappedBy="post")
+    private List<Like> likes;
+
     public PostRequest toRequest() {
         return PostRequest.builder()
                 .title(title)
