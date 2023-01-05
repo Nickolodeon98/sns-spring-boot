@@ -1,5 +1,6 @@
 package com.example.likelionfinalproject.service;
 
+import com.example.likelionfinalproject.domain.entity.Like;
 import com.example.likelionfinalproject.domain.entity.User;
 import com.example.likelionfinalproject.exception.ErrorCode;
 import com.example.likelionfinalproject.exception.UserException;
