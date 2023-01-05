@@ -473,10 +473,21 @@ class PostControllerTest {
         @Test
         @DisplayName("성공")
         @WithMockUser
-        void success_show_my_posts() {
-            Page<Post>
+        void success_show_my_posts() throws Exception {
+            given(postService.showMyPosts(any())).willReturn(posts);
 
-            given()
+            mockMvc.perform(get("/api/v1/posts/my").with(csrf()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
+                    .andExpect(jsonPath("$.result.content.id").value(postId))
+                    .andExpect(jsonPath("$.result.content.title").value(PostTestEssentials.POST_TITLE.getValue()))
+                    .andExpect(jsonPath("$.result.content.body").value(PostTestEssentials.POST_BODY.getValue()))
+                    .andExpect(jsonPath("$.result.content.userName").value(userName))
+                    .andExpect(jsonPath("$.result.content.createdAt").value(timeInfo))
+                    .andExpect(jsonPath("$.result.content.lastModifiedAt").value(timeInfo))
+                    .andDo(print());
+
+            verify(postService).showMyPosts(any());
         }
     }
 }
