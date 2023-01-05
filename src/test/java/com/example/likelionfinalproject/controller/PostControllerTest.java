@@ -474,7 +474,7 @@ class PostControllerTest {
         @DisplayName("성공")
         @WithMockUser
         void success_show_my_posts() throws Exception {
-            given(postService.showMyPosts(any())).willReturn(posts);
+            given(postService.showMyPosts(any(), pageable)).willReturn(posts);
 
             mockMvc.perform(get("/api/v1/posts/my").with(csrf()))
                     .andExpect(status().isOk())
@@ -482,7 +482,7 @@ class PostControllerTest {
                     .andExpect(jsonPath("$.result.content").exists())
                     .andDo(print());
 
-            verify(postService).showMyPosts(any());
+            verify(postService).showMyPosts(any(), pageable);
         }
     }
 }
