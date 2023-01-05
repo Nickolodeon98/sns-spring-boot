@@ -525,5 +525,33 @@ class PostControllerTest {
 
             verify(likeService).pushThumbsUp(any(), any());
         }
+
+        @Test
+        @DisplayName("실패 - 로그인 하지 않음")
+        @WithAnonymousUser
+        void fail_generate_like_not_a_user() throws Exception {
+            mockMvc.perform(post(url + "/likes")
+                    .contentType(MediaType.APPLICATION_JSON).with(csrf()))
+                    .andExpect(status().isUnauthorized())
+                    .andDo(print());
+        }
+
+        @Test
+        @DisplayName("실패 - 포스트 없음")
+        @WithMockUser
+        void fail_generate_like_no_post() throws Exception {
+            given(likeService.pushThumbsUp(eq(1), any()))
+                    .willThrow(new UserException(ErrorCode.POST_NOT_FOUND, ErrorCode.POST_NOT_FOUND.getMessage()));
+
+            mockMvc.perform(post(url + "/likes")
+                            .contentType(MediaType.APPLICATION_JSON).with(csrf()))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.resultCode").value("ERROR"))
+                    .andExpect(jsonPath("$.result.errorCode").value(ErrorCode.POST_NOT_FOUND.name()))
+                    .andExpect(jsonPath("$.result.message").value(ErrorCode.POST_NOT_FOUND.getMessage()))
+                    .andDo(print());
+
+            verify(likeService).pushThumbsUp(eq(1), any());
+        }
     }
 }
