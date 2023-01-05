@@ -8,6 +8,7 @@ import com.example.likelionfinalproject.exception.ErrorCode;
 import com.example.likelionfinalproject.exception.UserException;
 import com.example.likelionfinalproject.fixture.PostFixture;
 import com.example.likelionfinalproject.service.CommentService;
+import com.example.likelionfinalproject.service.LikeService;
 import com.example.likelionfinalproject.service.PostService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.*;
@@ -72,6 +73,9 @@ class PostControllerTest {
     Page<SelectedPostResponse> posts;
     Pageable pageable;
     final int size = 20;
+    @MockBean
+    LikeService likeService;
+
     @BeforeEach
     void setUp() {
         postRequest = PostRequest.builder()
