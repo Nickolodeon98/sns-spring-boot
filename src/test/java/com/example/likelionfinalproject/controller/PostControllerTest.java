@@ -20,7 +20,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.*;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultMatcher;
@@ -481,6 +483,16 @@ class PostControllerTest {
                     .andDo(print());
 
             verify(postService).showMyPosts(any(), any());
+        }
+        
+        @Test
+        @DisplayName("실패")
+//        @WithAnonymousUser
+        void fail_show_my_posts() throws Exception {
+            mockMvc.perform(get("/api/v1/posts/my")
+                            .header(HttpHeaders.AUTHORIZATION, "").with(csrf()))
+                    .andExpect(status().isUnauthorized())
+                    .andDo(print());
         }
     }
 }
