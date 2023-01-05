@@ -3,6 +3,7 @@ package com.example.likelionfinalproject.controller;
 import com.example.likelionfinalproject.domain.Response;
 import com.example.likelionfinalproject.domain.dto.*;
 import com.example.likelionfinalproject.service.CommentService;
+import com.example.likelionfinalproject.service.LikeService;
 import com.example.likelionfinalproject.service.PostService;
 import io.swagger.annotations.Api;
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,6 +27,7 @@ public class PostController {
 
     private final PostService postService;
     private final CommentService commentService;
+    private final LikeService likeService;
 
     @Operation(summary = "포스트 작성", description = "로그인 한 사용자는 포스트 제목과 내용을 작성하여 등록할 수 있다.")
     @PostMapping
@@ -127,4 +129,14 @@ public class PostController {
 
         return Response.success(recalled);
     }
+
+    @Operation(summary = "좋아요 누르는 기능", description = "인증된 사용자는 포스트에 좋아요를 달 수 있다.")
+    @ResponseBody
+    @PostMapping("/{postId}/likes")
+    public Response<String> toggleOnLike(@PathVariable Integer postId, @ApiIgnore Authentication authentication) {
+        String response = likeService.pushThumbsUp(postId, authentication.getName());
+
+        return Response.success(response);
+    }
+
 }
