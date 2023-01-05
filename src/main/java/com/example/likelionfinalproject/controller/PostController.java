@@ -116,4 +116,13 @@ public class PostController {
 
         return Response.success(response);
     }
+
+    @Operation(summary = "마이 피드", description = "인증된 사용자는 자신이 작성한 포스트를 모아서 볼 수 있다.")
+    @ResponseBody
+    @GetMapping("/my")
+    public Response<Page<SelectedPostResponse>> retrievePast(@ApiIgnore Authentication authentication) {
+        Page<SelectedPostResponse> recalled = postService.showMyPosts(authentication.getName());
+
+        return Response.success(recalled);
+    }
 }
