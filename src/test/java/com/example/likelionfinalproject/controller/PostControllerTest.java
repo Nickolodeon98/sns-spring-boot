@@ -57,6 +57,9 @@ class PostControllerTest {
     @MockBean
     CommentService commentService;
 
+    @MockBean
+    LikeService likeService;
+
     @Autowired
     ObjectMapper objectMapper;
 
@@ -73,8 +76,6 @@ class PostControllerTest {
     Page<SelectedPostResponse> posts;
     Pageable pageable;
     final int size = 20;
-    @MockBean
-    LikeService likeService;
 
     @BeforeEach
     void setUp() {
