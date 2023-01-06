@@ -9,6 +9,7 @@ import com.example.likelionfinalproject.fixture.UserFixture;
 import com.example.likelionfinalproject.repository.LikeRepository;
 import com.example.likelionfinalproject.repository.PostRepository;
 import com.example.likelionfinalproject.repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,6 +24,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@Slf4j
 public class SoftDeleteTest {
 
     Post post;
@@ -58,7 +60,10 @@ public class SoftDeleteTest {
         postRepository.delete(post);
 
         Assertions.assertEquals(1, likeRepository.countByPost(post));
-        Assertions.assertNotNull(like.getDeletedAt());
+
+        Like likeAfterDeletion = likeRepository.findByPost(post);
+
+        Assertions.assertNotNull(likeAfterDeletion.getDeletedAt());
     }
 
 }
