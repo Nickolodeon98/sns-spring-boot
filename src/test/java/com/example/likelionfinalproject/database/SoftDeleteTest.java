@@ -28,9 +28,9 @@ public class SoftDeleteTest {
     Post post;
     Like like;
     User user;
-    final Integer postId = 1;
-    final Integer userId = 1;
-    final String userName = "test";
+    final Integer postId = 2;
+    final Integer userId = 14;
+    final String userName = "string";
     @Autowired
     private PostRepository postRepository;
     @Autowired
@@ -40,17 +40,16 @@ public class SoftDeleteTest {
 
     @BeforeEach
     void setUp() {
-        post = PostFixture.get(postId);
         user = UserFixture.get(userId, userName);
+        userRepository.save(user);
+        post = PostFixture.get(postId, user);
+        postRepository.save(post);
         like = LikeFixture.get(post, user);
     }
 
     @Test
     @DisplayName("Soft Delete 로 데이터를 삭제하는 대신 업데이트한다.")
     void success_soft_delete() {
-        userRepository.save(user);
-        postRepository.save(post);
-
         likeRepository.save(like);
 
         Assertions.assertEquals(1, likeRepository.countByPost(post));
