@@ -1,6 +1,8 @@
 package com.example.likelionfinalproject.domain.entity;
 
 import lombok.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLDeleteAll;
 
 import javax.persistence.*;
 
@@ -10,7 +12,9 @@ import javax.persistence.*;
 @Setter
 @NoArgsConstructor
 @Builder
-@Table(name = "\"likes\"")
+@Table(name = "likes")
+@SQLDelete(sql="UPDATE likes SET deleted_at = current_timestamp WHERE id = ?")
+@SQLDeleteAll(sql = "UPDATE likes SET deleted_at = current_timestamp WHERE id = ?")
 public class Like extends BaseEntityForPost{
 
     @Id
