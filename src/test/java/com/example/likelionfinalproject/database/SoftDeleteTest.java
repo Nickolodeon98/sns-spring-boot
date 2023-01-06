@@ -3,10 +3,12 @@ package com.example.likelionfinalproject.database;
 import com.example.likelionfinalproject.domain.entity.Like;
 import com.example.likelionfinalproject.domain.entity.Post;
 import com.example.likelionfinalproject.domain.entity.User;
+import com.example.likelionfinalproject.fixture.LikeFixture;
 import com.example.likelionfinalproject.fixture.PostFixture;
 import com.example.likelionfinalproject.fixture.UserFixture;
 import com.example.likelionfinalproject.repository.LikeRepository;
 import com.example.likelionfinalproject.repository.PostRepository;
+import org.hibernate.Session;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -23,12 +25,18 @@ public class SoftDeleteTest {
     Post post;
     Like like;
     User user;
-    final Integer postId = 1;
+    final Integer postId = 2;
+    final Integer userId = 14;
+    final String userName = "string";
+    @Autowired
+    private PostRepository postRepository;
+    @Autowired
+    private LikeRepository likeRepository;
 
     @BeforeEach
     void setUp() {
         post = PostFixture.get(postId);
-        user = UserFixture.get();
+        user = UserFixture.get(userId, userName);
         like = LikeFixture.get(post, user);
     }
 
