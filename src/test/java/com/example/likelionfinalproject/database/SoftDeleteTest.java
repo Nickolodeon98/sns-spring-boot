@@ -8,6 +8,7 @@ import com.example.likelionfinalproject.fixture.PostFixture;
 import com.example.likelionfinalproject.fixture.UserFixture;
 import com.example.likelionfinalproject.repository.LikeRepository;
 import com.example.likelionfinalproject.repository.PostRepository;
+import com.example.likelionfinalproject.repository.UserRepository;
 import org.hibernate.Session;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,23 +16,27 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class SoftDeleteTest {
 
     Post post;
     Like like;
     User user;
-    final Integer postId = 2;
-    final Integer userId = 14;
-    final String userName = "string";
+    final Integer postId = 1;
+    final Integer userId = 1;
+    final String userName = "test";
     @Autowired
     private PostRepository postRepository;
     @Autowired
     private LikeRepository likeRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     @BeforeEach
     void setUp() {
@@ -43,6 +48,7 @@ public class SoftDeleteTest {
     @Test
     @DisplayName("Soft Delete 로 데이터를 삭제하는 대신 업데이트한다.")
     void success_soft_delete() {
+        userRepository.save(user);
         postRepository.save(post);
 
         likeRepository.save(like);
