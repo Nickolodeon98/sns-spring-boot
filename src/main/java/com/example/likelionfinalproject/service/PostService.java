@@ -85,7 +85,7 @@ public class PostService {
     public PostResponse removePost(Integer postId, String userName) {
         Post postToDelete = validate(postId, userName);
 
-        postRepository.delete(postToDelete);
+        postRepository.deleteById(postToDelete.getId());
 
         return PostResponse.of(postToDelete, "포스트 삭제 완료");
     }
