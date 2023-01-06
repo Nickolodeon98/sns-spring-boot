@@ -26,7 +26,7 @@ public class BaseEntityForPost {
     private LocalDateTime createdAt;
 
     @LastModifiedDate
-    @Column(updatable = false)
+    @Column
     private LocalDateTime lastModifiedAt;
 
     private LocalDateTime deletedAt;
