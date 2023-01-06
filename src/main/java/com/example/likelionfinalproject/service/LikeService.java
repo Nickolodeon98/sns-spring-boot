@@ -44,9 +44,12 @@ public class LikeService {
 
         Optional<Like> duplicateLike = likeRepository.findByPostIdAndUserId(postId, user.getId());
 
-        if (duplicateLike.isPresent()) {
-            likeRepository.delete(duplicateLike.get());
-            return "좋아요를 해제했습니다.";
+        if (duplicateLike.isPresent() ) {
+            if (duplicateLike.get().getDeletedAt() == null) {
+                likeRepository.delete(duplicateLike.get());
+                return "좋아요를 해제했습니다.";
+            }
+            like.setId(duplicateLike.get().getId());
         }
         likeRepository.save(like);
         return "좋아요를 눌렀습니다.";
