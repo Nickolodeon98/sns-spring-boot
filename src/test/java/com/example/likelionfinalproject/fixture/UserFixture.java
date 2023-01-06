@@ -16,4 +16,11 @@ public class UserFixture {
                 .userName(name)
                 .build();
     }
+
+    public static User get(Integer userId, String name) {
+        return User.builder()
+                .id(userId)
+                .userName(name)
+                .build();
+    }
 }
