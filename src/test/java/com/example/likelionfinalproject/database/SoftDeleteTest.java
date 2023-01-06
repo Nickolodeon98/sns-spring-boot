@@ -21,6 +21,8 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.Optional;
+
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -61,9 +63,9 @@ public class SoftDeleteTest {
 
         Assertions.assertEquals(1, likeRepository.countByPost(post));
 
-        Like likeAfterDeletion = likeRepository.findByPost(post);
+        Optional<Like> likeAfterDeletion = likeRepository.findByPostIdAndUserId(postId, userId);
 
-        Assertions.assertNotNull(likeAfterDeletion.getDeletedAt());
+        Assertions.assertNotNull(likeAfterDeletion.get().getDeletedAt());
     }
 
 }
