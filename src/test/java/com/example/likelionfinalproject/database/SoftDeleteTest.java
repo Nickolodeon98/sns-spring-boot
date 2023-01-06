@@ -19,13 +19,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Optional;
 
 @ExtendWith(SpringExtension.class)
+//@SpringBootTest
 @DataJpaTest
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.AUTO_CONFIGURED)
 @Slf4j
 public class SoftDeleteTest {
 
@@ -59,11 +61,18 @@ public class SoftDeleteTest {
         Assertions.assertEquals(1, likeRepository.countByPost(post));
 
         /* cascade 를 사용하여 영속성 객체 Post 와 Like 의 생명주기를 같게 하면 두 번 삭제해주지 않아도 된다. */
-        postRepository.delete(post);
+        Optional<Like> likeBeforeDeletion = likeRepository.findByPostIdAndUserId(postId, userId);
+        log.info("likeBeforeDeletion:{}", likeBeforeDeletion);
+
+        Assertions.assertNull(likeBeforeDeletion.get().getDeletedAt());
+
+        postRepository.deleteById(post.getId());
+        log.info("like:{}", like);
 
         Assertions.assertEquals(1, likeRepository.countByPost(post));
 
         Optional<Like> likeAfterDeletion = likeRepository.findByPostIdAndUserId(postId, userId);
+        log.info("likeAfterDeletion:{}", likeAfterDeletion);
 
         Assertions.assertNotNull(likeAfterDeletion.get().getDeletedAt());
     }
