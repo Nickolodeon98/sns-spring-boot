@@ -67,7 +67,9 @@ public class CommentService {
         Comment comment = validate(commentId, userName);
 
         /* Comment 객체를 변경하는 것이 맞을지, 댓글 요청 DTO 를 사용해 새로운 Comment 객체를 생성하는 것이 맞을 지 고민이다.
-         * 새로운 객체를 생성하는 것은 공간 복잡도를 늘리기 때문에 setter 를 사용해 기존 Comment 객체를 업데이트한다. */
+         * 새로운 객체를 생성하는 것은 공간 복잡도를 늘리기 때문에 setter 를 사용해 기존 Comment 객체를 업데이트한다.
+         * 뿐만 아니라 새로운 객체를 생성하더라도 기존 댓글의 아이디를 포함한 정보를 넣어주면 created_at 은 null 이 된다.
+         * 이는 updatable = false 이기 때문이다. */
         comment.setComment(commentRequest.getComment());
 
         Comment savedComment = commentRepository.save(comment);
