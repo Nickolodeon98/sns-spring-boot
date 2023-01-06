@@ -29,6 +29,8 @@ public class BaseEntityForPost {
     @Column(updatable = false)
     private LocalDateTime lastModifiedAt;
 
+    private LocalDateTime deletedAt;
+
     @PrePersist
     public void beforeCreation() {
         LocalDateTime localDateTime = LocalDateTime
