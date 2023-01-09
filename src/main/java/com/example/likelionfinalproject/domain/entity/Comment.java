@@ -12,8 +12,8 @@ import javax.persistence.*;
 @AllArgsConstructor
 @Getter
 @Setter
-@SQLDelete(sql = "UPDATE likes SET deleted_at = current_timestamp WHERE id = ?")
-@SQLDeleteAll(sql = "UPDATE likes SET deleted_at = current_timestamp WHERE id = ?")
+@SQLDelete(sql = "UPDATE comment SET deleted_at = current_timestamp WHERE id = ?")
+@SQLDeleteAll(sql = "UPDATE comment SET deleted_at = current_timestamp WHERE id = ?")
 public class Comment extends BaseEntityForPost {
 
     @Id
