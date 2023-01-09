@@ -28,10 +28,13 @@ public class LikeService {
          * 이미 좋아요를 눌렀다는 사실을 확인할 수 있다. */
 
         UserEntity userEntity = userRepository.findByUserName(userName)
-                .orElseThrow(()->new UserException(ErrorCode.USERNAME_NOT_FOUND, ErrorCode.USERNAME_NOT_FOUND.getMessage()));
+                .orElseThrow(()->new UserException(ErrorCode.USERNAME_NOT_FOUND));
 
         Post post = postRepository.findById(postId)
-                .orElseThrow(()->new UserException(ErrorCode.POST_NOT_FOUND, ErrorCode.POST_NOT_FOUND.getMessage()));
+                .orElseThrow(()->new UserException(ErrorCode.POST_NOT_FOUND));
+
+        if (post.getDeletedAt() != null)
+            throw new UserException(ErrorCode.POST_NOT_FOUND);
 
         /* DDD (Domain Driven Development) 를 적용하면 엔티티 내에서 빌더 패턴으로 엔티티를 생성할 수도 있다. */
         LikeEntity likeEntity = LikeEntity.builder()
