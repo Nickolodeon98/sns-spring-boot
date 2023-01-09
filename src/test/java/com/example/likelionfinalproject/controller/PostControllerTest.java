@@ -554,4 +554,24 @@ class PostControllerTest {
             verify(likeService).pushThumbsUp(eq(1), any());
         }
     }
+
+    @Nested
+    @DisplayName("좋아요 개수 세기")
+    class LikesCounter {
+
+        @Test
+        @DisplayName("성공")
+        @WithMockUser
+        void success_count_likes() throws Exception {
+            given(likeService.countLikes(eq(postId))).willReturn(3L);
+
+            mockMvc.perform(get(url + "/likes").with(csrf()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
+                    .andExpect(jsonPath("$.result").value(3L))
+                    .andDo(print());
+
+            verify(likeService).countLikes(eq(postId));
+        }
+    }
 }
