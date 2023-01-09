@@ -12,6 +12,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @Builder
+@Table(name = "users")
 public class UserEntity extends BaseEntityForUser implements Serializable  {
 
     @Id
