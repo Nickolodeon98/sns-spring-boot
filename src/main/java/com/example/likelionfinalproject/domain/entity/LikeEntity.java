@@ -3,6 +3,7 @@ package com.example.likelionfinalproject.domain.entity;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLDeleteAll;
+import org.hibernate.annotations.Target;
 import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
@@ -16,7 +17,6 @@ import javax.persistence.*;
 @Table(name = "likes")
 @SQLDelete(sql="UPDATE likes SET deleted_at = current_timestamp WHERE id = ?")
 @SQLDeleteAll(sql = "UPDATE likes SET deleted_at = current_timestamp WHERE id = ?")
-@Where(clause = "deleted_at IS NULL")
 public class LikeEntity extends BaseEntityForPost{
 
     @Id
