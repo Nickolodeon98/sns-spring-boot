@@ -3,6 +3,7 @@ package com.example.likelionfinalproject.domain.entity;
 import com.example.likelionfinalproject.domain.dto.PostRequest;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import java.util.List;
@@ -15,6 +16,7 @@ import java.util.List;
 @Builder
 @ToString(callSuper = true)
 @SQLDelete(sql = "UPDATE post SET deleted_at = current_timestamp WHERE id = ?")
+@Where(clause = "deleted_at IS NULL")
 public class Post extends BaseEntityForPost {
 
     @Id
