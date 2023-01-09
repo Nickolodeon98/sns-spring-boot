@@ -1,16 +1,12 @@
 package com.example.likelionfinalproject.database;
 
-import com.example.likelionfinalproject.domain.entity.Like;
+import com.example.likelionfinalproject.domain.entity.LikeEntity;
 import com.example.likelionfinalproject.domain.entity.Post;
-import com.example.likelionfinalproject.domain.entity.User;
-import com.example.likelionfinalproject.fixture.LikeFixture;
-import com.example.likelionfinalproject.fixture.PostFixture;
-import com.example.likelionfinalproject.fixture.UserFixture;
+import com.example.likelionfinalproject.domain.entity.UserEntity;
 import com.example.likelionfinalproject.repository.LikeRepository;
 import com.example.likelionfinalproject.repository.PostRepository;
 import com.example.likelionfinalproject.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.Session;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -22,18 +18,21 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @ExtendWith(SpringExtension.class)
 //@SpringBootTest
 @DataJpaTest
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.AUTO_CONFIGURED)
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
 @Slf4j
 public class SoftDeleteTest {
 
     Post post;
-    Like like;
-    User user;
+    Post savedPost;
+    LikeEntity likeEntity;
+    UserEntity userEntity;
     final Integer postId = 2;
     final Integer userId = 14;
     final String userName = "string";
@@ -43,35 +42,48 @@ public class SoftDeleteTest {
     private LikeRepository likeRepository;
     @Autowired
     private UserRepository userRepository;
+    final LocalDateTime timeInfo = LocalDateTime.of(2022, 12, 26, 18, 03, 14);
 
     @BeforeEach
     void setUp() {
-        user = UserFixture.get(userId, userName);
-        userRepository.save(user);
-        post = PostFixture.get(postId, user);
-        postRepository.save(post);
-        like = LikeFixture.get(post, user);
+//        like = LikeFixture.get(post);
+        likeEntity = LikeEntity.builder().build();
+        post = Post.builder()
+                .id(postId)
+                .body("body")
+                .title("title")
+                .build();
+
+        savedPost = postRepository.save(post);
+
+        likeEntity.setPost(savedPost);
+        savedPost.setLikeEntities(List.of(likeEntity));
+
     }
 
     @Test
     @DisplayName("Soft Delete 로 데이터를 삭제하는 대신 업데이트한다.")
     void success_soft_delete() {
-        likeRepository.save(like);
+        likeRepository.save(likeEntity);
 
-        Assertions.assertEquals(1, likeRepository.countByPost(post));
+        Assertions.assertEquals(1, likeRepository.countByPost(savedPost));
 
         /* cascade 를 사용하여 영속성 객체 Post 와 Like 의 생명주기를 같게 하면 두 번 삭제해주지 않아도 된다. */
-        Optional<Like> likeBeforeDeletion = likeRepository.findByPostIdAndUserId(postId, userId);
+        Optional<LikeEntity> likeBeforeDeletion = likeRepository.findByPost(savedPost);
         log.info("likeBeforeDeletion:{}", likeBeforeDeletion);
 
         Assertions.assertNull(likeBeforeDeletion.get().getDeletedAt());
+        Optional<Post> foundPost = postRepository.findById(savedPost.getId());
+        log.info("post:{}", foundPost);
 
-        postRepository.deleteById(post.getId());
-        log.info("like:{}", like);
+        postRepository.deleteById(savedPost.getId());
 
-        Assertions.assertEquals(1, likeRepository.countByPost(post));
+        Assertions.assertEquals(1, likeRepository.countByPost(savedPost));
 
-        Optional<Like> likeAfterDeletion = likeRepository.findByPostIdAndUserId(postId, userId);
+        Optional<Post> postAfterDeletion = postRepository.findById(savedPost.getId());
+        log.info("postAfterDeletion:{}", postAfterDeletion);
+
+        Optional<LikeEntity> likeAfterDeletion = likeRepository.findByPost(savedPost);
         log.info("likeAfterDeletion:{}", likeAfterDeletion);
 
         Assertions.assertNotNull(likeAfterDeletion.get().getDeletedAt());
