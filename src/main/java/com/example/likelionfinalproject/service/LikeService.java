@@ -21,6 +21,16 @@ public class LikeService {
     private final UserRepository userRepository;
     private final PostRepository postRepository;
 
+    private Post validate(Integer postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(()->new UserException(ErrorCode.POST_NOT_FOUND));
+
+        if (post.getDeletedAt() != null)
+            throw new UserException(ErrorCode.POST_NOT_FOUND);
+
+        return post;
+    }
+
     public String pushThumbsUp(Integer postId, String userName) {
 
         /* TODO: 사용자가 현재 요청된 포스트에 좋아요를 이미 눌렀을 때, 한 번 더 누른 상황이면 좋아요가 삭제된다.
@@ -30,11 +40,7 @@ public class LikeService {
         UserEntity userEntity = userRepository.findByUserName(userName)
                 .orElseThrow(()->new UserException(ErrorCode.USERNAME_NOT_FOUND));
 
-        Post post = postRepository.findById(postId)
-                .orElseThrow(()->new UserException(ErrorCode.POST_NOT_FOUND));
-
-        if (post.getDeletedAt() != null)
-            throw new UserException(ErrorCode.POST_NOT_FOUND);
+        Post post = validate(postId);
 
         /* DDD (Domain Driven Development) 를 적용하면 엔티티 내에서 빌더 패턴으로 엔티티를 생성할 수도 있다. */
         LikeEntity likeEntity = LikeEntity.builder()
@@ -56,5 +62,13 @@ public class LikeService {
         }
         likeRepository.save(likeEntity);
         return "좋아요를 눌렀습니다.";
+    }
+
+    public long countLikes(Integer postId) {
+        Post post = validate(postId);
+
+        long numOfLikes = likeRepository.countByPost(post);
+
+        return numOfLikes;
     }
 }
