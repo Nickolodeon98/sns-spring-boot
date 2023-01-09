@@ -1,15 +1,19 @@
 # 실제 DB를 사용해서 DB 테스트를 할 것이므로 YAML 파일에 datasource 관련 설정값들을 입력한다.
-
+server:
+  servlet:
+    encoding:
+      force-response: true
 spring:
   datasource:
-    driver-class-name: org.h2.Driver
-    url: jdbc:h2:mem:testdb;MODE=MySQL;DB_CLOSE_DELAY=-1
+    driverClassName: org.h2.Driver
+    url: jdbc:h2:mem:sprint1-db;MODE=MySQL;DB_CLOSE_DELAY=-1
     username: root
     password: 1234
+  h2:
+    console:
+      enabled: true
   jpa:
     show-sql: true
-    database-platform: org.hibernate.dialect.MySQL8Dialect
-    database: mysql
     hibernate:
       ddl-auto: update
   mvc:
