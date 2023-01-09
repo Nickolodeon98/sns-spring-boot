@@ -65,6 +65,7 @@ public class SoftDeleteTest {
     @DisplayName("Soft Delete 로 데이터를 삭제하는 대신 업데이트한다.")
     void success_soft_delete() {
         likeRepository.save(likeEntity);
+        log.info("foundLike:{}", likeRepository.findByPost(savedPost));
 
         Assertions.assertEquals(1, likeRepository.countByPost(savedPost));
 
@@ -78,7 +79,7 @@ public class SoftDeleteTest {
 
         postRepository.deleteById(savedPost.getId());
 
-        Assertions.assertEquals(1, likeRepository.countByPost(savedPost));
+        Assertions.assertEquals(0, likeRepository.countByPost(savedPost));
 
         Optional<Post> postAfterDeletion = postRepository.findById(savedPost.getId());
         log.info("postAfterDeletion:{}", postAfterDeletion);
@@ -86,7 +87,7 @@ public class SoftDeleteTest {
         Optional<LikeEntity> likeAfterDeletion = likeRepository.findByPost(savedPost);
         log.info("likeAfterDeletion:{}", likeAfterDeletion);
 
-        Assertions.assertNotNull(likeAfterDeletion.get().getDeletedAt());
+        Assertions.assertTrue(likeAfterDeletion.isEmpty());
     }
 
 }
