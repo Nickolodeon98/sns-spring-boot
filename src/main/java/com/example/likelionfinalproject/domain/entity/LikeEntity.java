@@ -15,7 +15,7 @@ import javax.persistence.*;
 @Table(name = "likes")
 @SQLDelete(sql="UPDATE likes SET deleted_at = current_timestamp WHERE id = ?")
 @SQLDeleteAll(sql = "UPDATE likes SET deleted_at = current_timestamp WHERE id = ?")
-public class Like extends BaseEntityForPost{
+public class LikeEntity extends BaseEntityForPost{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,7 +25,7 @@ public class Like extends BaseEntityForPost{
     private Post post;
 
     @ManyToOne
-    private User user;
+    private UserEntity userEntity;
 
 
 }

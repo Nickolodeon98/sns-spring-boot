@@ -1,6 +1,6 @@
 package com.example.likelionfinalproject.domain.dto;
 
-import com.example.likelionfinalproject.domain.entity.User;
+import com.example.likelionfinalproject.domain.entity.UserEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,7 +13,7 @@ public class UserJoinResponse {
     private Integer userId;
     private String userName;
 
-    public static UserJoinResponse of(User user) {
-        return new UserJoinResponse(user.getId(), user.getUserName());
+    public static UserJoinResponse of(UserEntity userEntity) {
+        return new UserJoinResponse(userEntity.getId(), userEntity.getUserName());
     }
 }

@@ -1,8 +1,8 @@
 package com.example.likelionfinalproject.service;
 
-import com.example.likelionfinalproject.domain.entity.Like;
+import com.example.likelionfinalproject.domain.entity.LikeEntity;
 import com.example.likelionfinalproject.domain.entity.Post;
-import com.example.likelionfinalproject.domain.entity.User;
+import com.example.likelionfinalproject.domain.entity.UserEntity;
 import com.example.likelionfinalproject.exception.ErrorCode;
 import com.example.likelionfinalproject.exception.UserException;
 import com.example.likelionfinalproject.repository.LikeRepository;
@@ -27,31 +27,31 @@ public class LikeService {
          * 매개 변수로 받은 포스트 아이디와 사용자 아이디를 사용해서 레코드를 조회했을 때 하나 이상의 레코드가 반환되면
          * 이미 좋아요를 눌렀다는 사실을 확인할 수 있다. */
 
-        User user = userRepository.findByUserName(userName)
+        UserEntity userEntity = userRepository.findByUserName(userName)
                 .orElseThrow(()->new UserException(ErrorCode.USERNAME_NOT_FOUND, ErrorCode.USERNAME_NOT_FOUND.getMessage()));
 
         Post post = postRepository.findById(postId)
                 .orElseThrow(()->new UserException(ErrorCode.POST_NOT_FOUND, ErrorCode.POST_NOT_FOUND.getMessage()));
 
         /* DDD (Domain Driven Development) 를 적용하면 엔티티 내에서 빌더 패턴으로 엔티티를 생성할 수도 있다. */
-        Like like = Like.builder()
+        LikeEntity likeEntity = LikeEntity.builder()
                 .post(post)
-                .user(user)
+                .userEntity(userEntity)
                 .build();
 
 //        likeRepository.findByPostIdAndUserId(postId, user.getId())
 //                .ifPresentOrElse(likeRepository::delete, () -> likeRepository.save(like));
 
-        Optional<Like> duplicateLike = likeRepository.findByPostIdAndUserId(postId, user.getId());
+        Optional<LikeEntity> duplicateLike = likeRepository.findByPostIdAndUserEntityId(postId, userEntity.getId());
 
         if (duplicateLike.isPresent() ) {
             if (duplicateLike.get().getDeletedAt() == null) {
                 likeRepository.delete(duplicateLike.get());
                 return "좋아요를 해제했습니다.";
             }
-            like.setId(duplicateLike.get().getId());
+            likeEntity.setId(duplicateLike.get().getId());
         }
-        likeRepository.save(like);
+        likeRepository.save(likeEntity);
         return "좋아요를 눌렀습니다.";
     }
 }
