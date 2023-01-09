@@ -1,6 +1,7 @@
 package com.example.likelionfinalproject.controller;
 
-import com.example.likelionfinalproject.enums.TestEssentials;
+import com.example.likelionfinalproject.domain.dto.AlarmResponse;
+import com.example.likelionfinalproject.enums.AlarmTestEssentials;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -15,9 +16,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -68,12 +71,12 @@ class AlarmControllerTest {
         @DisplayName("성공")
         void success_display_alarms() throws Exception {
             AlarmResponse alarmResponse = AlarmResponse.builder()
-                    .id()
-                    .alarmType()
-                    .fromUserId()
-                    .targetId()
-                    .text()
-                    .createdAt()
+                    .id(Integer.parseInt(AlarmTestEssentials.ALARM_ID.name()))
+                    .alarmType(AlarmTestEssentials.ALARM_TYPE.name())
+                    .fromUserId(Integer.parseInt(AlarmTestEssentials.FROM_USER.name()))
+                    .targetId(Integer.parseInt(AlarmTestEssentials.TARGET_USER.name()))
+                    .text(AlarmTestEssentials.TEXT.name())
+                    .createdAt(LocalDateTime.of(LocalDate.of(2023, 1, 10), LocalTime.of(10, 10, 10) ))
                     .build();
 
             Pageable pageable = PageRequest.of(0, 20, Sort.Direction.DESC, "createdAt");
@@ -82,7 +85,7 @@ class AlarmControllerTest {
 
             given(alarmService.fetchAllAlarms(pageable)).willReturn(alarms);
 
-            mockMvc.perform(get(TestEssentials.ALARM_URL.name()).with(csrf())
+            mockMvc.perform(get(AlarmTestEssentials.ALARM_URL.name()).with(csrf())
                     .content(objectMapper.writeValueAsBytes(pageable)))
                     .andExpect(status().isAccepted())
                     .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
