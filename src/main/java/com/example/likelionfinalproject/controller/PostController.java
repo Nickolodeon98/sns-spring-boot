@@ -139,4 +139,11 @@ public class PostController {
         return Response.success(response);
     }
 
+    @Operation(summary = "좋아요 개수 세는 기능", description = "모든 사용자는 특정 포스트에 총 몇 개의 좋아요가 눌렸는지 볼 수 있다.")
+    @ResponseBody
+    @GetMapping("/{postId}/likes")
+    public Response<Long> showLikesVolume(@PathVariable Integer postId) {
+        Long likesVolume = likeService.countLikes(postId);
+        return Response.success(likesVolume);
+    }
 }
