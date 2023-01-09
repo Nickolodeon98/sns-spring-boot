@@ -504,7 +504,7 @@ class PostControllerTest {
 
     @Nested
     @DisplayName("좋아요 등록")
-    class LikeGeneration {
+    class LikeEntityGeneration {
 
         /* 좋아요가 눌릴 시 서비스단 likeService 에서 성공 메시지를 반환하는 상황을 가정한다. */
         @Test
