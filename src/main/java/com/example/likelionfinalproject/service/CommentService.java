@@ -29,10 +29,13 @@ public class CommentService {
     public CommentResponse uploadComment(CommentRequest commentRequest, String userName, Integer postId) {
         /* TODO: commentRequest 로 부터 comment 내용을 받아서 Comment 엔티티에 저장한다. */
         UserEntity userEntity = userRepository.findByUserName(userName)
-                .orElseThrow(()->new UserException(ErrorCode.USERNAME_NOT_FOUND, ErrorCode.USERNAME_NOT_FOUND.getMessage()));
+                .orElseThrow(()->new UserException(ErrorCode.USERNAME_NOT_FOUND));
 
         Post post = postRepository.findById(postId)
-                .orElseThrow(()->new UserException(ErrorCode.POST_NOT_FOUND, ErrorCode.POST_NOT_FOUND.getMessage()));
+                .orElseThrow(()->new UserException(ErrorCode.POST_NOT_FOUND));
+
+        if (post.getDeletedAt() != null)
+            throw new UserException(ErrorCode.POST_NOT_FOUND);
 
         Comment savedComment = commentRepository.save(commentRequest.toEntity(post, userEntity));
 
@@ -40,9 +43,11 @@ public class CommentService {
     }
 
     public Page<CommentResponse> fetchComments(Pageable pageable, Integer postId) {
-        postRepository.findById(postId)
-                .orElseThrow(()->new UserException(ErrorCode.POST_NOT_FOUND, ErrorCode.POST_NOT_FOUND.getMessage()));
+        Post post = postRepository.findById(postId)
+                .orElseThrow(()->new UserException(ErrorCode.POST_NOT_FOUND));
 
+        if (post.getDeletedAt() != null)
+            throw new UserException(ErrorCode.POST_NOT_FOUND);
 //        Page<Comment> comments = new PageImpl<>(post.getComments());
 
         Page<Comment> comments = commentRepository.findAllByPostId(postId, pageable);
@@ -52,10 +57,13 @@ public class CommentService {
 
     private Comment validate(Integer commentId, String userName) {
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(()->new UserException(ErrorCode.COMMENT_NOT_FOUND, ErrorCode.COMMENT_NOT_FOUND.getMessage()));
+                .orElseThrow(()->new UserException(ErrorCode.COMMENT_NOT_FOUND));
+
+        if (comment.getDeletedAt() != null)
+            throw new UserException(ErrorCode.COMMENT_NOT_FOUND);
 
         if (!userName.equals(comment.getAuthor().getUserName()))
-            throw new UserException(ErrorCode.INVALID_PERMISSION, ErrorCode.INVALID_PERMISSION.getMessage());
+            throw new UserException(ErrorCode.INVALID_PERMISSION);
 
         /* TODO: 데이터베이스 에러가 발생하는 상황을 생각해보고 예외 처리한다. */
 

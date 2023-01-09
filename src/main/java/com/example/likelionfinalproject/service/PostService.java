@@ -62,6 +62,10 @@ public class PostService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(()-> new UserException(ErrorCode.POST_NOT_FOUND));
 
+
+        if (post.getDeletedAt() != null)
+            throw new UserException(ErrorCode.POST_NOT_FOUND);
+
         /* 포스트의 작성자로 등록되어 있는 사용자를 못 찾을 때 */
         UserEntity userEntity = userRepository.findByUserName(post.getAuthor().getUserName())
                 .orElseThrow(()-> new UserException(ErrorCode.USERNAME_NOT_FOUND, ErrorCode.USERNAME_NOT_FOUND.getMessage()));
