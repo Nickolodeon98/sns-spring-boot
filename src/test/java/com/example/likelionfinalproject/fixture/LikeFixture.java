@@ -7,6 +7,12 @@ import com.example.likelionfinalproject.domain.entity.User;
 
 public class LikeFixture {
 
+    public static Like get(Post post) {
+        return Like.builder()
+                .post(post)
+                .build();
+    }
+
     public static Like get(Post post, User user) {
         return Like.builder()
                 .post(post)
