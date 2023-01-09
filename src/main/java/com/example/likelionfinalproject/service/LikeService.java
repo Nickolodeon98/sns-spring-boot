@@ -64,11 +64,9 @@ public class LikeService {
         return "좋아요를 눌렀습니다.";
     }
 
-    public long countLikes(Integer postId) {
+    public Long countLikes(Integer postId) {
         Post post = validate(postId);
 
-        long numOfLikes = likeRepository.countByPost(post);
-
-        return numOfLikes;
+        return likeRepository.countByPost(post);
     }
 }

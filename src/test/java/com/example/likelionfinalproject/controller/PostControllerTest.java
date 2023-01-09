@@ -563,12 +563,12 @@ class PostControllerTest {
         @DisplayName("성공")
         @WithMockUser
         void success_count_likes() throws Exception {
-            given(likeService.countLikes(eq(postId))).willReturn(3);
+            given(likeService.countLikes(eq(postId))).willReturn(3L);
 
             mockMvc.perform(get(url + "/likes").with(csrf()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
-                    .andExpect(jsonPath("$.result").value(3))
+                    .andExpect(jsonPath("$.result").value(3L))
                     .andDo(print());
 
             verify(likeService).countLikes(eq(postId));
