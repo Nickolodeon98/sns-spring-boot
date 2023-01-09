@@ -1,7 +1,5 @@
 package com.example.likelionfinalproject.domain.entity;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.jsonschema.JsonSerializableSchema;
 import lombok.*;
 
 import javax.persistence.*;
@@ -14,7 +12,8 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @Builder
-public class User extends BaseEntityForUser implements Serializable  {
+@Table(name = "users")
+public class UserEntity extends BaseEntityForUser implements Serializable  {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,6 +28,6 @@ public class User extends BaseEntityForUser implements Serializable  {
     @OneToMany(mappedBy = "author")
     private List<Comment> comments;
 
-    @OneToMany(mappedBy="user")
-    private List<Like> likes;
+    @OneToMany(mappedBy="userEntity")
+    private List<LikeEntity> likeEntities;
 }

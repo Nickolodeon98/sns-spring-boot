@@ -4,7 +4,7 @@ import com.example.likelionfinalproject.domain.dto.PostRequest;
 import com.example.likelionfinalproject.domain.dto.PostResponse;
 import com.example.likelionfinalproject.domain.dto.SelectedPostResponse;
 import com.example.likelionfinalproject.domain.entity.Post;
-import com.example.likelionfinalproject.domain.entity.User;
+import com.example.likelionfinalproject.domain.entity.UserEntity;
 import com.example.likelionfinalproject.exception.ErrorCode;
 import com.example.likelionfinalproject.exception.UserException;
 import com.example.likelionfinalproject.repository.PostRepository;
@@ -16,8 +16,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.sql.SQLDataException;
-import java.sql.SQLException;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,10 +29,10 @@ public class PostService {
     public PostResponse createPost(PostRequest postRequest, String authorId) {
         Post savedPost;
         Post post = postRequest.toEntity();
-        User user = userRepository.findByUserName(authorId)
+        UserEntity userEntity = userRepository.findByUserName(authorId)
                 .orElseThrow(() -> new UserException(ErrorCode.USERNAME_NOT_FOUND, authorId + "은 없는 아이디입니다."));
 
-        post.setAuthor(user);
+        post.setAuthor(userEntity);
 
         savedPost = postRepository.save(post);
 
@@ -64,12 +62,16 @@ public class PostService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(()-> new UserException(ErrorCode.POST_NOT_FOUND));
 
+
+        if (post.getDeletedAt() != null)
+            throw new UserException(ErrorCode.POST_NOT_FOUND);
+
         /* 포스트의 작성자로 등록되어 있는 사용자를 못 찾을 때 */
-        User user = userRepository.findByUserName(post.getAuthor().getUserName())
+        UserEntity userEntity = userRepository.findByUserName(post.getAuthor().getUserName())
                 .orElseThrow(()-> new UserException(ErrorCode.USERNAME_NOT_FOUND, ErrorCode.USERNAME_NOT_FOUND.getMessage()));
 
         /* Authentication 에서 가져온 사용자 아이디와 postId 로 찾은 포스트의 사용자 아이디의 일치 여부를 확인한다 */
-        if (!userName.equals(user.getUserName()))
+        if (!userName.equals(userEntity.getUserName()))
             throw new UserException(ErrorCode.INVALID_PERMISSION, ErrorCode.INVALID_PERMISSION.getMessage());
 
         return post;
@@ -85,7 +87,7 @@ public class PostService {
     public PostResponse removePost(Integer postId, String userName) {
         Post postToDelete = validate(postId, userName);
 
-        postRepository.delete(postToDelete);
+        postRepository.deleteById(postToDelete.getId());
 
         return PostResponse.of(postToDelete, "포스트 삭제 완료");
     }

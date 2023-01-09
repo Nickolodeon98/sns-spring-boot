@@ -1,6 +1,6 @@
 package com.example.likelionfinalproject.domain.dto;
 
-import com.example.likelionfinalproject.domain.entity.User;
+import com.example.likelionfinalproject.domain.entity.UserEntity;
 import lombok.*;
 
 @Getter
@@ -15,7 +15,7 @@ public class UserRequest {
     private String password;
 
 
-    public User toEntity(String password) {
-        return User.builder().userName(this.userName).password(password).build();
+    public UserEntity toEntity(String password) {
+        return UserEntity.builder().userName(this.userName).password(password).build();
     }
 }

@@ -25,11 +25,11 @@ import java.time.format.DateTimeFormatter;
 public class BaseEntityForUser {
 
     @CreatedDate
-    @Column(updatable = false)
+    @Column
     private LocalDateTime registeredAt;
 
     @LastModifiedDate
-    @Column(updatable = false)
+    @Column
     private LocalDateTime updatedAt;
 
     @PrePersist
