@@ -1,8 +1,8 @@
 package com.example.likelionfinalproject.controller;
 
-import com.example.likelionfinalproject.domain.Response;
-import com.example.likelionfinalproject.domain.dto.*;
-import com.example.likelionfinalproject.domain.entity.Post;
+import com.example.likelionfinalproject.domain.dto.request.CommentRequest;
+import com.example.likelionfinalproject.domain.dto.request.PostRequest;
+import com.example.likelionfinalproject.domain.dto.response.*;
 import com.example.likelionfinalproject.enums.PostTestEssentials;
 import com.example.likelionfinalproject.exception.ErrorCode;
 import com.example.likelionfinalproject.exception.UserException;
@@ -18,7 +18,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.client.RestClientTest;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.*;

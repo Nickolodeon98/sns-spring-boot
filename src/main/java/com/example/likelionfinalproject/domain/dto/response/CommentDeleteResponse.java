@@ -1,4 +1,4 @@
-package com.example.likelionfinalproject.domain.dto;
+package com.example.likelionfinalproject.domain.dto.response;
 
 import com.example.likelionfinalproject.domain.entity.Comment;
 import lombok.*;

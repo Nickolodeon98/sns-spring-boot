@@ -30,4 +30,7 @@ public class UserEntity extends BaseEntityForUser implements Serializable  {
 
     @OneToMany(mappedBy="userEntity")
     private List<LikeEntity> likeEntities;
+
+    @OneToMany(mappedBy="userEntity")
+    private List<Alarm> alarms;
 }
