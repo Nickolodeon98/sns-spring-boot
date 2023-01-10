@@ -48,12 +48,14 @@ public class SecurityConfig{
                 .and()
                 .authorizeRequests()
                 .antMatchers(HttpMethod.GET, "/api/v1/posts", "/api/v1/posts/{postId:\\d+}",
-                        "/api/v1/posts/{postId:\\d+}/comments", "/api/v1/posts/{postId:\\d+}/likes",
-                        "/api/v1/alarms").permitAll()
+                        "/api/v1/posts/{postId:\\d+}/comments", "/api/v1/posts/{postId:\\d+}/likes").permitAll()
                 .and()
                 .antMatcher("/api/v1/posts/**")
                 .authorizeRequests()
                 .anyRequest().authenticated()
+                .and()
+                .antMatcher("/api/v1/alarms")
+                .authorizeRequests().anyRequest().authenticated()
                 .and()
                 .addFilterBefore(new JwtAuthenticationFilter(secretKey, exceptionResolver), UsernamePasswordAuthenticationFilter.class)
                 .build();
