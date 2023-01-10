@@ -1,8 +1,7 @@
 package com.example.likelionfinalproject.service;
 
-import com.example.likelionfinalproject.domain.dto.AlarmRequest;
+import com.example.likelionfinalproject.domain.dto.request.AlarmRequest;
 import com.example.likelionfinalproject.domain.dto.AlarmType;
-import com.example.likelionfinalproject.domain.entity.Alarm;
 import com.example.likelionfinalproject.domain.entity.LikeEntity;
 import com.example.likelionfinalproject.domain.entity.Post;
 import com.example.likelionfinalproject.domain.entity.UserEntity;

@@ -1,6 +1,6 @@
 package com.example.likelionfinalproject.controller;
 
-import com.example.likelionfinalproject.domain.dto.AlarmResponse;
+import com.example.likelionfinalproject.domain.dto.response.AlarmResponse;
 import com.example.likelionfinalproject.enums.AlarmTestEssentials;
 import com.example.likelionfinalproject.service.AlarmService;
 import com.fasterxml.jackson.databind.ObjectMapper;

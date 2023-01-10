@@ -1,10 +1,9 @@
 package com.example.likelionfinalproject.controller;
 
 import com.example.likelionfinalproject.domain.Response;
-import com.example.likelionfinalproject.domain.dto.AlarmResponse;
+import com.example.likelionfinalproject.domain.dto.response.AlarmResponse;
 import com.example.likelionfinalproject.service.AlarmService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Required;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;

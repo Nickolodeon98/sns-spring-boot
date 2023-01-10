@@ -1,5 +1,6 @@
-package com.example.likelionfinalproject.domain.dto;
+package com.example.likelionfinalproject.domain.dto.request;
 
+import com.example.likelionfinalproject.domain.dto.AlarmType;
 import com.example.likelionfinalproject.domain.entity.Alarm;
 import com.example.likelionfinalproject.domain.entity.UserEntity;
 import lombok.AllArgsConstructor;

@@ -1,6 +1,10 @@
 package com.example.likelionfinalproject.service;
 
 import com.example.likelionfinalproject.domain.dto.*;
+import com.example.likelionfinalproject.domain.dto.request.AlarmRequest;
+import com.example.likelionfinalproject.domain.dto.request.CommentRequest;
+import com.example.likelionfinalproject.domain.dto.response.CommentDeleteResponse;
+import com.example.likelionfinalproject.domain.dto.response.CommentResponse;
 import com.example.likelionfinalproject.domain.entity.Comment;
 import com.example.likelionfinalproject.domain.entity.Post;
 import com.example.likelionfinalproject.domain.entity.UserEntity;
@@ -11,7 +15,6 @@ import com.example.likelionfinalproject.repository.CommentRepository;
 import com.example.likelionfinalproject.repository.PostRepository;
 import com.example.likelionfinalproject.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.Session;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;

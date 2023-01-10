@@ -1,6 +1,6 @@
 package com.example.likelionfinalproject.service;
 
-import com.example.likelionfinalproject.domain.dto.AlarmResponse;
+import com.example.likelionfinalproject.domain.dto.response.AlarmResponse;
 import com.example.likelionfinalproject.domain.entity.Alarm;
 import com.example.likelionfinalproject.domain.entity.UserEntity;
 import com.example.likelionfinalproject.exception.ErrorCode;
