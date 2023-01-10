@@ -1,5 +1,6 @@
 package com.example.likelionfinalproject.configuration;
 
+import com.example.likelionfinalproject.exception.ErrorCode;
 import com.example.likelionfinalproject.service.UserService;
 import com.example.likelionfinalproject.utils.TokenUtils;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -30,6 +31,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            request.setAttribute("exception", ErrorCode.INVALID_PERMISSION.name());
             filterChain.doFilter(request, response);
             return;
         }
