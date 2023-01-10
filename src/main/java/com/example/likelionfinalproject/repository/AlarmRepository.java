@@ -10,4 +10,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface AlarmRepository extends JpaRepository<Alarm, Integer> {
 
     Page<Alarm> findAllByUserEntity(UserEntity user, Pageable pageable);
+
+    Page<Alarm> findAllByTargetId(Integer targetId, Pageable pageable);
 }
