@@ -1,10 +1,9 @@
 package com.example.likelionfinalproject.service;
 
-import com.example.likelionfinalproject.domain.dto.PostRequest;
-import com.example.likelionfinalproject.domain.dto.PostResponse;
-import com.example.likelionfinalproject.domain.dto.SelectedPostResponse;
+import com.example.likelionfinalproject.domain.dto.response.PostResponse;
+import com.example.likelionfinalproject.domain.dto.response.SelectedPostResponse;
 import com.example.likelionfinalproject.domain.entity.Post;
-import com.example.likelionfinalproject.domain.entity.User;
+import com.example.likelionfinalproject.domain.entity.UserEntity;
 import com.example.likelionfinalproject.exception.ErrorCode;
 import com.example.likelionfinalproject.exception.UserException;
 import com.example.likelionfinalproject.fixture.PostFixture;
@@ -20,8 +19,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.lang.Nullable;
-import org.springframework.test.web.servlet.ResultMatcher;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -39,19 +36,19 @@ class PostServiceTest {
     UserRepository userRepository;
     @InjectMocks
     PostService postService;
-    User mockUser;
+    UserEntity mockUserEntity;
     Post mockPost;
     Integer postId;
     @BeforeEach
     void setUp() {
         postId = 1;
-        mockUser = UserFixture.get();
+        mockUserEntity = UserFixture.get();
         mockPost = PostFixture.get(postId);
     }
     /* 테스트 코드마다 같은 패턴에 다른 인수들이 사용되고 있으므로 다른 인수를 주입하는 메서드를 정의한다. */
     private static Stream<Arguments> provideObjectAndErrorCase() {
         Post mockPost = PostFixture.get();
-        User mockCurrentUser = UserFixture.get("다른 작성자");
+        UserEntity mockCurrentUserEntity = UserFixture.get("다른 작성자");
         return Stream.of(Arguments.of(Named.of("포스트 없음", ErrorCode.POST_NOT_FOUND),
                         Optional.empty(),
                         Optional.of(mockPost.getAuthor()),
@@ -63,7 +60,7 @@ class PostServiceTest {
                 Arguments.of( Named.of("작성자 사용자 불일치", ErrorCode.INVALID_PERMISSION),
                         Optional.of(mockPost),
                         Optional.of(mockPost.getAuthor()),
-                        mockCurrentUser.getUserName()));
+                        mockCurrentUserEntity.getUserName()));
     }
     @Nested
     @DisplayName("포스트 등록")
@@ -71,31 +68,31 @@ class PostServiceTest {
         @Test
         @DisplayName("성공")
         void success_add_post() {
-            when(userRepository.findByUserName(mockUser.getUserName())).thenReturn(Optional.of(mockPost.getAuthor()));
+            when(userRepository.findByUserName(mockUserEntity.getUserName())).thenReturn(Optional.of(mockPost.getAuthor()));
             when(postRepository.save(any())).thenReturn(mockPost);
 
-            PostResponse postResponse = postService.createPost(mockPost.toRequest(), mockUser.getUserName());
+            PostResponse postResponse = postService.createPost(mockPost.toRequest(), mockUserEntity.getUserName());
 
             Assertions.assertDoesNotThrow(() -> new UserException(ErrorCode.USERNAME_NOT_FOUND,
-                    mockUser.getUserName() + "은 없는 아이디입니다."));
+                    mockUserEntity.getUserName() + "은 없는 아이디입니다."));
 
             Assertions.assertEquals(mockPost.getId(), postResponse.getPostId());
 
             verify(postRepository).save(any());
-            verify(userRepository).findByUserName(mockUser.getUserName());
+            verify(userRepository).findByUserName(mockUserEntity.getUserName());
         }
 
         @Test
         @DisplayName("실패")
         void fail_add_post() {
-            when(userRepository.findByUserName(mockUser.getUserName())).thenReturn(Optional.empty());
+            when(userRepository.findByUserName(mockUserEntity.getUserName())).thenReturn(Optional.empty());
 
             UserException e = Assertions.assertThrows(UserException.class,
-                    () -> postService.createPost(mockPost.toRequest(), mockUser.getUserName()));
+                    () -> postService.createPost(mockPost.toRequest(), mockUserEntity.getUserName()));
 
             Assertions.assertEquals(ErrorCode.USERNAME_NOT_FOUND, e.getErrorCode());
 
-            verify(userRepository).findByUserName(mockUser.getUserName());
+            verify(userRepository).findByUserName(mockUserEntity.getUserName());
         }
     }
     @Nested

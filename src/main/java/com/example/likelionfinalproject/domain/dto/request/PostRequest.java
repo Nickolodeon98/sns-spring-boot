@@ -1,7 +1,7 @@
-package com.example.likelionfinalproject.domain.dto;
+package com.example.likelionfinalproject.domain.dto.request;
 
 import com.example.likelionfinalproject.domain.entity.Post;
-import com.example.likelionfinalproject.domain.entity.User;
+import com.example.likelionfinalproject.domain.entity.UserEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,7 +23,7 @@ public class PostRequest {
                 .build();
     }
 
-    public Post toEntity(Integer postId, User author) {
+    public Post toEntity(Integer postId, UserEntity author) {
         return Post.builder()
                 .id(postId)
                 .title(title)

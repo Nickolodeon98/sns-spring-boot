@@ -1,8 +1,8 @@
 package com.example.likelionfinalproject.controller;
 
-import com.example.likelionfinalproject.domain.dto.UserJoinResponse;
-import com.example.likelionfinalproject.domain.dto.UserLoginResponse;
-import com.example.likelionfinalproject.domain.dto.UserRequest;
+import com.example.likelionfinalproject.domain.dto.response.UserJoinResponse;
+import com.example.likelionfinalproject.domain.dto.response.UserLoginResponse;
+import com.example.likelionfinalproject.domain.dto.request.UserRequest;
 import com.example.likelionfinalproject.enums.UserTestEssentials;
 import com.example.likelionfinalproject.exception.ErrorCode;
 import com.example.likelionfinalproject.exception.UserException;
@@ -33,7 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(UserController.class)
-class UserControllerTest {
+class UserEntityControllerTest {
 
     @Autowired
     MockMvc mockMvc;
@@ -139,7 +139,7 @@ class UserControllerTest {
         @ParameterizedTest
         @DisplayName("실패")
         @WithMockUser
-        @MethodSource("com.example.likelionfinalproject.controller.UserControllerTest#provideErrorCases")
+        @MethodSource("com.example.likelionfinalproject.controller.UserEntityControllerTest#provideErrorCases")
         void fail_login(ResultMatcher error, ErrorCode code) throws Exception {
             given(userService.verify(any())).willThrow(new UserException(code, code.getMessage()));
 
