@@ -53,17 +53,6 @@ public class LikeService {
                 .userEntity(userEntity)
                 .build();
 
-        AlarmRequest alarmRequest = AlarmRequest.builder()
-                .alarmType(AlarmType.NEW_LIKE_ON_POST)
-                .userEntity(userEntity)
-                .fromUserId(userEntity.getId())
-                .targetId(post.getAuthor().getId())
-                .text("new like!")
-                .build();
-
-
-        alarmRepository.save(alarmRequest.toEntity());
-
         Optional<LikeEntity> duplicateLike = likeRepository.findByPostIdAndUserEntityId(postId, userEntity.getId());
 
         if (duplicateLike.isPresent() ) {
@@ -74,6 +63,16 @@ public class LikeService {
             likeEntity.setId(duplicateLike.get().getId());
         }
         likeRepository.save(likeEntity);
+
+        AlarmRequest alarmRequest = AlarmRequest.builder()
+                .alarmType(AlarmType.NEW_LIKE_ON_POST)
+                .fromUserId(userEntity.getId())
+                .targetId(post.getAuthor().getId())
+                .text("new like!")
+                .build();
+
+        alarmRepository.save(alarmRequest.toEntity(userEntity));
+
         return "좋아요를 눌렀습니다.";
     }
 
