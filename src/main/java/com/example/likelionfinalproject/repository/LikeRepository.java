@@ -15,6 +15,10 @@ public interface LikeRepository extends JpaRepository<LikeEntity, Integer> {
     @Where(clause = "deleted_at IS NULL")
     Optional<LikeEntity> findByPost(Post post);
 
-    @Where(clause = "deleted_at IS NULL")
-    long countByPost(Post post);
+    @Query(value = "SELECT l FROM LikeEntity l WHERE l.deletedAt is null AND l.id = ?1")
+    @Override
+    Optional<LikeEntity> findById(Integer id);
+
+    @Query(value = "SELECT count(l) FROM LikeEntity l WHERE l.deletedAt is null AND l.post.id = ?1")
+    long countByPostId(Integer id);
 }
