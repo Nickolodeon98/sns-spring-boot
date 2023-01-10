@@ -57,7 +57,7 @@ public class PostController {
     @Operation(summary = "전체 포스트 조회", description = "현재까지 작성된 모든 포스트를 조회할 수 있다.")
     @GetMapping
     @ResponseBody
-    public Response<Page<SelectedPostResponse>> getEveryPost(@PageableDefault(size=20, sort="id", direction = Sort.Direction.DESC) Pageable pageable) {
+    public Response<Page<SelectedPostResponse>> getEveryPost(@PageableDefault(size=20, sort="lastModifiedAt", direction = Sort.Direction.DESC) Pageable pageable) {
         Page<SelectedPostResponse> responses = postService.listAllPosts(pageable);
         log.info("Responses:{}", responses);
         return Response.success(responses);
