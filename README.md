@@ -4,7 +4,7 @@ http://ec2-13-209-88-90.ap-northeast-2.compute.amazonaws.com:8080/swagger-ui/
 
 # 📁 Entity Relationship Diagram
 
-![img.png](img.png)
+![img_1.png](img_1.png)
 
 # 🧾 Endpoints
 
