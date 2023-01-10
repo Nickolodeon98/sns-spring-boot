@@ -64,10 +64,10 @@ public class SoftDeleteTest {
     @Test
     @DisplayName("Soft Delete 로 데이터를 삭제하는 대신 업데이트한다.")
     void success_soft_delete() {
-        likeRepository.save(likeEntity);
+        LikeEntity savedLike = likeRepository.save(likeEntity);
         log.info("foundLike:{}", likeRepository.findByPost(savedPost));
 
-        Assertions.assertEquals(1, likeRepository.countByPost(savedPost));
+        Assertions.assertEquals(1, likeRepository.countByPostId(savedPost.getId()));
 
         /* cascade 를 사용하여 영속성 객체 Post 와 Like 의 생명주기를 같게 하면 두 번 삭제해주지 않아도 된다. */
         Optional<LikeEntity> likeBeforeDeletion = likeRepository.findByPost(savedPost);
@@ -79,12 +79,17 @@ public class SoftDeleteTest {
 
         postRepository.deleteById(savedPost.getId());
 
-        Assertions.assertEquals(0, likeRepository.countByPost(savedPost));
+        log.info("countByPost:{}", likeRepository.countByPostId(savedPost.getId()));
+        Assertions.assertEquals(0, likeRepository.countByPostId(savedPost.getId()));
 
         Optional<Post> postAfterDeletion = postRepository.findById(savedPost.getId());
         log.info("postAfterDeletion:{}", postAfterDeletion);
 
-        Optional<LikeEntity> likeAfterDeletion = likeRepository.findByPost(savedPost);
+        /* 더 이상에는 테스트 내에서 저장하고 지운 포스트가 soft-delete 되어서 find 로 조회가 되지 않으며, 존재하지 않는 포스트로 취급받게 되었다.
+         * 그래서 더이상 Post 객체로 Like row 를 찾을 수 없다. (Post 객체가 사라졌기 때문에)
+         * 그래서 아래의 방식은 사용하지 않고, 대신에 Like 저장 시 반환된 likes 테이블의 row 에 대한 참조 엔티티 객체를 사용해 LikeEntity 객체를 찾는다. */
+//        Optional<LikeEntity> likeAfterDeletion = likeRepository.findByPost(savedPost);
+        Optional<LikeEntity> likeAfterDeletion = likeRepository.findById(savedLike.getId());
         log.info("likeAfterDeletion:{}", likeAfterDeletion);
 
         Assertions.assertTrue(likeAfterDeletion.isEmpty());

@@ -18,6 +18,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -55,7 +57,7 @@ public class PostController {
     @Operation(summary = "전체 포스트 조회", description = "현재까지 작성된 모든 포스트를 조회할 수 있다.")
     @GetMapping
     @ResponseBody
-    public Response<Page<SelectedPostResponse>> getEveryPost(@PageableDefault(size=20, sort="id", direction = Sort.Direction.DESC) Pageable pageable) {
+    public Response<Page<SelectedPostResponse>> getEveryPost(@PageableDefault(size=20, sort="lastModifiedAt", direction = Sort.Direction.DESC) Pageable pageable) {
         Page<SelectedPostResponse> responses = postService.listAllPosts(pageable);
         log.info("Responses:{}", responses);
         return Response.success(responses);
@@ -105,43 +107,43 @@ public class PostController {
     @Operation(summary = "댓글 수정", description = "인증된 사용자는 자신이 작성한 댓글을 수정할 수 있다.")
     @ResponseBody
     @PutMapping("/{postId}/comments/{id}")
-    public Response<CommentResponse> editComment(@PathVariable Integer postId, @PathVariable Integer id,
+    public ResponseEntity<Response<CommentResponse>> editComment(@PathVariable Integer postId, @PathVariable Integer id,
                                                  @RequestBody(required=false) CommentRequest commentRequest,
                                                  @ApiIgnore Authentication authentication) {
 
         CommentResponse commentResponse = commentService.modifyComment(commentRequest, id, authentication.getName());
 
-        return Response.success(commentResponse);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(Response.success(commentResponse));
     }
 
     @Operation(summary = "댓글 삭제", description = "인증된 사용자는 자신이 작성한 댓글을 삭제할 수 있다.")
     @ResponseBody
     @DeleteMapping("/{postId}/comments/{id}")
-    public Response<CommentDeleteResponse> deleteComment(@PathVariable Integer postId, @PathVariable Integer id,
+    public ResponseEntity<Response<CommentDeleteResponse>> deleteComment(@PathVariable Integer postId, @PathVariable Integer id,
                                                          @ApiIgnore Authentication authentication) {
         CommentDeleteResponse response = commentService.removeComment(id, authentication.getName());
 
-        return Response.success(response);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(Response.success(response));
     }
 
     @Operation(summary = "마이 피드", description = "인증된 사용자는 자신이 작성한 포스트를 모아서 볼 수 있다.")
     @ResponseBody
     @GetMapping("/my")
-    public Response<Page<SelectedPostResponse>> retrievePast(@ApiIgnore Authentication authentication,
-                                                             @PageableDefault(size = 20, direction = Sort.Direction.DESC, sort = "lastModifiedAt")
+    public ResponseEntity<Response<Page<SelectedPostResponse>>> retrievePast(@ApiIgnore Authentication authentication,
+                                                                             @PageableDefault(size = 20, direction = Sort.Direction.DESC, sort = "lastModifiedAt")
                                                              Pageable pageable) {
         Page<SelectedPostResponse> recalled = postService.showMyPosts(authentication.getName(), pageable);
 
-        return Response.success(recalled);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(Response.success(recalled));
     }
 
     @Operation(summary = "좋아요 누르는 기능", description = "인증된 사용자는 포스트에 좋아요를 달 수 있다.")
     @ResponseBody
     @PostMapping("/{postId}/likes")
-    public Response<String> toggleOnLike(@PathVariable Integer postId, @ApiIgnore Authentication authentication) {
+    public ResponseEntity<Response<String>> toggleOnLike(@PathVariable Integer postId, @ApiIgnore Authentication authentication) {
         String response = likeService.pushThumbsUp(postId, authentication.getName());
 
-        return Response.success(response);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(Response.success(response));
     }
 
     @Operation(summary = "좋아요 개수 세는 기능", description = "모든 사용자는 특정 포스트에 총 몇 개의 좋아요가 눌렸는지 볼 수 있다.")

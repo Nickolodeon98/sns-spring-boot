@@ -139,7 +139,7 @@ class UserEntityControllerTest {
         @ParameterizedTest
         @DisplayName("실패")
         @WithMockUser
-        @MethodSource("com.example.likelionfinalproject.controller.UserControllerTest#provideErrorCases")
+        @MethodSource("com.example.likelionfinalproject.controller.UserEntityControllerTest#provideErrorCases")
         void fail_login(ResultMatcher error, ErrorCode code) throws Exception {
             given(userService.verify(any())).willThrow(new UserException(code, code.getMessage()));
 

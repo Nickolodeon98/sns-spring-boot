@@ -59,7 +59,7 @@ class AlarmControllerTest {
                 .createdAt(LocalDateTime.of(LocalDate.of(2023, 1, 10), LocalTime.of(10, 10, 10) ))
                 .build();
 
-        expectedPageable = PageRequest.of(0, 20, Sort.Direction.DESC, "createdAt");
+        expectedPageable = PageRequest.of(0, 20, Sort.Direction.DESC, "lastModifiedAt");
 
         alarms = new PageImpl<>(List.of(alarmResponse));
     }
