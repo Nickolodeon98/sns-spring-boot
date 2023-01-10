@@ -72,8 +72,8 @@ public class CommentService {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(()->new UserException(ErrorCode.COMMENT_NOT_FOUND));
 
-        if (comment.getDeletedAt() != null)
-            throw new UserException(ErrorCode.COMMENT_NOT_FOUND);
+        userRepository.findByUserName(comment.getAuthor().getUserName())
+                .orElseThrow(() -> new UserException(ErrorCode.USERNAME_NOT_FOUND));
 
         if (!userName.equals(comment.getAuthor().getUserName()))
             throw new UserException(ErrorCode.INVALID_PERMISSION);

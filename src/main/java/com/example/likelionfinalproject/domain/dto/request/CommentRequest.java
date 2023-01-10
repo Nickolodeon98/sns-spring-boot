@@ -21,4 +21,10 @@ public class CommentRequest {
                 .author(userEntity)
                 .build();
     }
+
+    public static CommentRequest of(Comment comment) {
+        return CommentRequest.builder()
+                .comment(comment.getComment())
+                .build();
+    }
 }

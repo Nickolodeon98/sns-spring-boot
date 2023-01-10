@@ -26,13 +26,8 @@ public class LikeService {
     private final AlarmRepository alarmRepository;
 
     private Post validate(Integer postId) {
-        Post post = postRepository.findById(postId)
+        return postRepository.findById(postId)
                 .orElseThrow(()->new UserException(ErrorCode.POST_NOT_FOUND));
-
-        if (post.getDeletedAt() != null)
-            throw new UserException(ErrorCode.POST_NOT_FOUND);
-
-        return post;
     }
 
     public String pushThumbsUp(Integer postId, String userName) {
