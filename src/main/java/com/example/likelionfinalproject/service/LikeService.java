@@ -58,14 +58,17 @@ public class LikeService {
         }
         likeRepository.save(likeEntity);
 
-        AlarmRequest alarmRequest = AlarmRequest.builder()
-                .alarmType(AlarmType.NEW_LIKE_ON_POST)
-                .fromUserId(userEntity.getId())
-                .targetId(post.getAuthor().getId())
-                .text("new like!")
-                .build();
+        /* 자신이 작성한 포스트에 좋아요를 누르지 않는 이상 포스트 작성자에게 알람을 전송한다. */
+        if (!userEntity.getId().equals(post.getAuthor().getId())) {
+            AlarmRequest alarmRequest = AlarmRequest.builder()
+                    .alarmType(AlarmType.NEW_LIKE_ON_POST)
+                    .fromUserId(userEntity.getId())
+                    .targetId(post.getAuthor().getId())
+                    .text("new like!")
+                    .build();
+            alarmRepository.save(alarmRequest.toEntity(userEntity));
+        }
 
-        alarmRepository.save(alarmRequest.toEntity(userEntity));
 
         return "좋아요를 눌렀습니다.";
     }

@@ -43,14 +43,17 @@ public class CommentService {
 
         Comment savedComment = commentRepository.save(commentRequest.toEntity(post, userEntity));
 
-        AlarmRequest alarmRequest = AlarmRequest.builder()
-                .alarmType(AlarmType.NEW_COMMENT_ON_POST)
-                .fromUserId(userEntity.getId())
-                .targetId(post.getAuthor().getId())
-                .text("new comment!")
-                .build();
+        /* 자신이 작성한 포스트에 댓글을 다는 것이 아닌 이상 포스트 작성자에게 알람을 전송한다. */
+        if (!userEntity.getId().equals(post.getAuthor().getId())) {
+            AlarmRequest alarmRequest = AlarmRequest.builder()
+                    .alarmType(AlarmType.NEW_COMMENT_ON_POST)
+                    .fromUserId(userEntity.getId())
+                    .targetId(post.getAuthor().getId())
+                    .text("new comment!")
+                    .build();
 
-        alarmRepository.save(alarmRequest.toEntity(userEntity));
+            alarmRepository.save(alarmRequest.toEntity(userEntity));
+        }
 
         return CommentResponse.of(savedComment);
     }
