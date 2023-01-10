@@ -11,6 +11,7 @@ import com.example.likelionfinalproject.service.CommentService;
 import com.example.likelionfinalproject.service.LikeService;
 import com.example.likelionfinalproject.service.PostService;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +31,7 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequiredArgsConstructor
 @Slf4j
 @Api(tags = "POST Endpoints")
+@ApiOperation(value = "포스트 관련 API 의 컨트롤러")
 public class PostController {
 
     private final PostService postService;

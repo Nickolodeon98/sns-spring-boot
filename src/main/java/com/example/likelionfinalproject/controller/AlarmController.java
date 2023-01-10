@@ -4,6 +4,7 @@ import com.example.likelionfinalproject.domain.Response;
 import com.example.likelionfinalproject.domain.dto.response.AlarmResponse;
 import com.example.likelionfinalproject.service.AlarmService;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -23,6 +24,7 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1")
 @Api(tags= "ALARM Endpoints")
+@ApiOperation(value = "알람 관련 API 의 컨트롤러")
 public class AlarmController {
 
     private final AlarmService alarmService;
