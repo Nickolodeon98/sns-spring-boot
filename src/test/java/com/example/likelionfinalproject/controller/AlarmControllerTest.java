@@ -2,17 +2,19 @@ package com.example.likelionfinalproject.controller;
 
 import com.example.likelionfinalproject.domain.dto.AlarmResponse;
 import com.example.likelionfinalproject.enums.AlarmTestEssentials;
+import com.example.likelionfinalproject.service.AlarmService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.*;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
@@ -39,9 +41,21 @@ class AlarmControllerTest {
     @Autowired
     ObjectMapper objectMapper;
 
+    AlarmResponse alarmResponse;
+
+    @Captor
+    ArgumentCaptor<Pageable> pageableCaptor;
+
     @BeforeEach
     void setUp() {
-
+        alarmResponse = AlarmResponse.builder()
+                .id(Integer.parseInt(AlarmTestEssentials.ALARM_ID.getValue()))
+                .alarmType(AlarmTestEssentials.ALARM_TYPE.getValue())
+                .fromUserId(Integer.parseInt(AlarmTestEssentials.FROM_USER.getValue()))
+                .targetId(Integer.parseInt(AlarmTestEssentials.TARGET_USER.getValue()))
+                .text(AlarmTestEssentials.TEXT.getValue())
+                .createdAt(LocalDateTime.of(LocalDate.of(2023, 1, 10), LocalTime.of(10, 10, 10) ))
+                .build();
     }
 
 /*
@@ -69,30 +83,27 @@ class AlarmControllerTest {
 
         @Test
         @DisplayName("성공")
+        @WithMockUser
         void success_display_alarms() throws Exception {
-            AlarmResponse alarmResponse = AlarmResponse.builder()
-                    .id(Integer.parseInt(AlarmTestEssentials.ALARM_ID.name()))
-                    .alarmType(AlarmTestEssentials.ALARM_TYPE.name())
-                    .fromUserId(Integer.parseInt(AlarmTestEssentials.FROM_USER.name()))
-                    .targetId(Integer.parseInt(AlarmTestEssentials.TARGET_USER.name()))
-                    .text(AlarmTestEssentials.TEXT.name())
-                    .createdAt(LocalDateTime.of(LocalDate.of(2023, 1, 10), LocalTime.of(10, 10, 10) ))
-                    .build();
-
-            Pageable pageable = PageRequest.of(0, 20, Sort.Direction.DESC, "createdAt");
+            Pageable expectedPageable = PageRequest.of(0, 20, Sort.Direction.DESC, "createdAt");
 
             Page<AlarmResponse> alarms = new PageImpl<>(List.of(alarmResponse));
 
-            given(alarmService.fetchAllAlarms(pageable)).willReturn(alarms);
+            given(alarmService.fetchAllAlarms(any(), any())).willReturn(alarms);
 
-            mockMvc.perform(get(AlarmTestEssentials.ALARM_URL.name()).with(csrf())
-                    .content(objectMapper.writeValueAsBytes(pageable)))
+            mockMvc.perform(get(AlarmTestEssentials.ALARM_URL.getValue()).with(csrf()))
                     .andExpect(status().isAccepted())
                     .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
                     .andExpect(jsonPath("$.result.content").exists())
                     .andDo(print());
 
-            verify(alarmService).fetchAllAlarms(pageable);
+            verify(alarmService).fetchAllAlarms(pageableCaptor.capture(), any());
+
+            Pageable apiPageable = pageableCaptor.getValue();
+
+            Assertions.assertEquals(expectedPageable.getPageNumber(), apiPageable.getPageNumber());
+            Assertions.assertEquals(expectedPageable.getPageSize(), apiPageable.getPageSize());
+            Assertions.assertEquals(expectedPageable.getSort(), apiPageable.getSort());
         }
     }
 
