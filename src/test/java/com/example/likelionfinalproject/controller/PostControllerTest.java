@@ -482,7 +482,7 @@ class PostControllerTest {
             given(postService.showMyPosts(any(), any())).willReturn(posts);
 
             mockMvc.perform(get("/api/v1/posts/my").with(csrf()))
-                    .andExpect(status().isOk())
+                    .andExpect(status().isAccepted())
                     .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
                     .andExpect(jsonPath("$.result.content").exists())
                     .andDo(print());
