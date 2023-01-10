@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.*;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -45,7 +46,8 @@ class AlarmControllerTest {
 
     @Captor
     ArgumentCaptor<Pageable> pageableCaptor;
-
+    Pageable expectedPageable;
+    Page<AlarmResponse> alarms;
     @BeforeEach
     void setUp() {
         alarmResponse = AlarmResponse.builder()
@@ -56,6 +58,10 @@ class AlarmControllerTest {
                 .text(AlarmTestEssentials.TEXT.getValue())
                 .createdAt(LocalDateTime.of(LocalDate.of(2023, 1, 10), LocalTime.of(10, 10, 10) ))
                 .build();
+
+        expectedPageable = PageRequest.of(0, 20, Sort.Direction.DESC, "createdAt");
+
+        alarms = new PageImpl<>(List.of(alarmResponse));
     }
 
 /*
@@ -85,9 +91,6 @@ class AlarmControllerTest {
         @DisplayName("성공")
         @WithMockUser
         void success_display_alarms() throws Exception {
-            Pageable expectedPageable = PageRequest.of(0, 20, Sort.Direction.DESC, "createdAt");
-
-            Page<AlarmResponse> alarms = new PageImpl<>(List.of(alarmResponse));
 
             given(alarmService.fetchAllAlarms(any(), any())).willReturn(alarms);
 
@@ -105,6 +108,18 @@ class AlarmControllerTest {
             Assertions.assertEquals(expectedPageable.getPageSize(), apiPageable.getPageSize());
             Assertions.assertEquals(expectedPageable.getSort(), apiPageable.getSort());
         }
+
+        @Test
+        @DisplayName("실패")
+        @WithAnonymousUser
+        void fail_display_alarms() throws Exception {
+            given(alarmService.fetchAllAlarms(any(), any())).willReturn(alarms);
+
+            mockMvc.perform(get(AlarmTestEssentials.ALARM_URL.getValue()).with(csrf()))
+                    .andExpect(status().isUnauthorized())
+                    .andDo(print());
+        }
+
     }
 
 
