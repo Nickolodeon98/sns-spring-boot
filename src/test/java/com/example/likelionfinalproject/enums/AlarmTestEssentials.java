@@ -1,5 +1,8 @@
 package com.example.likelionfinalproject.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum AlarmTestEssentials {
     ALARM_URL("/api/v1/alarms"),
     ALARM_TITLE("포스트 제목"),
