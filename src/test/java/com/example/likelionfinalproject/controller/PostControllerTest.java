@@ -99,7 +99,7 @@ class PostControllerTest {
                 .createdAt(timeInfo)
                 .build();
 
-        pageable = PageRequest.of(0, size, Sort.by("createdAt").descending());
+        pageable = PageRequest.of(0, size, Sort.by("lastModifiedAt").descending());
 
         posts = new PageImpl<>(List.of(selectedPostResponse));
     }
@@ -389,7 +389,7 @@ class PostControllerTest {
             mockMvc.perform(put(url + "/comments/" + commentId)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsBytes(commentRequest)).with(csrf()))
-                    .andExpect(status().isOk())
+                    .andExpect(status().isAccepted())
                     .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
                     .andExpect(jsonPath("$.result.id").value(commentId))
                     .andExpect(jsonPath("$.result.comment").value(commentResponse.getComment()))
@@ -425,7 +425,7 @@ class PostControllerTest {
 
     private void confirmSuccess(MockHttpServletRequestBuilder httpType, ResponseDto responseDto) throws Exception {
         mockMvc.perform(httpType.with(csrf()))
-                .andExpect(status().isOk())
+                .andExpect(status().isAccepted())
                 .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
                 .andExpect(jsonPath("$.result.message").value(responseDto.getMessage()))
                 .andExpect(jsonPath("$.result.id").value(responseDto.getId()))
@@ -517,7 +517,7 @@ class PostControllerTest {
 
             mockMvc.perform(post(url + "/likes")
                     .contentType(MediaType.APPLICATION_JSON).with(csrf()))
-                    .andExpect(status().isOk())
+                    .andExpect(status().isAccepted())
                     .andExpect(jsonPath("$.resultCode").value("SUCCESS"))
                     .andExpect(jsonPath("$.result").value(response))
                     .andDo(print());
