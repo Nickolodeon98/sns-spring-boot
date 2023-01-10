@@ -78,6 +78,6 @@ public class LikeService {
     public Long countLikes(Integer postId) {
         Post post = validate(postId);
 
-        return likeRepository.countByPost(post);
+        return likeRepository.countByPostId(post.getId());
     }
 }
