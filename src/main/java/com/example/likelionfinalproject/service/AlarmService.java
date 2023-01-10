@@ -25,7 +25,7 @@ public class AlarmService {
         UserEntity userEntity = userRepository.findByUserName(userName)
                 .orElseThrow(()->new UserException(ErrorCode.USERNAME_NOT_FOUND));
 
-        Page<Alarm> alarms = alarmRepository.findAllByUserEntity(userEntity, pageable);
+        Page<Alarm> alarms = alarmRepository.findAllByTargetId(userEntity.getId(), pageable);
         return alarms.map(AlarmResponse::of);
     }
 }
