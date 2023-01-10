@@ -1,10 +1,13 @@
 package com.example.likelionfinalproject.service;
 
+import com.example.likelionfinalproject.domain.dto.request.AlarmRequest;
+import com.example.likelionfinalproject.domain.dto.AlarmType;
 import com.example.likelionfinalproject.domain.entity.LikeEntity;
 import com.example.likelionfinalproject.domain.entity.Post;
 import com.example.likelionfinalproject.domain.entity.UserEntity;
 import com.example.likelionfinalproject.exception.ErrorCode;
 import com.example.likelionfinalproject.exception.UserException;
+import com.example.likelionfinalproject.repository.AlarmRepository;
 import com.example.likelionfinalproject.repository.LikeRepository;
 import com.example.likelionfinalproject.repository.PostRepository;
 import com.example.likelionfinalproject.repository.UserRepository;
@@ -20,6 +23,7 @@ public class LikeService {
     private final LikeRepository likeRepository;
     private final UserRepository userRepository;
     private final PostRepository postRepository;
+    private final AlarmRepository alarmRepository;
 
     private Post validate(Integer postId) {
         Post post = postRepository.findById(postId)
@@ -48,9 +52,6 @@ public class LikeService {
                 .userEntity(userEntity)
                 .build();
 
-//        likeRepository.findByPostIdAndUserId(postId, user.getId())
-//                .ifPresentOrElse(likeRepository::delete, () -> likeRepository.save(like));
-
         Optional<LikeEntity> duplicateLike = likeRepository.findByPostIdAndUserEntityId(postId, userEntity.getId());
 
         if (duplicateLike.isPresent() ) {
@@ -61,6 +62,16 @@ public class LikeService {
             likeEntity.setId(duplicateLike.get().getId());
         }
         likeRepository.save(likeEntity);
+
+        AlarmRequest alarmRequest = AlarmRequest.builder()
+                .alarmType(AlarmType.NEW_LIKE_ON_POST)
+                .fromUserId(userEntity.getId())
+                .targetId(post.getAuthor().getId())
+                .text("new like!")
+                .build();
+
+        alarmRepository.save(alarmRequest.toEntity(userEntity));
+
         return "좋아요를 눌렀습니다.";
     }
 

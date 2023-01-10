@@ -1,7 +1,12 @@
 package com.example.likelionfinalproject.controller;
 
 import com.example.likelionfinalproject.domain.Response;
-import com.example.likelionfinalproject.domain.dto.*;
+import com.example.likelionfinalproject.domain.dto.request.CommentRequest;
+import com.example.likelionfinalproject.domain.dto.request.PostRequest;
+import com.example.likelionfinalproject.domain.dto.response.CommentDeleteResponse;
+import com.example.likelionfinalproject.domain.dto.response.CommentResponse;
+import com.example.likelionfinalproject.domain.dto.response.PostResponse;
+import com.example.likelionfinalproject.domain.dto.response.SelectedPostResponse;
 import com.example.likelionfinalproject.service.CommentService;
 import com.example.likelionfinalproject.service.LikeService;
 import com.example.likelionfinalproject.service.PostService;

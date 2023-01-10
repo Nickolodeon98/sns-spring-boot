@@ -1,8 +1,8 @@
 package com.example.likelionfinalproject.controller;
 
-import com.example.likelionfinalproject.domain.dto.UserJoinResponse;
-import com.example.likelionfinalproject.domain.dto.UserLoginResponse;
-import com.example.likelionfinalproject.domain.dto.UserRequest;
+import com.example.likelionfinalproject.domain.dto.response.UserJoinResponse;
+import com.example.likelionfinalproject.domain.dto.response.UserLoginResponse;
+import com.example.likelionfinalproject.domain.dto.request.UserRequest;
 import com.example.likelionfinalproject.enums.UserTestEssentials;
 import com.example.likelionfinalproject.exception.ErrorCode;
 import com.example.likelionfinalproject.exception.UserException;

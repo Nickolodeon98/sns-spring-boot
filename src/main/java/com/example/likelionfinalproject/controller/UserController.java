@@ -1,9 +1,9 @@
 package com.example.likelionfinalproject.controller;
 
 import com.example.likelionfinalproject.domain.Response;
-import com.example.likelionfinalproject.domain.dto.UserJoinResponse;
-import com.example.likelionfinalproject.domain.dto.UserLoginResponse;
-import com.example.likelionfinalproject.domain.dto.UserRequest;
+import com.example.likelionfinalproject.domain.dto.response.UserJoinResponse;
+import com.example.likelionfinalproject.domain.dto.response.UserLoginResponse;
+import com.example.likelionfinalproject.domain.dto.request.UserRequest;
 import com.example.likelionfinalproject.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.v3.oas.annotations.Operation;

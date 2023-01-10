@@ -1,13 +1,16 @@
 package com.example.likelionfinalproject.service;
 
-import com.example.likelionfinalproject.domain.dto.CommentDeleteResponse;
-import com.example.likelionfinalproject.domain.dto.CommentRequest;
-import com.example.likelionfinalproject.domain.dto.CommentResponse;
+import com.example.likelionfinalproject.domain.dto.*;
+import com.example.likelionfinalproject.domain.dto.request.AlarmRequest;
+import com.example.likelionfinalproject.domain.dto.request.CommentRequest;
+import com.example.likelionfinalproject.domain.dto.response.CommentDeleteResponse;
+import com.example.likelionfinalproject.domain.dto.response.CommentResponse;
 import com.example.likelionfinalproject.domain.entity.Comment;
 import com.example.likelionfinalproject.domain.entity.Post;
 import com.example.likelionfinalproject.domain.entity.UserEntity;
 import com.example.likelionfinalproject.exception.ErrorCode;
 import com.example.likelionfinalproject.exception.UserException;
+import com.example.likelionfinalproject.repository.AlarmRepository;
 import com.example.likelionfinalproject.repository.CommentRepository;
 import com.example.likelionfinalproject.repository.PostRepository;
 import com.example.likelionfinalproject.repository.UserRepository;
@@ -25,6 +28,7 @@ public class CommentService {
     private final UserRepository userRepository;
 
     private final PostRepository postRepository;
+    private final AlarmRepository alarmRepository;
 
     public CommentResponse uploadComment(CommentRequest commentRequest, String userName, Integer postId) {
         /* TODO: commentRequest 로 부터 comment 내용을 받아서 Comment 엔티티에 저장한다. */
@@ -38,6 +42,15 @@ public class CommentService {
             throw new UserException(ErrorCode.POST_NOT_FOUND);
 
         Comment savedComment = commentRepository.save(commentRequest.toEntity(post, userEntity));
+
+        AlarmRequest alarmRequest = AlarmRequest.builder()
+                .alarmType(AlarmType.NEW_COMMENT_ON_POST)
+                .fromUserId(userEntity.getId())
+                .targetId(post.getAuthor().getId())
+                .text("new comment!")
+                .build();
+
+        alarmRepository.save(alarmRequest.toEntity(userEntity));
 
         return CommentResponse.of(savedComment);
     }
