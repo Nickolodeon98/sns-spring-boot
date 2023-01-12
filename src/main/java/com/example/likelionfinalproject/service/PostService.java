@@ -57,31 +57,53 @@ public class PostService {
         return new PageImpl<>(posts.stream().map(SelectedPostResponse::of).collect(Collectors.toList()));
     }
 
-    private Post validate(Integer postId, String userName) {
+    private <T> T validate(ValidateObject<T> method, String argument) {
+        return method.find(argument);
+    }
+
+    interface ValidateObject<T> {
+        T find(String object);
+    }
+
+    class PostValidation implements ValidateObject<Post> {
         /* 주어진 고유 번호의 포스트가 존재하지 않을 때 */
-        Post post = postRepository.findById(postId)
-                .orElseThrow(()-> new UserException(ErrorCode.POST_NOT_FOUND));
+        @Override
+        public Post find(String object) {
+            return postRepository.findById(Integer.parseInt(object))
+                    .orElseThrow(()-> new UserException(ErrorCode.POST_NOT_FOUND));
+        }
+    }
 
-        /* 포스트의 작성자로 등록되어 있는 사용자를 못 찾을 때 */
-        UserEntity userEntity = userRepository.findByUserName(post.getAuthor().getUserName())
-                .orElseThrow(()-> new UserException(ErrorCode.USERNAME_NOT_FOUND, ErrorCode.USERNAME_NOT_FOUND.getMessage()));
+    class UserValidation implements ValidateObject<UserEntity> {
 
-        /* Authentication 에서 가져온 사용자 아이디와 postId 로 찾은 포스트의 사용자 아이디의 일치 여부를 확인한다 */
-        if (!userName.equals(userEntity.getUserName()))
-            throw new UserException(ErrorCode.INVALID_PERMISSION, ErrorCode.INVALID_PERMISSION.getMessage());
-
-        return post;
+        @Override
+        public UserEntity find(String object) {
+            /* 포스트의 작성자로 등록되어 있는 사용자를 못 찾을 때 */
+            return userRepository.findByUserName(object)
+                    .orElseThrow(()-> new UserException(ErrorCode.USERNAME_NOT_FOUND));
+        }
     }
 
     public PostResponse editPost(PostRequest editPostRequest, Integer postId, String currentUser) {
-        Post postToUpdate = validate(postId, currentUser);
+        Post postToUpdate = validate(new PostValidation(), String.valueOf(postId));
+        UserEntity authorToUpdate = validate(new UserValidation(), postToUpdate.getAuthor().getUserName());
+
+        /* Authentication 에서 가져온 사용자 아이디와 postId 로 찾은 포스트의 사용자 아이디의 일치 여부를 확인한다 */
+        if (!currentUser.equals(authorToUpdate.getUserName()))
+            throw new UserException(ErrorCode.INVALID_PERMISSION);
+
         Post editedPost = postRepository.save(editPostRequest.toEntity(postId, postToUpdate.getAuthor()));
 
         return PostResponse.of(editedPost, "포스트 수정 완료");
     }
 
     public PostResponse removePost(Integer postId, String userName) {
-        Post postToDelete = validate(postId, userName);
+        Post postToDelete = validate(new PostValidation(), String.valueOf(postId));
+        UserEntity authorToDelete = validate(new UserValidation(), postToDelete.getAuthor().getUserName());
+
+        /* Authentication 에서 가져온 사용자 아이디와 postId 로 찾은 포스트의 사용자 아이디의 일치 여부를 확인한다 */
+        if (!userName.equals(authorToDelete.getUserName()))
+            throw new UserException(ErrorCode.INVALID_PERMISSION);
 
         postRepository.deleteById(postToDelete.getId());
 
