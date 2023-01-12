@@ -66,7 +66,7 @@ class CommentServiceTest {
         @ParameterizedTest
         @DisplayName("실패")
         @MethodSource("com.example.likelionfinalproject.service.CommentServiceTest#provideErrorCases")
-        void fail_edit_comment(ErrorCode code, Optional comment, Optional user, String userName) {
+        void fail_edit_comment(ErrorCode code, Optional<Comment> comment, Optional<UserEntity> user, String userName) {
             when(commentRepository.findById(commentA.getId())).thenReturn(comment);
             when(userRepository.findByUserName(commentA.getAuthor().getUserName())).thenReturn(user);
 
@@ -85,7 +85,7 @@ class CommentServiceTest {
         @DisplayName("실패")
         @ParameterizedTest
         @MethodSource("com.example.likelionfinalproject.service.CommentServiceTest#provideErrorCases")
-        void fail_delete_comment(ErrorCode code, Optional comment, Optional user, String userName) {
+        void fail_delete_comment(ErrorCode code, Optional<Comment> comment, Optional<UserEntity> user, String userName) {
             when(commentRepository.findById(commentA.getId())).thenReturn(comment);
             when(userRepository.findByUserName(commentA.getAuthor().getUserName())).thenReturn(user);
 
