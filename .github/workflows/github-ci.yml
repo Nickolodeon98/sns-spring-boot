@@ -10,7 +10,8 @@
 name: Create and publish a Docker image
 
 on:
-  push: ['main']
+  push:
+    branches: ['main']
 
 env:
   REGISTRY: ghcr.io
